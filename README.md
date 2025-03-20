@@ -1,0 +1,1 @@
+# mabinogi-open-api-server
