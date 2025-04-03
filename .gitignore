@@ -1,6 +1,6 @@
-HELP.md
 .gradle
 build/
+.DS_STORE
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -26,6 +26,11 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+### Docker ###
+docker/
+logs/
+spy.log
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -35,3 +40,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Kotlin ###
+.kotlin

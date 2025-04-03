@@ -1,1 +1,1 @@
-rootProject.name = "eternity"
+rootProject.name = "devnogi-server"
