@@ -77,7 +77,7 @@ decorator:
 
 logging:
   level:
-    com.devnogi.server: DEBUG
+    until.the.eternity: DEBUG
 
 ---
 spring:

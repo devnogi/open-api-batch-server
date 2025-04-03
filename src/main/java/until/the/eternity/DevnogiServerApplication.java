@@ -1,4 +1,4 @@
-package com.devnogi.server;
+package until.the.eternity;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
