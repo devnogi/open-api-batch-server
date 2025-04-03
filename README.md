@@ -1,1 +1,1 @@
-# mabinogi-open-api-server
+# DEVNOGI API Server

@@ -1,0 +1,19 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: devnogi-mysql
+    ports:
+      - "3366:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: devnogi
+      MYSQL_ROOT_PASSWORD: devnogi
+      LANG: C.UTF_8
+    volumes:
+      - "./docker/mysql:/var/lib/mysql"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --skip-character-set-client-handshake
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION

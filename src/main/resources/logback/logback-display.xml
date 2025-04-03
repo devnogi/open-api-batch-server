@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="logback/logback-appender.xml"/>
+
+    <root level="INFO">
+        <springProfile name="default">
+            <appender-ref ref="CONSOLE"/>
+        </springProfile>
+        <springProfile name="dev">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR"/>
+        </springProfile>
+        <springProfile name="prod">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR"/>
+        </springProfile>
+    </root>
+</configuration>
