@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     id("org.asciidoctor.jvm.convert")
+    id("com.diffplug.spotless")
 }
 
 group = "${property("projectGroup")}"
@@ -74,6 +75,32 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:${property("testContainersVersion")}")
     testImplementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:${property("flywayTestExtensionVersion")}")
+}
+
+spotless {
+    java {
+        googleJavaFormat().aosp()
+        removeUnusedImports()
+        importOrder()
+        trimTrailingWhitespace()
+        leadingTabsToSpaces()
+        endWithNewline()
+    }
+
+    format("misc") {
+        target("*.gradle.kts", ".gitignore")
+        trimTrailingWhitespace()
+        leadingTabsToSpaces()
+        endWithNewline()
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn("spotlessApply")
+}
+
+tasks.named("build") {
+    dependsOn("spotlessApply")
 }
 
 tasks.withType<Test> {

@@ -4,6 +4,7 @@ pluginManagement {
     val springBootVersion: String by settings
     val springDependencyManagementVersion: String by settings
     val asciidoctorJvmConvertPluginVersion: String by settings
+    val spotlessPluginVersion: String by settings
 
     resolutionStrategy {
         eachPlugin {
@@ -11,6 +12,7 @@ pluginManagement {
                 "org.springframework.boot" -> useVersion(springBootVersion)
                 "io.spring.dependency-management" -> useVersion(springDependencyManagementVersion)
                 "org.asciidoctor.jvm.convert" -> useVersion(asciidoctorJvmConvertPluginVersion)
+                "com.diffplug.spotless" -> useVersion(spotlessPluginVersion)
             }
         }
     }
