@@ -108,15 +108,38 @@ tasks.withType<Test> {
 }
 
 // REST Docs Snippets
-extra["snippetsDir"] = file("build/generated-snippets")
-
-tasks.test {
-    outputs.dir(project.extra["snippetsDir"]!!)
+val asciidoctorExt: Configuration by configurations.creating
+dependencies {
+    asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
 }
 
-tasks.asciidoctor {
-    inputs.dir(project.extra["snippetsDir"]!!)
-    dependsOn(tasks.test)
+val snippetsDir: File by extra { file("build/generated-snippets") }
+tasks {
+    test {
+        outputs.dir(snippetsDir)
+    }
+
+    asciidoctor {
+        configurations(asciidoctorExt.name)
+        dependsOn(test)
+
+        doFirst {
+            delete(file("src/main/resources/static/docs"))
+        }
+
+        inputs.dir(snippetsDir)
+
+        doLast {
+            copy {
+                from("build/docs/asciidoc")
+                into("src/main/resources/static/docs")
+            }
+        }
+    }
+
+    build {
+        dependsOn(asciidoctor)
+    }
 }
 
 // jar & bootJar
