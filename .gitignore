@@ -26,6 +26,12 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+**/src/main/generated/
+
+### RestDocs index.html ###
+src/docs/asciidoc/**/*.html
+src/main/resources/static/docs
+
 ### Docker ###
 docker/
 logs/
