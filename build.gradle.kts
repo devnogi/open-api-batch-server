@@ -1,19 +1,20 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    id("org.asciidoctor.jvm.convert")
-    id("com.diffplug.spotless")
+    id("org.springframework.boot") version "3.2.5" // 최신 안정 버전 사용 권장
+    id("io.spring.dependency-management") version "1.1.4"
+    id("org.asciidoctor.jvm.convert") version "4.0.2"
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
-group = "${property("projectGroup")}"
-version = "${property("applicationVersion")}"
+group = property("projectGroup") as String
+version = property("applicationVersion") as String
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of("${property("javaVersion")}")
+        languageVersion.set(JavaLanguageVersion.of(property("javaVersion") as String))
     }
 }
 
@@ -28,50 +29,39 @@ repositories {
 }
 
 dependencies {
-    // Spring Boot Web
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
 
-    // Spring Web View (Thymeleaf)
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 
-    // Data
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.mysql:mysql-connector-j")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
 
-    // Monitoring
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    // JWT
     implementation("io.jsonwebtoken:jjwt-api:${property("jwtTokenVersion")}")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${property("jwtTokenVersion")}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${property("jwtTokenVersion")}")
 
-    // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
 
-    // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("swaggerVersion")}")
 
-    // p6spy
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:${property("p6spyVersion")}")
 
-    // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
-    // REST Docs
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 
-    // TestContainers
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:${property("testContainersVersion")}")
     testImplementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:${property("flywayTestExtensionVersion")}")
@@ -83,14 +73,12 @@ spotless {
         removeUnusedImports()
         importOrder()
         trimTrailingWhitespace()
-        leadingTabsToSpaces()
         endWithNewline()
     }
 
     format("misc") {
         target("*.gradle.kts", ".gitignore")
         trimTrailingWhitespace()
-        leadingTabsToSpaces()
         endWithNewline()
     }
 }
@@ -105,49 +93,45 @@ tasks.named("build") {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events = setOf(TestLogEvent.FAILED, TestLogEvent.SKIPPED)
+    }
 }
 
-// REST Docs Snippets
-val asciidoctorExt: Configuration by configurations.creating
+// REST Docs
+val snippetsDir = layout.buildDirectory.dir("generated-snippets")
+val asciidoctorExt by configurations.creating
 dependencies {
     asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
 }
 
-val snippetsDir: File by extra { file("build/generated-snippets") }
-tasks {
-    test {
-        outputs.dir(snippetsDir)
+tasks.named<Test>("test") {
+    outputs.dir(snippetsDir)
+}
+
+tasks.named("asciidoctor") {
+    dependsOn(tasks.named("test"))
+    inputs.dir(snippetsDir)
+    doFirst {
+        delete("src/main/resources/static/docs")
     }
-
-    asciidoctor {
-        configurations(asciidoctorExt.name)
-        dependsOn(test)
-
-        doFirst {
-            delete(file("src/main/resources/static/docs"))
+    doLast {
+        copy {
+            from("build/docs/asciidoc")
+            into("src/main/resources/static/docs")
         }
-
-        inputs.dir(snippetsDir)
-
-        doLast {
-            copy {
-                from("build/docs/asciidoc")
-                into("src/main/resources/static/docs")
-            }
-        }
-    }
-
-    build {
-        dependsOn(asciidoctor)
     }
 }
 
-// jar & bootJar
+tasks.named("build") {
+    dependsOn("asciidoctor")
+}
+
 tasks.named<Jar>("jar") {
     enabled = false
 }
 
 tasks.named<BootJar>("bootJar") {
-    archiveBaseName = "DevnogiServer"
-    archiveFileName = "DevnogiServer.jar"
+    archiveBaseName.set("DevnogiServer")
+    archiveFileName.set("DevnogiServer.jar")
 }
