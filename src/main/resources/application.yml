@@ -79,6 +79,9 @@ logging:
   level:
     until.the.eternity: DEBUG
 
+openapi:
+  nexon:
+    api-key: ${NEXON_API_KEY}
 ---
 spring:
   config:
