@@ -22,7 +22,7 @@ spring:
       add-mappings: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL:jdbc:mysql://localhost:3366/devnogi}
+    url: jdbc:mysql://localhost:${DB_PORT:3366}/${DB_SCHEMA}
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:devnogi}
   jpa:
