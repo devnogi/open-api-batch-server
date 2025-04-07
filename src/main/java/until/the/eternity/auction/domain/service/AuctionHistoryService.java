@@ -26,10 +26,19 @@ public class AuctionHistoryService {
     @Value("${openapi.nexon.api-key}")
     private String nexonApiKey;
 
+    @Value("${openapi.auction-history.delay-ms}")
+    private long delayMs;
+
     @Scheduled(cron = "0 */1 * * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             fetchAndSaveAuctionHistory(category);
+            try {
+                Thread.sleep(delayMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 현재 스레드 인터럽트 설정
+                log.warn("⏱️ 딜레이 중 인터럽트 발생", e);
+            }
         }
     }
 
