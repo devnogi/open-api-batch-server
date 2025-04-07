@@ -1,18 +1,14 @@
 package until.the.eternity.auction.domain.service;
 
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
+import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
-import until.the.eternity.auction.domain.dto.AuctionHistoryResponse;
-import until.the.eternity.auction.domain.model.AuctionHistory;
-import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
 @Service
@@ -20,78 +16,41 @@ import until.the.eternity.common.enums.ItemCategory;
 @Slf4j
 public class AuctionHistoryService {
 
-    private final WebClient webClient;
-    private final AuctionHistoryRepository auctionHistoryRepository; // JPA Repo
-
-    @Value("${openapi.nexon.api-key}")
-    private String nexonApiKey;
+    private final AuctionHistoryFetcher fetcher;
+    private final AuctionHistoryPersister persister;
 
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 */3 * * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
-            fetchAndSaveAuctionHistory(category);
             try {
-                Thread.sleep(delayMs);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 현재 스레드 인터럽트 설정
-                log.warn("⏱️ 딜레이 중 인터럽트 발생", e);
-            }
-        }
-    }
-
-    public void fetchAndSaveAuctionHistory(ItemCategory itemCategory) {
-
-        try {
-            AuctionHistoryResponse response =
-                    webClient
-                            .get()
-                            .uri(
-                                    uriBuilder ->
-                                            uriBuilder
-                                                    .path("/auction/history")
-                                                    .queryParam(
-                                                            "auction_item_category",
-                                                            itemCategory.getItemName())
-                                                    .build())
-                            .header("x-nxopen-api-key", nexonApiKey)
-                            .header("accept", "application/json")
-                            .retrieve()
-                            .bodyToMono(AuctionHistoryResponse.class)
-                            .block();
-
-            try {
-                if (response != null && response.getAuction_history() != null) {
-                    log.info("✅ Auction history save start");
-                    List<AuctionHistory> entities =
-                            response.getAuction_history().stream()
-                                    .map(this::convertToEntity)
-                                    .collect(Collectors.toList());
-
-                    auctionHistoryRepository.saveAll(entities);
-                    log.info("✅ Auction history 저장 완료 - {}건", entities.size());
-                } else {
-                    log.info("✅ Auction history is null");
-                }
+                fetchAndSaveAuctionHistory(category);
             } catch (Exception e) {
-                log.error("Auction history save fail", e.fillInStackTrace());
+                log.error("Error during processing category [{}]", category.getItemName(), e);
             }
-
-        } catch (Exception e) {
-            log.error("❌ API 호출 실패", e);
+            delayBetweenRequests();
         }
     }
 
-    private AuctionHistory convertToEntity(AuctionHistoryDto dto) {
-        return AuctionHistory.builder()
-                .itemName(dto.getItemName())
-                .itemDisplayName(dto.getItemDisplayName())
-                .itemCount(dto.getItemCount())
-                .auctionPricePerUnit(dto.getAuctionPricePerUnit())
-                .dateAuctionBuy(OffsetDateTime.parse(dto.getDateAuctionBuy()).toInstant())
-                .auctionBuyId(dto.getAuctionBuyId())
-                .build();
+    private void fetchAndSaveAuctionHistory(ItemCategory category) {
+        List<AuctionHistoryDto> dtoList = fetcher.fetch(category);
+
+        if (dtoList == null || dtoList.isEmpty()) {
+            log.info("[{}] No auction history data received", category.getItemName());
+            return;
+        }
+
+        persister.saveIfNotExists(dtoList, category);
+    }
+
+    private void delayBetweenRequests() {
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Interrupted during delay between requests", e);
+        }
     }
 }
