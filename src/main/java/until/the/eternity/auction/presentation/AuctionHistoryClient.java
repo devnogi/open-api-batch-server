@@ -1,2 +1,3 @@
-package until.the.eternity.auction.presentation;public class AuctionHistoryClient {
-}
+package until.the.eternity.auction.presentation;
+
+public class AuctionHistoryClient {}

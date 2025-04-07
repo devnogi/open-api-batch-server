@@ -86,6 +86,5 @@ public enum ItemCategory {
     BOW("활"),
     HILLWEN_ENGINEERING("힐웬 공학");
 
-    private final String koreanName;
+    private final String itemName;
 }
-
