@@ -43,7 +43,7 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.jsonwebtoken:jjwt-api:${property("jwtTokenVersion")}")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${property("jwtTokenVersion")}")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${property("jwtTokenVersion")}")

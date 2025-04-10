@@ -1,0 +1,56 @@
+package until.the.eternity.auction.domain.service;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
+import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
+import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
+import until.the.eternity.common.enums.ItemCategory;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class AuctionHistoryService {
+
+    private final AuctionHistoryFetcher fetcher;
+    private final AuctionHistoryPersister persister;
+
+    @Value("${openapi.auction-history.delay-ms}")
+    private long delayMs;
+
+    @Scheduled(cron = "0 */3 * * * *")
+    public void fetchAndSaveAuctionHistoryAll() {
+        for (ItemCategory category : ItemCategory.values()) {
+            try {
+                fetchAndSaveAuctionHistory(category);
+            } catch (Exception e) {
+                log.error("Error during processing category [{}]", category.getSubCategory(), e);
+            }
+            delayBetweenRequests();
+        }
+    }
+
+    private void fetchAndSaveAuctionHistory(ItemCategory category) {
+        List<AuctionHistoryDto> dtoList = fetcher.fetch(category);
+
+        if (dtoList == null || dtoList.isEmpty()) {
+            log.info("[{}] No auction history data received", category.getSubCategory());
+            return;
+        }
+
+        persister.saveIfNotExists(dtoList, category);
+    }
+
+    private void delayBetweenRequests() {
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Interrupted during delay between requests", e);
+        }
+    }
+}

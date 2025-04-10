@@ -1,10 +1,9 @@
 package until.the.eternity.auction.domain.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
+import lombok.*;
 
 @Entity
 @Table(name = "auction_history")
@@ -32,11 +31,17 @@ public class AuctionHistory {
     private Long auctionPricePerUnit;
 
     @Column(name = "date_auction_buy", nullable = false)
-    private LocalDateTime dateAuctionBuy;
+    private Instant dateAuctionBuy;
 
     @Column(name = "auction_buy_id", nullable = false, unique = true)
     private String auctionBuyId;
 
     @OneToMany(mappedBy = "auctionHistory", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AuctionItemOption> itemOptions;
+    private List<ItemOption> itemOptions;
+
+    @Column(name = "item_sub_category", nullable = false)
+    private String itemSubCategory;
+
+    @Column(name = "item_top_category", nullable = false)
+    private String itemTopCategory;
 }
