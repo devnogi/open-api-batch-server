@@ -28,7 +28,7 @@ public class AuctionHistoryService {
             try {
                 fetchAndSaveAuctionHistory(category);
             } catch (Exception e) {
-                log.error("Error during processing category [{}]", category.getItemName(), e);
+                log.error("Error during processing category [{}]", category.getSubCategory(), e);
             }
             delayBetweenRequests();
         }
@@ -38,7 +38,7 @@ public class AuctionHistoryService {
         List<AuctionHistoryDto> dtoList = fetcher.fetch(category);
 
         if (dtoList == null || dtoList.isEmpty()) {
-            log.info("[{}] No auction history data received", category.getItemName());
+            log.info("[{}] No auction history data received", category.getSubCategory());
             return;
         }
 

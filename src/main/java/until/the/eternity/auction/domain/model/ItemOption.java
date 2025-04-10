@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuctionItemOption {
+public class ItemOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

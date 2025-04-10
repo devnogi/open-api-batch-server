@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
 import until.the.eternity.auction.domain.model.AuctionHistory;
+import until.the.eternity.auction.domain.model.ItemOption;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
@@ -32,29 +33,53 @@ public class AuctionHistoryPersister {
         List<AuctionHistory> newEntities =
                 dtoList.stream()
                         .filter(dto -> !existingIds.contains(dto.getAuctionBuyId()))
-                        .map(this::convertToEntity)
+                        .map(dto -> convertToEntity(dto, category))
                         .collect(Collectors.toList());
 
         if (newEntities.isEmpty()) {
-            log.info("[{}] No new auction history to save", category.getItemName());
+            log.info("[{}] No new auction history to save", category.getSubCategory());
             return;
         }
 
         auctionHistoryRepository.saveAll(newEntities);
         log.info(
                 "[{}] Saved {} new auction history records",
-                category.getItemName(),
+                category.getSubCategory(),
                 newEntities.size());
     }
 
-    private AuctionHistory convertToEntity(AuctionHistoryDto dto) {
-        return AuctionHistory.builder()
-                .itemName(dto.getItemName())
-                .itemDisplayName(dto.getItemDisplayName())
-                .itemCount(dto.getItemCount())
-                .auctionPricePerUnit(dto.getAuctionPricePerUnit())
-                .dateAuctionBuy(OffsetDateTime.parse(dto.getDateAuctionBuy()).toInstant())
-                .auctionBuyId(dto.getAuctionBuyId())
-                .build();
+    private AuctionHistory convertToEntity(AuctionHistoryDto dto, ItemCategory category) {
+        AuctionHistory auctionHistory =
+                AuctionHistory.builder()
+                        .itemName(dto.getItemName())
+                        .itemDisplayName(dto.getItemDisplayName())
+                        .itemCount(dto.getItemCount())
+                        .auctionPricePerUnit(dto.getAuctionPricePerUnit())
+                        .dateAuctionBuy(OffsetDateTime.parse(dto.getDateAuctionBuy()).toInstant())
+                        .auctionBuyId(dto.getAuctionBuyId())
+                        .itemSubCategory(category.getSubCategory())
+                        .itemTopCategory(category.getTopCategory())
+                        .build();
+
+        // ItemOption도 같이 변환
+        if (dto.getItemOptionDtos() != null) {
+            List<ItemOption> itemOptions =
+                    dto.getItemOptionDtos().stream()
+                            .map(
+                                    optionDto ->
+                                            ItemOption.builder()
+                                                    .optionType(optionDto.getOptionType())
+                                                    .optionSubType(optionDto.getOptionSubType())
+                                                    .optionValue(optionDto.getOptionValue())
+                                                    .optionValue2(optionDto.getOptionValue2())
+                                                    .optionDesc(optionDto.getOptionDesc())
+                                                    .auctionHistory(auctionHistory) // 연관관계 설정
+                                                    .build())
+                            .collect(Collectors.toList());
+
+            auctionHistory.setItemOptions(itemOptions);
+        }
+
+        return auctionHistory;
     }
 }

@@ -28,7 +28,7 @@ public class AuctionHistoryFetcher {
                                                 .path("/auction/history")
                                                 .queryParam(
                                                         "auction_item_category",
-                                                        category.getItemName())
+                                                        category.getSubCategory())
                                                 .build())
                         .header("x-nxopen-api-key", nexonApiKey)
                         .header("accept", "application/json")

@@ -34,5 +34,5 @@ public class AuctionItem {
     private LocalDateTime dateAuctionExpire;
 
     @OneToMany(mappedBy = "auctionItem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AuctionItemOption> itemOptions;
+    private List<ItemOption> itemOptions;
 }

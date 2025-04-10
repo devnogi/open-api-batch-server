@@ -37,5 +37,11 @@ public class AuctionHistory {
     private String auctionBuyId;
 
     @OneToMany(mappedBy = "auctionHistory", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AuctionItemOption> itemOptions;
+    private List<ItemOption> itemOptions;
+
+    @Column(name = "item_sub_category", nullable = false)
+    private String itemSubCategory;
+
+    @Column(name = "item_top_category", nullable = false)
+    private String itemTopCategory;
 }
