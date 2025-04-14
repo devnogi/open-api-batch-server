@@ -4,14 +4,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
-import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
