@@ -65,7 +65,6 @@ public class AuctionHistoryFetcher {
                     .header("accept", "application/json")
                     .retrieve()
                     .bodyToMono(AuctionHistoryResponse.class)
-                    .timeout(Duration.ofSeconds(30)) // ⏰ 타임아웃 5초
                     .retryWhen(
                             Retry.backoff(3, Duration.ofSeconds(2)) // 🔁 최대 3번 재시도, 2초 간격 (지수 백오프)
                                     .filter(this::isRetryableException)) // 재시도 조건
