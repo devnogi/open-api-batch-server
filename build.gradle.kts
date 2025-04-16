@@ -20,11 +20,7 @@ java {
 
 val querydslDir = "$buildDir/generated/querydsl"
 
-sourceSets {
-    named("main") {
-        java.srcDir(querydslDir)
-    }
-}
+sourceSets["main"].java.srcDirs(querydslDir)
 
 configurations {
     compileOnly {
@@ -65,12 +61,13 @@ dependencies {
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:${property("p6spyVersion")}")
 
     // QueryDSL (with Jakarta API)
-    implementation("com.querydsl:querydsl-jpa:5.1.0")
     implementation("com.querydsl:querydsl-core:5.1.0")
-    annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jpa")
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+
+    annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
+    annotationProcessor("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     annotationProcessor("jakarta.persistence:jakarta.persistence-api:3.1.0")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api:2.1.1")
-    annotationProcessor("javax.persistence:javax.persistence-api:2.2")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
