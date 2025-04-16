@@ -1,2 +1,4 @@
-package until.the.eternity.auction.presentation;public class AuctionHistoryContoller {
+package until.the.eternity.auction.presentation;
+
+public class AuctionHistoryController {
 }

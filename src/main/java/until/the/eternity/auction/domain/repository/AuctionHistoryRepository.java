@@ -11,7 +11,9 @@ import until.the.eternity.auction.domain.model.AuctionHistory;
 
 @Repository
 public interface AuctionHistoryRepository
-        extends JpaRepository<AuctionHistory, Long>, JpaSpecificationExecutor<AuctionHistory> {
+        extends JpaRepository<AuctionHistory, Long>,
+                JpaSpecificationExecutor<AuctionHistory>,
+                AuctionHistoryRepositoryCustom {
     List<AuctionHistory> findAllByAuctionBuyIdIn(List<String> auctionBuyIds);
 
     @Override
