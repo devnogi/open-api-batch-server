@@ -12,49 +12,6 @@
         <script th:src="@{/res/js/ext/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js}"></script>
         <script th:src="@{/res/js/ext/moment.min.js}"></script>
         <script th:src="@{/res/js/ext/moment-with-locales.min.js}"></script>
-
-        <!--  프로젝트 js  -->
-        <script th:src="@{/res/js/spinner.js}"></script>
-        <script th:src="@{/res/js/utils/request-util.js}"></script>
-        <script th:src="@{/res/js/app.js}"></script>
-
-        <!-- 메뉴 검색 및 자동완성 -->
-        <script th:src="@{/res/js/menu-search.js}"></script>
-
-        <script>
-            /* sidebar nav 메뉴 활성화 */
-            document.addEventListener("DOMContentLoaded", function () {
-                const links = document.querySelectorAll(".sidebar a.nav-link");
-                const currentPath = window.location.pathname;
-
-                links.forEach(link => {
-                    const href = link.getAttribute("href");
-                    if (!href) return;
-
-                    if (currentPath.includes(href)) {
-                        link.classList.add("active");
-
-                        let parent = link.closest(".collapse");
-
-                        while (parent) {
-                            // 열기
-                            const collapseInstance = bootstrap.Collapse.getOrCreateInstance(parent);
-                            collapseInstance.show();
-
-                            // 상위 toggle link도 강조
-                            const toggleLink = parent.previousElementSibling;
-                            if (toggleLink && toggleLink.classList.contains("nav-link")) {
-                                toggleLink.classList.add("active");
-                            }
-
-                            const nextParent = parent.closest(".collapse");
-                            if (nextParent === parent) break;
-                            parent = nextParent;
-                        }
-                    }
-                });
-            });
-        </script>
     </th:block>
 </body>
 

@@ -4,11 +4,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
+import until.the.eternity.auction.domain.dto.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
@@ -24,7 +28,7 @@ public class AuctionHistoryService {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 */3 * * * *")
+    @Scheduled(cron = "0 0 */2 * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             try {
@@ -54,5 +58,9 @@ public class AuctionHistoryService {
             Thread.currentThread().interrupt();
             log.warn("Interrupted during delay between requests", e);
         }
+    }
+
+    public Page<AuctionHistory> search(AuctionHistorySearchCondition condition, Pageable pageable) {
+        return repository.search(condition, pageable);
     }
 }

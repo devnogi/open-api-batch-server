@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <th:block th:insert="~{fragments/header :: header}" />
+    <title>데브노기 - 마비노기 경매장</title>
 </head>
+
 <body>
-$END$
+<div class="main-wrap d-flex">
+    <div class="content-area flex-grow-1">
+        <div class="container-fluid mt-3">
+            <th:block layout:fragment="content" />
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/spinner::spinner}"></th:block>
+<th:block th:replace="~{fragments/scripts::scripts}"></th:block>
+<th:block layout:fragment="scripts" />
 </body>
+
 </html>

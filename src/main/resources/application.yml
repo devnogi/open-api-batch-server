@@ -38,6 +38,12 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
     locations: classpath:db/migration
+  thymeleaf:
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: false
 
 jwt:
   secret-key: ${JWT_SECRET_KEY:e4f1a5c8d2b7e9f0a6c3d1b8e5f2c7a9d4e6f3b1a2c8d5e9f0b3a7c2d1e8f5a4}
