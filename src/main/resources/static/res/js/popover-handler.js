@@ -1,32 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/app}">
-<head>
-    <title></title>
-</head>
-<body>
-<th:block layout:fragment="content">
-    <h1>Auction History</h1>
-    <button id="popoverBtn" type="button" class="btn btn-primary">
-        상세 보기
-    </button>
-    <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
-
-    <style>
-  .popover {
-    max-height: 100vh;
-    overflow-y: auto;
-  }
-
-  /* 선택적으로 popover-content 내부도 스크롤 컨트롤 */
-  .popover-body {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-</style>
-<script>
-    (() => {
+(() => {
   document.addEventListener('DOMContentLoaded', initPopoverHandler);
 
   const POPOVER_BTN_ID = 'popoverBtn';
@@ -110,9 +82,3 @@
     }, HIDE_DELAY_MS);
   }
 })();
-
-</script>
-<script th:src="@{/js/popover-handler.js}"></script>
-</th:block>
-</body>
-</html>

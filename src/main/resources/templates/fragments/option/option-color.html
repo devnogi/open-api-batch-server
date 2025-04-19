@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="section(item)">
+    <div class="position-relative border rounded p-4 mt-5 m-2">
+        <span class="position-absolute top-0 start-50 translate-middle-y bg-white px-2 text-muted small">아이템 색상</span>
+        <div th:each="option : ${item.itemOptions}">
+            <p th:if="${option.optionType == '아이템 색상'}">
+                <span th:text="${option.optionType}"></span>
+                <span th:text="${option.optionSubType}"></span>
+                <span th:text="${option.optionValue}"></span>
+                <span th:text="${option.optionValue2}"></span>
+                <span th:text="${option.optionDesc}"></span>
+            </p>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>
