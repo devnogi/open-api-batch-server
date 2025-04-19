@@ -8,6 +8,7 @@
 <body>
 <th:block layout:fragment="content">
     <h1>Auction History</h1>
+    <div th:replace="~{pages/auction-history/item-detail:: itemDetail(${sample})}"></div>
 </th:block>
 </body>
 </html>

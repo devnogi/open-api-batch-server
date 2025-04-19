@@ -63,4 +63,8 @@ public class AuctionHistoryService {
     public Page<AuctionHistory> search(AuctionHistorySearchCondition condition, Pageable pageable) {
         return repository.search(condition, pageable);
     }
+
+    public AuctionHistory findByIdOrElseThrow(Long id) {
+        return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("에러 발생생"));
+    }
 }
