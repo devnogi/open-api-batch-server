@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<th:block th:fragment="showHeader(item, labelText)">
+    <div class="mb-4">
+        <h4 th:text="${labelText ?: '-'}" class="mb-3"></h4>
+    </div>
+
+    <div class="mb-3">
+        <span th:replace="~{fragments/dataset/metro-line :: metroLine(${item.lineNm})}"></span>
+        <small class="text-muted ml-2"
+               th:text="'전송일시: ' + ${#temporals.format(item.trnsfDt, 'yyyy-MM-dd HH:mm:ss')}">
+        </small>
+    </div>
+</th:block>
+</body>
+</html>

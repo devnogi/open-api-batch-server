@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- fragments/search-form.html -->
+<div th:fragment="searchForm(actionUrl, searchConditions)">
+  <div class="card mb-4">
+    <div class="card-body">
+      <form th:action="@{__${actionUrl}__}" method="get" class="row g-3">
+        <!-- 검색 조건 삽입 -->
+        <div th:replace="${searchConditions}"></div>
+
+        <!-- 검색 및 초기화 버튼 -->
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary" id="searchBtn">검색</button>
+          <a th:href="@{__${actionUrl}__}" class="btn btn-secondary" id="resetBtn">초기화</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</html>

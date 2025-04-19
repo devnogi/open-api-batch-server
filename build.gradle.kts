@@ -69,6 +69,11 @@ dependencies {
     annotationProcessor("jakarta.persistence:jakarta.persistence-api:3.1.0")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api:2.1.1")
 
+    // Thymeleaf
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
+    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.1")
+
     // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

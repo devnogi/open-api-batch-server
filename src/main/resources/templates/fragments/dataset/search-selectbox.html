@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="select(labelText, id, items, selectedValue)">
+    <div class="col-md-3">
+        <label th:for="${id}" class="form-label" th:text="${labelText}">라벨</label>
+        <select class="form-control" th:id="${id}" th:name="${id}">
+            <option value="">전체</option>
+            <option th:each="item : ${items}"
+                    th:value="${item}"
+                    th:text="${item}"
+                    th:selected="${item == selectedValue}">
+            </option>
+        </select>
+    </div>
+</th:block>
+</html>

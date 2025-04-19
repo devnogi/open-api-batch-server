@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="metroLine(lineNm)">
+    <span th:class="${'metro-line ' +
+        (lineNm == null || lineNm.isEmpty() ? 'text-black' :
+         #lists.contains({'1호선', '1'}, lineNm) ? 'line-1' :
+         #lists.contains({'2호선', '2'}, lineNm) ? 'line-2' :
+         #lists.contains({'3호선', '3'}, lineNm) ? 'line-3' :
+         #lists.contains({'4호선', '4'}, lineNm) ? 'line-4' :
+         #lists.contains({'5호선', '5'}, lineNm) ? 'line-5' :
+         #lists.contains({'6호선', '6'}, lineNm) ? 'line-6' :
+         #lists.contains({'7호선', '7'}, lineNm) ? 'line-7' :
+         #lists.contains({'8호선', '8'}, lineNm) ? 'line-8' :
+         #lists.contains({'9호선', '9'}, lineNm) ? 'line-9' :
+         lineNm == '신분당선'   ? 'line-s' :
+         lineNm == '공항철도'   ? 'line-k' :
+         lineNm == '경춘선'    ? 'line-g' :
+         'line-default')}"
+          th:text="${(lineNm == null || lineNm.isEmpty()) ? '-' : (lineNm.matches('[0-9]') ? lineNm + '호선' : lineNm)}"></span>
+</th:block>
+</html>

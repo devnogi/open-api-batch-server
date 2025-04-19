@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org">
+<title>header</title>
+<th:block th:fragment="header">
+    <meta charset="utf-8" />
+
+    <!--/*@thymesVar id="contextPath" type="kr.or.chest.social_platform.config.GlobalControllerAdvice"*/-->
+    <meta name="ctx" th:content="${contextPath}" />
+    <!--    <meta name="_csrf" th:content="${_csrf.token}"/>-->
+    <!--    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/res/css/app.css}" />
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/res/css/font-awesome.css}" />
+    <link rel="stylesheet" type="text/css" href="#" th:href="@{/res/css/ext/swiper.css}" />
+</th:block>
+
+</html>

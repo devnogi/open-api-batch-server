@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="baseUploadModal2(datasetType)">
+    <head>
+        <meta charset="UTF-8">
+        <title>빠른하차 정보 업로드</title>
+    </head>
+    <body>
+    <div th:fragment="uploadModal2" class="modal fade" id="dataUploadModal2" tabindex="-1" role="dialog"
+         aria-labelledby="dataUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataUploadModalLabel" th:text="${datasetType.getNameKr() + ' 업로드'}"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="dataUploadForm" th:action="@{'/rest/dataset/upload'}" method="post"
+                          enctype="multipart/form-data">
+                        <input type="hidden" name="datasetEnum" th:value="${datasetType.name()}">
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="dataFile" name="file" accept=".xlsx, xls"
+                                   required>
+                        </div>
+                    </form>
+                    <div class="mt-3">
+                        <a th:href="@{'/rest/dataset/template?datasetEnum=' + ${datasetType.name()}}" class="btn btn-outline-primary">
+                            <i class="fas fa-download"></i> 템플릿 다운로드
+                        </a>
+                        <small class="d-block text-muted mt-2">
+                            * 업로드 시 기존 데이터는 모두 삭제됩니다.
+                        </small>
+                    </div>
+                    <div th:replace="~{fragments/upload-spinner :: .upload-spinner}"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button id="dataUploadBtn" type="button" class="btn btn-primary">업로드</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+</th:block>
+</html>
