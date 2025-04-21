@@ -8,10 +8,10 @@
 <body>
 <th:block layout:fragment="content">
     <h1>Auction History</h1>
-    <button id="popoverBtn" type="button" class="btn btn-primary">
-        상세 보기
-    </button>
-    <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
+    <div th:each="sample : ${samples}">
+        <button type="button" class="popoverBtn btn btn-primary" th:text="${sample.itemDisplayName}"></button>
+        <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
+    </div>
 
     <style>
   .popover {
@@ -27,7 +27,7 @@
 </style>
 </th:block>
 <th:block layout:fragment="scripts">
-    <script th:src="@{/js/popover-handler.js}"></script>
+    <script th:src="@{/js/popover-handler-index.js}"></script>
 </th:block>
 </body>
 </html>

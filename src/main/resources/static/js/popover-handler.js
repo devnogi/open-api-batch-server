@@ -1,65 +1,68 @@
-(() => {
-  document.addEventListener('DOMContentLoaded', initPopoverHandler);
+const PopoverHandler = {
+  POPOVER_BTN_ID: 'popoverBtn',
+  POPOVER_CONTENT_ID: 'popoverContent',
+  POPOVER_CLASS: 'popover',
+  SHOW_DELAY_MS: 50,
+  HIDE_DELAY_MS: 100,
 
-  const POPOVER_BTN_ID = 'popoverBtn';
-  const POPOVER_CONTENT_ID = 'popoverContent';
-  const POPOVER_CLASS = 'popover';
-  const SHOW_DELAY_MS = 50;
-  const HIDE_DELAY_MS = 100;
+  isInsidePopover: false,
+  popoverInstance: null,
 
-  let isInsidePopover = false;
-  let popoverInstance = null;
+  init() {
+    document.addEventListener('DOMContentLoaded', () => {
+      const button = document.getElementById(this.POPOVER_BTN_ID);
+      const popoverContent = document.getElementById(this.POPOVER_CONTENT_ID);
 
-  function initPopoverHandler() {
-    const button = document.getElementById(POPOVER_BTN_ID);
-    const popoverContent = document.getElementById(POPOVER_CONTENT_ID);
+      if (!button || !popoverContent) return;
 
-    if (!button || !popoverContent) return;
+      this.createPopover(button, popoverContent.innerHTML);
+      this.bindButtonEvents(button);
+    });
+  },
 
-    createPopover(button, popoverContent.innerHTML);
-    bindButtonEvents(button);
-  }
-
-  function createPopover(button, content) {
-    popoverInstance = new bootstrap.Popover(button, {
+  createPopover(button, content) {
+    this.popoverInstance = new bootstrap.Popover(button, {
       content,
       html: true,
       trigger: 'manual',
       placement: 'right',
     });
-  }
+  },
 
-  function bindButtonEvents(button) {
-    button.addEventListener('mouseenter', () => showPopover(button));
-    button.addEventListener('mouseleave', tryHidePopover);
-  }
+  bindButtonEvents(button) {
+    button.addEventListener('mouseenter', () => this.showPopover(button));
+    button.addEventListener('mouseleave', () => this.tryHidePopover(button));
+  },
 
-  function showPopover(button) {
-    if (!popoverInstance) return;
-    popoverInstance.show();
+  showPopover(button) {
+    if (!this.popoverInstance) return;
+
+    this.popoverInstance.show();
 
     setTimeout(() => {
-      const popoverEl = document.querySelector(`.${POPOVER_CLASS}`);
+      const popoverEl = document.querySelector(`.${this.POPOVER_CLASS}`);
       if (!popoverEl) return;
 
-      setupPopoverEvents(popoverEl, button);
-    }, SHOW_DELAY_MS);
-  }
+      this.setupPopoverEvents(popoverEl, button);
+    }, this.SHOW_DELAY_MS);
+  },
 
-  function setupPopoverEvents(popoverEl, button) {
+  setupPopoverEvents(popoverEl, button) {
     popoverEl.addEventListener('mouseenter', () => {
-      isInsidePopover = true;
+      this.isInsidePopover = true;
     });
 
     popoverEl.addEventListener('mouseleave', () => {
-      isInsidePopover = false;
-      tryHidePopover(button);
+      this.isInsidePopover = false;
+      this.tryHidePopover(button);
     });
 
-    popoverEl.addEventListener('wheel', preventBodyScroll(popoverEl), { passive: false });
-  }
+    popoverEl.addEventListener('wheel', this.preventBodyScroll(popoverEl), {
+      passive: false,
+    });
+  },
 
-  function preventBodyScroll(el) {
+  preventBodyScroll(el) {
     return function (e) {
       const { scrollTop, scrollHeight, clientHeight } = el;
       const delta = e.deltaY;
@@ -72,13 +75,16 @@
       }
       e.stopPropagation();
     };
-  }
+  },
 
-  function tryHidePopover(button) {
+  tryHidePopover(button) {
     setTimeout(() => {
-      if (!isInsidePopover && !button.matches(':hover')) {
-        popoverInstance?.hide();
+      if (!this.isInsidePopover && !button.matches(':hover')) {
+        this.popoverInstance?.hide();
       }
-    }, HIDE_DELAY_MS);
+    }, this.HIDE_DELAY_MS);
   }
-})();
+};
+
+// 실행
+PopoverHandler.init();

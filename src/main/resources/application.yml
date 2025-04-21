@@ -19,7 +19,7 @@ spring:
     name: devnogi-server
   web:
     resources:
-      add-mappings: false
+      static-locations: classpath:/static/
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:${DB_PORT:3366}/${DB_SCHEMA}
