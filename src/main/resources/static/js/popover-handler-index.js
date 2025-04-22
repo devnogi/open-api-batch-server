@@ -1,68 +1,60 @@
 const PopoverHandler = {
   POPOVER_BTN_CLASS: 'popover-btn',
-  POPOVER_CONTENT_CLASS: 'popover-content',
   POPOVER_CLASS: 'popover',
   SHOW_DELAY_MS: 50,
   HIDE_DELAY_MS: 100,
 
-  activePopovers: new Map(), // key: button element, value: popover instance
-  isInsidePopoverMap: new Map(), // key: button element, value: boolean
+  activePopovers: new Map(),
 
   init() {
     document.addEventListener('DOMContentLoaded', () => {
       const buttons = document.querySelectorAll(`.${this.POPOVER_BTN_CLASS}`);
-
-      buttons.forEach((button) => {
-        const contentId = button.dataset.popoverContentId;
-        const contentEl = contentId
-          ? document.getElementById(contentId)
-          : button.querySelector(`.${this.POPOVER_CONTENT_CLASS}`);
-
-        if (!contentEl) return;
-
-        const popoverInstance = new bootstrap.Popover(button, {
-          content: contentEl.innerHTML,
-          html: true,
-          trigger: 'manual',
-          placement: 'right',
-        });
-
-        this.activePopovers.set(button, popoverInstance);
-        this.isInsidePopoverMap.set(button, false);
-
-        this.bindButtonEvents(button);
-      });
+      buttons.forEach((button) => this.setupButton(button));
     });
   },
 
-  bindButtonEvents(button) {
+  setupButton(button) {
+    const id = button.dataset.id;
+    const contentEl = document.getElementById(`popover-content-${id}`);
+    if (!contentEl) return;
+
+    const popover = new bootstrap.Popover(button, {
+      content: contentEl.innerHTML,
+      html: true,
+      trigger: 'manual',
+      placement: 'right',
+    });
+
+    this.activePopovers.set(button, { popover, isInside: false });
+
     button.addEventListener('mouseenter', () => this.showPopover(button));
     button.addEventListener('mouseleave', () => this.tryHidePopover(button));
   },
 
   showPopover(button) {
-    const popoverInstance = this.activePopovers.get(button);
-    if (!popoverInstance) return;
+    const popoverData = this.activePopovers.get(button);
+    if (!popoverData) return;
 
-    popoverInstance.show();
+    popoverData.popover.show();
 
     setTimeout(() => {
-      const popovers = document.querySelectorAll(`.${this.POPOVER_CLASS}`);
-      const latestPopover = Array.from(popovers).pop(); // 가장 최근에 띄워진 popover로 가정
+      const popoverEl = document.querySelector(`.${this.POPOVER_CLASS}`);
+      if (!popoverEl) return;
 
-      if (!latestPopover) return;
-
-      this.setupPopoverEvents(latestPopover, button);
+      this.setupPopoverEvents(popoverEl, button);
     }, this.SHOW_DELAY_MS);
   },
 
   setupPopoverEvents(popoverEl, button) {
+    const popoverData = this.activePopovers.get(button);
+    if (!popoverData) return;
+
     popoverEl.addEventListener('mouseenter', () => {
-      this.isInsidePopoverMap.set(button, true);
+      popoverData.isInside = true;
     });
 
     popoverEl.addEventListener('mouseleave', () => {
-      this.isInsidePopoverMap.set(button, false);
+      popoverData.isInside = false;
       this.tryHidePopover(button);
     });
 
@@ -87,10 +79,12 @@ const PopoverHandler = {
   },
 
   tryHidePopover(button) {
+    const popoverData = this.activePopovers.get(button);
+    if (!popoverData) return;
+
     setTimeout(() => {
-      const isInsidePopover = this.isInsidePopoverMap.get(button);
-      if (!isInsidePopover && !button.matches(':hover')) {
-        this.activePopovers.get(button)?.hide();
+      if (!popoverData.isInside && !button.matches(':hover')) {
+        popoverData.popover?.hide();
       }
     }, this.HIDE_DELAY_MS);
   }

@@ -8,10 +8,10 @@
 <body>
 <th:block layout:fragment="content">
     <h1>Auction History</h1>
-    <div th:each="sample : ${samples}">
+    <div th:each="sample : ${samples.content}" >
         <button type="button" class="popoverBtn btn btn-primary" th:text="${sample.itemDisplayName}"></button>
-        <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
-    </div>
+        <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}" id="popover-content-${item.id}" style="display: none;"></div>
+    </div> <!-- TODO: id랑 style을 fragment 내로 이동 -->
 
     <style>
   .popover {
