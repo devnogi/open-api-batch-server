@@ -3,29 +3,45 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/app}">
 <head>
-    <title></title>
+    <title>Auction History</title>
 </head>
 <body>
 <th:block layout:fragment="content">
     <h1>Auction History</h1>
-    <div th:each="sample : ${samples.content}" >
-        <button type="button" class="popover-btn btn btn-primary" th:data-id="${sample.id}" th:text="${sample.itemDisplayName}"></button>
-        <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
-    </div> <!-- TODO: id랑 style을 fragment 내로 이동 -->
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>아이템명</th>
+            <th>거래 가격</th>
+            <th>거래 일자</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sample : ${samples.content}">
+            <td class="popover-btn"
+                th:data-id="${sample.id}"
+                th:text="${sample.itemDisplayName}"></td>
+            <td th:text="${sample.auctionPricePerUnit}"></td>
+            <td th:text="${#temporals.format(sample.dateAuctionBuy, 'yyyy-MM-dd HH:mm')}"></td>
+            <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
+        </tr>
+        </tbody>
+    </table>
 
     <style>
-  .popover {
-    max-height: 100vh;
-    overflow-y: auto;
-  }
+        .popover {
+            max-height: 100vh;
+            overflow-y: auto;
+        }
 
-  /* 선택적으로 popover-content 내부도 스크롤 컨트롤 */
-  .popover-body {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-</style>
+        .popover-body {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
 </th:block>
+
 <th:block layout:fragment="scripts">
     <script th:src="@{/js/popover-handler-index.js}"></script>
 </th:block>
