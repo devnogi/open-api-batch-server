@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
@@ -60,6 +61,7 @@ public class AuctionHistoryService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Page<AuctionHistory> search(AuctionHistorySearchCondition condition, Pageable pageable) {
         return repository.search(condition, pageable);
     }

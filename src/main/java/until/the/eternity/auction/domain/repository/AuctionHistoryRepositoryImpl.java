@@ -33,6 +33,8 @@ public class AuctionHistoryRepositoryImpl implements AuctionHistoryRepositoryCus
         List<AuctionHistory> content =
                 queryFactory
                         .selectFrom(ah)
+                        .leftJoin(ah.itemOptions)
+                        .fetchJoin()
                         .where(builder)
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())

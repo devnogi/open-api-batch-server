@@ -9,8 +9,8 @@
 <th:block layout:fragment="content">
     <h1>Auction History</h1>
     <div th:each="sample : ${samples.content}" >
-        <button type="button" class="popoverBtn btn btn-primary" th:text="${sample.itemDisplayName}"></button>
-        <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}" id="popover-content-${item.id}" style="display: none;"></div>
+        <button type="button" class="popover-btn btn btn-primary" th:data-id="${sample.id}" th:text="${sample.itemDisplayName}"></button>
+        <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
     </div> <!-- TODO: id랑 style을 fragment 내로 이동 -->
 
     <style>
