@@ -31,13 +31,24 @@
 
     <style>
         .popover {
+            min-height: 10vh;
             max-height: 100vh;
             overflow-y: auto;
         }
 
         .popover-body {
+            min-height: 10vh;
             max-height: 90vh;
             overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ */
+
+        }
+
+        .popover-body::-webkit-scrollbar {
+          max-height: 90vh;
+          overflow-y: auto;
+          display: none; /* Chrome, Safari, Opera */
         }
     </style>
 </th:block>

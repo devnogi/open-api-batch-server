@@ -2,14 +2,15 @@ const PopoverHandler = {
   POPOVER_BTN_CLASS: 'popover-btn',
   POPOVER_CLASS: 'popover',
   SHOW_DELAY_MS: 50,
-  HIDE_DELAY_MS: 100,
 
   activePopovers: new Map(),
+  currentPopoverEl: null,
 
   init() {
     document.addEventListener('DOMContentLoaded', () => {
       const buttons = document.querySelectorAll(`.${this.POPOVER_BTN_CLASS}`);
       buttons.forEach((button) => this.setupButton(button));
+      this.setupGlobalWheelHandler();
     });
   },
 
@@ -18,7 +19,6 @@ const PopoverHandler = {
     const contentEl = document.getElementById(`popover-content-${id}`);
     if (!contentEl) return;
 
-    // 가짜 요소 생성
     const fakeTarget = document.createElement('div');
     fakeTarget.style.position = 'absolute';
     fakeTarget.style.zIndex = '-1';
@@ -32,18 +32,33 @@ const PopoverHandler = {
       placement: 'right',
     });
 
+    const mouseMoveHandler = (e) => {
+      this.updateFakeTargetPosition(button, e);
+      const popoverData = this.activePopovers.get(button);
+      if (popoverData?.popover?._popper) {
+        popoverData.popover._popper.update();
+      }
+    };
+
     this.activePopovers.set(button, {
       popover,
       fakeTarget,
-      isInside: false,
+      mouseMoveHandler,
     });
 
-    button.addEventListener('mousemove', (e) => {
-      this.updateFakeTargetPosition(button, e);
+    button.addEventListener('mouseenter', (e) => {
+      this.hideAllPopovers(); // 빠르게 이동해도 기존 팝오버 정리
+      button.addEventListener('mousemove', mouseMoveHandler);
+      this.showPopover(button, e);
     });
 
-    button.addEventListener('mouseenter', (e) => this.showPopover(button, e));
-    button.addEventListener('mouseleave', () => this.tryHidePopover(button));
+    button.addEventListener('mouseleave', () => {
+      const data = this.activePopovers.get(button);
+      if (data?.mouseMoveHandler) {
+        button.removeEventListener('mousemove', data.mouseMoveHandler);
+      }
+      this.hidePopoverImmediately(button);
+    });
   },
 
   updateFakeTargetPosition(button, e) {
@@ -51,68 +66,64 @@ const PopoverHandler = {
     if (!popoverData) return;
 
     const { fakeTarget } = popoverData;
-    fakeTarget.style.left = `${e.clientX + 10}px`; // 마우스 오른쪽
-    fakeTarget.style.top = `${e.clientY - 10}px`;  // 마우스 약간 위
+    fakeTarget.style.left = `${e.clientX + 10}px`;
+    fakeTarget.style.top = `${e.clientY - 10}px`;
   },
 
   showPopover(button, e) {
     const popoverData = this.activePopovers.get(button);
     if (!popoverData) return;
 
-    this.updateFakeTargetPosition(button, e); // 위치 업데이트
+    this.updateFakeTargetPosition(button, e);
     popoverData.popover.show();
 
-    setTimeout(() => {
-      const popoverEl = document.querySelector(`.${this.POPOVER_CLASS}`);
-      if (!popoverEl) return;
-
-      this.setupPopoverEvents(popoverEl, button);
-    }, this.SHOW_DELAY_MS);
+    // 팝오버 엘리먼트를 즉시 가져와 currentPopoverEl로 설정
+    const popoverEl = popoverData.popover._getTipElement?.();
+    if (popoverEl) {
+      this.currentPopoverEl = popoverEl;
+    }
   },
 
-  setupPopoverEvents(popoverEl, button) {
+  hidePopoverImmediately(button) {
     const popoverData = this.activePopovers.get(button);
     if (!popoverData) return;
 
-    popoverEl.addEventListener('mouseenter', () => {
-      popoverData.isInside = true;
-    });
-
-    popoverEl.addEventListener('mouseleave', () => {
-      popoverData.isInside = false;
-      this.tryHidePopover(button);
-    });
-
-    popoverEl.addEventListener('wheel', this.preventBodyScroll(popoverEl), {
-      passive: false,
-    });
+    popoverData.popover?.hide();
+    this.currentPopoverEl = null;
   },
 
-  preventBodyScroll(el) {
-    return function (e) {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      const delta = e.deltaY;
-      const isScrollingDown = delta > 0;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight;
-      const isAtTop = scrollTop <= 0;
-
-      if ((isScrollingDown && isAtBottom) || (!isScrollingDown && isAtTop)) {
-        e.preventDefault();
-      }
-      e.stopPropagation();
-    };
+  hideAllPopovers() {
+    for (const [button, data] of this.activePopovers.entries()) {
+      data.popover?.hide();
+    }
+    this.currentPopoverEl = null;
   },
 
-  tryHidePopover(button) {
-    const popoverData = this.activePopovers.get(button);
-    if (!popoverData) return;
+  setupGlobalWheelHandler() {
+    document.addEventListener(
+      'wheel',
+      (e) => {
+        if (!this.currentPopoverEl) return;
 
-    setTimeout(() => {
-      if (!popoverData.isInside && !button.matches(':hover')) {
-        popoverData.popover?.hide();
-      }
-    }, this.HIDE_DELAY_MS);
-  }
+        const popoverBody = this.currentPopoverEl.querySelector('.popover-body');
+        if (!popoverBody) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = popoverBody;
+        const delta = e.deltaY;
+        const isScrollingDown = delta > 0;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+        const isAtTop = scrollTop <= 0;
+
+        if ((isScrollingDown && isAtBottom) || (!isScrollingDown && isAtTop)) {
+          e.preventDefault(); // body 스크롤 방지
+        } else {
+          e.preventDefault(); // 항상 body는 막음
+          popoverBody.scrollTop += delta; // 팝오버 내용 스크롤
+        }
+      },
+      { passive: false }
+    );
+  },
 };
 
 PopoverHandler.init();

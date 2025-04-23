@@ -3,7 +3,7 @@
 <body>
 <th:block th:fragment="section(item)">
     <div class="position-relative border rounded p-4 mt-5 m-2">
-        <span class="position-absolute top-0 start-50 translate-middle-y bg-white px-2 text-muted small">개조</span>
+        <span class="position-absolute top-0 start-25 translate-middle-y bg-white px-2 text-muted small">개조</span>
         <div th:each="option : ${item.itemOptions}">
             <p th:if="${#lists.contains({'일반 개조', '장인 개조', '특별 개조', '보석 개조'}, option.optionType)}">
                 <span th:text="${option.optionType}"></span>

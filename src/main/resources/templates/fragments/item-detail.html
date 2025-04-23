@@ -2,7 +2,7 @@
 <html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block th:fragment="itemDetail(item)">
-    <div class="d-none" th:id="'popover-content-' + ${item.id}">
+    <div class="d-none popover-body" th:id="'popover-content-' + ${item.id}">
         <div class="card mb-3">
             <div class="border-1">
                 <p class="text-center" th:text="${item.itemDisplayName}"></p>

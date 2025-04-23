@@ -2,8 +2,9 @@
 <html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block th:fragment="section(item)">
-    <div class="position-relative border rounded p-4 mt-5 m-2">
-        <span class="position-absolute top-0 start-50 translate-middle-y bg-white px-2 text-muted small">세트아이템</span>
+    <div class="position-relative border rounded p-4 mt-5 m-2"
+         th:if="${!#lists.isEmpty(item.itemOptions.?[optionType == '세트 '])}">
+        <span class="position-absolute top-0 start-25 translate-middle-y bg-white px-2 text-muted small">세트아이템</span>
         <div th:each="option : ${item.itemOptions}">
             <p th:if="${option.optionType == '세트 효과'}">
                 <span th:text="${option.optionType}"></span>
