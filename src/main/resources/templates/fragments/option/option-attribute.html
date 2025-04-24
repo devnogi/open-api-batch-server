@@ -3,9 +3,9 @@
 <body>
 <!-- fragments/option-attribute.html -->
 <th:block th:fragment="section(item)">
-    <div class="position-relative border rounded p-4 mt-5 m-2"
+    <div class="position-relative border rounded p-4 mt-3 m-1"
          th:if="${!#lists.isEmpty(item.itemOptions.?[#lists.contains({'공격력','크리티컬','밸런스','내구력','부상률','숙련','아이템 보호','피어싱 레벨','남은 전용 해제 가능 횟수','인챈트 불가능','방어력','보호','마법 방어력','마법 보호','남은 거래 횟수','내구도'}, optionType)])}">
-        <span class="position-absolute top-0 start-25 translate-middle-y bg-white px-2 text-muted small">아이템 속성</span>
+        <span class="option-label">아이템 속성</span>
         <div th:each="option : ${item.itemOptions}">
             <p th:if="${#lists.contains({'공격력','크리티컬','밸런스','내구력','부상률','숙련','아이템 보호','피어싱 레벨','남은 전용 해제 가능 횟수','인챈트 불가능','방어력','보호','마법 방어력','마법 보호','남은 거래 횟수','내구도'}, option.optionType)}">
                 <span th:text="${option.optionType}"></span>
