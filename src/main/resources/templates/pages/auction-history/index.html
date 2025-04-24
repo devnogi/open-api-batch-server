@@ -20,6 +20,7 @@
         <tbody>
         <tr th:each="sample : ${samples.content}">
             <td class="popover-btn"
+                th:attr="data-id=${sample.id}"
                 th:data-id="${sample.id}"
                 th:text="${sample.itemDisplayName}"></td>
             <td th:text="${sample.auctionPricePerUnit}"></td>
