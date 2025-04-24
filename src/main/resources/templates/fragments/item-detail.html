@@ -3,16 +3,33 @@
 <body>
 <th:block th:fragment="itemDetail(item)">
     <div class="d-none popover-body" th:id="'popover-content-' + ${item.id}">
-        <div class="card mb-3">
-            <div class="border-1">
-                <p class="text-center" th:text="${item.itemDisplayName}"></p>
-                <th:block th:replace="~{fragments/option/option-attribute :: section(${item})}" />
-                <th:block th:replace="~{fragments/option/option-enchant :: section(${item})}" />
-                <th:block th:replace="~{fragments/option/option-upgrade :: section(${item})}" />
-                <th:block th:replace="~{fragments/option/option-artifact :: section(${item})}" />
-                <th:block th:replace="~{fragments/option/option-erg :: section(${item})}" />
-                <th:block th:replace="~{fragments/option/option-set :: section(${item})}" />
-                <th:block th:replace="~{fragments/option/option-color :: section(${item})}" />
+        <div class="card shadow-sm border-0 rounded-4" style="background-color: #fffaf5;">
+            <div class="card-body p-3">
+                <h5 class="card-title text-center mb-3"
+                    th:text="${item.itemDisplayName}"
+                    style="color: #ff7f50; font-weight: bold;">아이템명</h5>
+
+                <div class="mb-2">
+                    <th:block th:replace="~{fragments/option/option-attribute :: section(${item})}" />
+                </div>
+                <div class="mb-2">
+                    <th:block th:replace="~{fragments/option/option-enchant :: section(${item})}" />
+                </div>
+                <div class="mb-2">
+                    <th:block th:replace="~{fragments/option/option-upgrade :: section(${item})}" />
+                </div>
+                <div class="mb-2">
+                    <th:block th:replace="~{fragments/option/option-artifact :: section(${item})}" />
+                </div>
+                <div class="mb-2">
+                    <th:block th:replace="~{fragments/option/option-erg :: section(${item})}" />
+                </div>
+                <div class="mb-2">
+                    <th:block th:replace="~{fragments/option/option-set :: section(${item})}" />
+                </div>
+                <div>
+                    <th:block th:replace="~{fragments/option/option-color :: section(${item})}" />
+                </div>
             </div>
         </div>
     </div>

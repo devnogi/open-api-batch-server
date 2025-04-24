@@ -4,54 +4,82 @@
       layout:decorate="~{layouts/app}">
 <head>
     <title>Auction History</title>
-</head>
-<body>
-<th:block layout:fragment="content">
-    <h1>Auction History</h1>
-
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>아이템명</th>
-            <th>거래 가격</th>
-            <th>거래 일자</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="sample : ${samples.content}">
-            <td class="popover-btn"
-                th:attr="data-id=${sample.id}"
-                th:data-id="${sample.id}"
-                th:text="${sample.itemDisplayName}"></td>
-            <td th:text="${sample.auctionPricePerUnit}"></td>
-            <td th:text="${#temporals.format(sample.dateAuctionBuy, 'yyyy-MM-dd HH:mm')}"></td>
-            <div th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
-        </tr>
-        </tbody>
-    </table>
-
     <style>
-        .popover {
-            min-height: 10vh;
-            max-height: 100vh;
-            overflow-y: auto;
+        .item-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+            background-color: #1f1f2e;
+            color: #fff;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
-        .popover-body {
-            min-height: 10vh;
-            max-height: 90vh;
-            overflow-y: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE 10+ */
-
+        .item-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
         }
 
-        .popover-body::-webkit-scrollbar {
-          max-height: 90vh;
-          overflow-y: auto;
-          display: none; /* Chrome, Safari, Opera */
+        .item-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffcd58;
+            cursor: pointer;
+        }
+
+        .item-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #36d399;
+        }
+
+        .item-date {
+            font-size: 0.85rem;
+            color: #ccc;
+            text-align: right;
         }
     </style>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="container py-4">
+        <div class="container py-4">
+            <h1 class="mb-4 text-center" style="color: #444; font-weight: bold;">🛒 게임 아이템 거래 내역</h1>
+
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle" style="background-color: #fffdf9; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);">
+                    <thead style="background-color: #ffe5ec;">
+                    <tr style="color: #d6336c;">
+                        <th style="font-weight: bold;">아이템명</th>
+                        <th style="font-weight: bold;">판매가격</th>
+                        <th style="font-weight: bold;">판매시간</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="sample : ${samples.content}" style="transition: background-color 0.2s;">
+                        <td>
+                    <span class="popover-btn"
+                          th:attr="data-id=${sample.id}"
+                          th:text="${sample.itemDisplayName}"
+                          style="color: #ff7f50; font-weight: 600; cursor: pointer;">아이템명</span>
+                            <div class="d-none"
+                                 th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
+                        </td>
+                        <td>
+                    <span style="color: #20c997; font-weight: bold;"
+                          th:text="${sample.auctionPricePerUnit} + ' G'">9999 G</span>
+                        </td>
+                        <td>
+                    <span style="color: #6c757d; font-size: 0.9rem;"
+                          th:text="${#temporals.format(sample.dateAuctionBuy, 'yyyy-MM-dd HH:mm')}">2024-04-01 12:30</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
 </th:block>
 
 <th:block layout:fragment="scripts">
