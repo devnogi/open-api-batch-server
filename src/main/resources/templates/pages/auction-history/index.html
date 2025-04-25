@@ -3,44 +3,8 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/app}">
 <head>
-    <title>Auction History</title>
-    <style>
-        .item-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s;
-            background-color: #1f1f2e;
-            color: #fff;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .item-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        .item-name {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffcd58;
-            cursor: pointer;
-        }
-
-        .item-price {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #36d399;
-        }
-
-        .item-date {
-            font-size: 0.85rem;
-            color: #ccc;
-            text-align: right;
-        }
-    </style>
+    <title>경매노기</title>
 </head>
-
 <body>
 <th:block layout:fragment="content">
     <div class="container py-4">
@@ -59,12 +23,12 @@
                     <tbody>
                     <tr th:each="sample : ${samples.content}" style="transition: background-color 0.2s;">
                         <td>
-                    <span class="popover-btn"
-                          th:attr="data-id=${sample.id}"
-                          th:text="${sample.itemDisplayName}"
-                          style="color: #ff7f50; font-weight: 600; cursor: pointer;">아이템명</span>
+                            <span class="popover-btn"
+                                  th:attr="data-id=${sample.id}"
+                                  th:text="${sample.itemDisplayName}"
+                                  style="color: #ff7f50; font-weight: 600; cursor: pointer;">아이템명</span>
                             <div class="d-none"
-                                 th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
+                                  th:replace="~{fragments/item-detail:: itemDetail(${sample})}"></div>
                         </td>
                         <td>
                     <span style="color: #20c997; font-weight: bold;"
@@ -79,7 +43,7 @@
                 </table>
             </div>
         </div>
-
+    </div>
 </th:block>
 
 <th:block layout:fragment="scripts">

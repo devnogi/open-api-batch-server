@@ -18325,59 +18325,6 @@ button.toggle-region-btn:hover {
   justify-content: space-between;
 }
 
-.option-label {
-    color: #ff7f50;
-    position: absolute;
-    top: 0;
-    left: 5%;
-    transform: translateY(-50%);
-    background-color: white;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: bold;
-}
-
-.artifact-value {
-    color: #4B89DC;
-}
-
-.enchant-value {
-    color: #4B89DC;
-}
-
-.mobile-card {
-  display: none;
-  margin-bottom: 15px;
-  border: 1px solid #dee2e6;
-  border-radius: 5px;
-  padding: 12px;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-.mobile-card-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-  word-break: break-word;
-}
-.mobile-card-row {
-  display: flex;
-  margin-bottom: 5px;
-}
-.mobile-card-label {
-  width: 90px;
-  flex-shrink: 0;
-  font-weight: 600;
-  color: #555;
-}
-.mobile-card-value {
-  flex: 1;
-  word-break: break-word;
-}
-
 @media (max-width: 1920px) {
     .hide-xxl {
         display: none;
@@ -18450,3 +18397,72 @@ body {
 }
 
 /*# sourceMappingURL=app.css.map */
+
+/* */
+
+.option-label {
+    color: #ff7f50;
+    position: absolute;
+    top: 0;
+    left: 5%;
+    transform: translateY(-50%);
+    background-color: white;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.artifact-value {
+    color: #4B89DC;
+}
+
+.enchant-value {
+    color: #4B89DC;
+}
+
+.item-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    background-color: #1f1f2e;
+    color: #fff;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.item-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.item-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffcd58;
+    cursor: pointer;
+}
+
+.item-price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #36d399;
+}
+
+.item-date {
+    font-size: 0.85rem;
+    color: #ccc;
+    text-align: right;
+}
+
+.popover-body {
+    max-height: 900px;  /* 또는 적절한 높이 */
+    overflow-y: auto;
+    -ms-overflow-style: none; /* 인터넷 익스플로러 */
+    scrollbar-width: none; /* 파이어폭스 */
+}
+.popover-body:-webkit-scrollbar {
+    max-height: 900px;  /* 또는 적절한 높이 */
+    overflow-y: auto;
+    display: none;
+}

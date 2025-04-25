@@ -40,6 +40,20 @@ const PopoverHandler = {
       html: true, // HTML 해석 가능
       trigger: 'manual', // 수동으로 표시 제어
       placement: 'right', // 오른쪽에 표시
+      popperConfig: (defaultBsPopperConfig) => {
+          return {
+            ...defaultBsPopperConfig,
+            modifiers: [
+              ...defaultBsPopperConfig.modifiers,
+              {
+                name: 'flip',
+                options: {
+                  fallbackPlacements: [], // 다른 방향으로 바꾸지 않게 함
+                },
+              },
+            ],
+          };
+      },
     });
 
     // 마우스 이동 시 팝오버 위치 업데이트용 핸들러
@@ -60,13 +74,20 @@ const PopoverHandler = {
 
     // 마우스를 올렸을 때 처리
     button.addEventListener('mouseenter', (e) => {
+      console.log('enter');
       this.hideAllPopovers(button); // 현재 버튼 제외하고 나머지 팝오버 숨김
       button.addEventListener('mousemove', mouseMoveHandler); // 마우스 움직임 추적 시작
       this.showPopover(button, e); // 팝오버 표시
     });
 
     // 마우스를 벗어났을 때 처리
-    button.addEventListener('mouseleave', () => {
+    button.addEventListener('mouseleave', (e) => {
+      console.log('leave');
+      const toEl = e.relatedTarget;
+      if (button.contains(toEl)) {
+        console.log('popover')
+        return;
+      }
       const data = this.activePopovers.get(button);
       if (data?.mouseMoveHandler) {
         button.removeEventListener('mousemove', data.mouseMoveHandler); // 추적 중단
@@ -76,29 +97,42 @@ const PopoverHandler = {
   },
 
   // 가짜 타겟 위치를 마우스 커서 근처로 이동
-  updateFakeTargetPosition(button, e) {
-    const popoverData = this.activePopovers.get(button);
-    if (!popoverData) return;
+    updateFakeTargetPosition(button, e) {
+      const popoverData = this.activePopovers.get(button);
+      if (!popoverData) return;
 
-    const { fakeTarget } = popoverData;
-    fakeTarget.style.left = `${e.clientX + 10}px`; // 마우스 우측 10px
-    fakeTarget.style.top = `${e.clientY - 10}px`; // 마우스 상단 10px
-  },
+      const { fakeTarget } = popoverData;
+
+      const minLeft = 50; // 왼쪽 끝에서 너무 가까우면 오른쪽 여백 보장
+      const adjustedLeft = Math.max(e.clientX + 20, minLeft);
+
+      fakeTarget.style.left = `${adjustedLeft}px`;
+      fakeTarget.style.top = `${Math.max(e.clientY - 10, 10)}px`; // 위쪽도 여유있게
+    },
 
   // 팝오버 표시
-  showPopover(button, e) {
-    const popoverData = this.activePopovers.get(button);
-    if (!popoverData) return;
+// 팝오버 표시
+showPopover(button, e) {
+  const popoverData = this.activePopovers.get(button);
+  if (!popoverData) return;
 
-    this.updateFakeTargetPosition(button, e); // 위치 먼저 갱신
-    popoverData.popover.show(); // 팝오버 표시
+  this.updateFakeTargetPosition(button, e); // 위치 먼저 갱신
+  popoverData.popover.show(); // 팝오버 표시
 
-    // 표시된 팝오버의 DOM 엘리먼트를 저장 (휠 이벤트 처리를 위해)
-    const popoverEl = popoverData.popover._getTipElement?.();
-    if (popoverEl) {
-      this.currentPopoverEl = popoverEl;
+  // 표시된 팝오버의 DOM 엘리먼트를 저장 (휠 이벤트 처리를 위해)
+  const popoverEl = popoverData.popover._getTipElement?.();
+  if (popoverEl) {
+    this.currentPopoverEl = popoverEl;
+
+    // 🔽 팝오버 내용 크기 반응형 조정 (화면 크기의 50% 이하로 제한)
+    const popoverBody = popoverEl.querySelector('.popover-body');
+    if (popoverBody) {
+      const maxHeight = window.innerHeight * 0.9; // 화면의 50%
+      popoverBody.style.maxHeight = `${maxHeight}px`;
+      popoverBody.style.overflowY = 'auto';
     }
-  },
+  }
+},
 
   // 팝오버를 즉시 닫음
   hidePopoverImmediately(button) {
