@@ -10,14 +10,65 @@
     <div class="container py-4">
         <div class="container py-4">
             <h1 class="mb-4 text-center" style="color: #444; font-weight: bold;">🛒 게임 아이템 거래 내역</h1>
+            <!-- 검색창 -->
+            <div class="mb-4">
+                <form class="row g-3 align-items-center" method="get" th:action="@{/auction/history/index}">
+                    <div class="col-auto">
+                        <select class="form-select" id="itemTopCategory" name="itemTopCategory">
+                            <option value="">상위 카테고리</option>
+                            <option value="근거리 장비" th:selected="${param.itemTopCategory} == '근거리 자입'">근거리 장비</option>
+                            <option value="원거리 장비" th:selected="${param.itemTopCategory} == '원거리 장비'">원거리 장비</option>
+                            <option value="마법 장비" th:selected="${param.itemTopCategory} == '마법 장비'">마법 장비</option>
+                            <option value="갑옷 장비" th:selected="${param.itemTopCategory} == '갑옷 장비'">갑옷 장비</option>
+                            <option value="방어 장비" th:selected="${param.itemTopCategory} == '방어 장비'">방어 장비</option>
+                            <option value="액세서리" th:selected="${param.itemTopCategory} == '액세서리'">액세서리</option>
+                            <option value="특수 장비" th:selected="${param.itemTopCategory} == '특수 장비'">특수 장비</option>
+                            <option value="설치물" th:selected="${param.itemTopCategory} == '설치물'">설치물</option>
+                            <option value="인챈트 용품" th:selected="${param.itemTopCategory} == '인챈트 용품'">인챈트 용품</option>
+                            <option value="스크롤" th:selected="${param.itemTopCategory} == '스크롤'">스크롤</option>
+                            <option value="마기그래피 용품" th:selected="${param.itemTopCategory} == '마기그래피 용품'">마기그래피 용품</option>
+                            <option value="서적" th:selected="${param.itemTopCategory} == '서적'">서적</option>
+                            <option value="소모품" th:selected="${param.itemTopCategory} == '소모품'">소모품</option>
+                            <option value="토템" th:selected="${param.itemTopCategory} == '토템'">토템</option>
+                            <option value="생활 재료" th:selected="${param.itemTopCategory} == '특생활 재료'">생활 재료</option>
+                            <option value="기타" th:selected="${param.itemTopCategory} == '기타'">기타</option>
+                            <!-- 필요하면 카테고리 추가 -->
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select" id="itemSubCategory" name="itemSubCategory">
+                            <option value="">하위 카테고리</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" class="form-control" name="itemName"
+                               placeholder="아이템명 검색"
+                               th:value="${param.itemName}">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"
+                                style="background-color: #d6336c; border-color: #d6336c;">
+                            검색
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-secondary"
+                                style="background-color: #6c757d; border-color: #6c757d;"
+                                onclick="location.href='@{/auction-history}'">
+                            초기화
+                        </button>
+                    </div>
+                </form>
+            </div>
 
+            <p>총 <span th:text="${samples.getTotalElements()}"></span>개</p>
             <div class="table-responsive">
                 <table class="table table-bordered text-center align-middle" style="background-color: #fffdf9; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);">
                     <thead style="background-color: #ffe5ec;">
                     <tr style="color: #d6336c;">
-                        <th style="font-weight: bold;">아이템명</th>
-                        <th style="font-weight: bold;">판매가격</th>
-                        <th style="font-weight: bold;">판매시간</th>
+                        <th style="font-weight: bold;" class="col-2">아이템명</th>
+                        <th style="font-weight: bold;" class="col-1">판매가격</th>
+                        <th style="font-weight: bold;" class="col-1">판매시간</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -48,6 +99,7 @@
 
 <th:block layout:fragment="scripts">
     <script th:src="@{/js/popover-handler-index.js}"></script>
+    <script th:src="@{/js/search.js}"></script>
 </th:block>
 </body>
 </html>

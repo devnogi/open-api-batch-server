@@ -22,18 +22,9 @@ public class ThymeleafAuctionHistoryController {
     @GetMapping("/history")
     public String search(Model model) {
 
-        // 검색 결과와 페이징된 결과 가져오기
-        //        Page<AuctionHistory> auctionHistories = auctionHistoryService.search(condition,
-        // pageable);
-        //
-        //        // 모델에 데이터를 추가
-        //        model.addAttribute("auctionHistories", auctionHistories);
-        //        model.addAttribute("condition", condition); // 검색 조건도 같이 전달
-
         AuctionHistory sample = auctionHistoryService.findByIdOrElseThrow(129996L);
         model.addAttribute("sample", sample);
-        return "/pages/auction-history/list"; // Thymeleaf 템플릿의 경로
-        // (src/main/resources/templates/auction-history/list.html)
+        return "/pages/auction-history/list";
     }
 
     @GetMapping("/history/index")
