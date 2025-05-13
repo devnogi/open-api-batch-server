@@ -15,12 +15,14 @@
 
 ### 🛠 기술 스택
 
-- **Backend**: Spring Boot, JPA (Hibernate), Spring Security, Spring Batch
+- **Backend**: Spring Boot, JPA (Hibernate), Spring Security, Spring Batch, JWT
+- **Test**: JUnit5, Mockito, K6
 - **Database**: MySQL, Redis
 - **DevOps**: Docker, Docker Compose, Flyway, GitHub Actions
 - **Frontend**: Thymeleaf (or React/Vue)
 - **Deployment**: AWS EC2, RDS, S3
-- **cooperation**: Notion, Slack
+- **Document**: Spring REST Docs, Postman
+- **Cooperation**: Notion, Slack
 
 <br>
 
@@ -31,12 +33,6 @@
 - `community/`: 게시판 및 댓글 기능
 - `estimate/`: 아이템 시세 견적 기능
 - `admin/`: 관리자 페이지 기능
-- `blog/`: 기술 블로그 기능
+- `techblog/`: 기술 블로그 기능
 
 <br>
-
-### 🚀 시작하기
-
-1. 레포지토리를 클론합니다.
-   ```bash
-   git clone https://github.com/yourusername/game-auction-tracker.git
