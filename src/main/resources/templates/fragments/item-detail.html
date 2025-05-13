@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xml:lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="itemDetail(item)">
+    <div class="d-none popover-body" th:id="'popover-content-' + ${item.id}">
+        <div class="card shadow-sm border-0 rounded-4" style="background-color: #fffaf5;">
+            <div class="card-body p-1">
+                <h6 class="card-title text-center mb-3"
+                    th:text="${item.itemDisplayName}"
+                    style="color: #ff7f50; font-weight: bold;">아이템명</h6>
+                <th:block th:replace="~{fragments/option/option-attribute :: section(${item})}" />
+                <th:block th:replace="~{fragments/option/option-enchant :: section(${item})}" />
+                <th:block th:replace="~{fragments/option/option-upgrade :: section(${item})}" />
+                <th:block th:replace="~{fragments/option/option-artifact :: section(${item})}" />
+                <th:block th:replace="~{fragments/option/option-erg :: section(${item})}" />
+                <th:block th:replace="~{fragments/option/option-set :: section(${item})}" />
+                <th:block th:replace="~{fragments/option/option-color :: section(${item})}" />
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>
