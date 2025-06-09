@@ -49,3 +49,9 @@ spy.log
 
 ### Kotlin ###
 .kotlin
+
+### Docker-Compose
+.env
+
+### Spring Boot ###
+application.yml
