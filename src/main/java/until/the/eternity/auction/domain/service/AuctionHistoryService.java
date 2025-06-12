@@ -57,7 +57,6 @@ public class AuctionHistoryService {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn("Interrupted during delay between requests", e);
         }
     }
 

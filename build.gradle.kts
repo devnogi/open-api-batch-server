@@ -18,9 +18,17 @@ java {
     }
 }
 
-val querydslDir = "$buildDir/generated/querydsl"
+val querydslDir = layout.buildDirectory.dir("generated/querydsl")
 
-sourceSets["main"].java.srcDirs(querydslDir)
+sourceSets {
+    main {
+        java.srcDirs("src/main/java", querydslDir)
+    }
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    options.generatedSourceOutputDirectory.set(querydslDir)
+}
 
 configurations {
     compileOnly {
