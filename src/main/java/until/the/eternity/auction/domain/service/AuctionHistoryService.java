@@ -16,6 +16,8 @@ import until.the.eternity.auction.domain.dto.AuctionHistorySearchCondition;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.common.exception.CustomException;
+import until.the.eternity.common.exception.enums.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +59,6 @@ public class AuctionHistoryService {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn("Interrupted during delay between requests", e);
         }
     }
 
@@ -66,7 +67,10 @@ public class AuctionHistoryService {
         return repository.search(condition, pageable);
     }
 
+    @Transactional(readOnly = true)
     public AuctionHistory findByIdOrElseThrow(Long id) {
-        return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("에러 발생생"));
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
     }
 }
