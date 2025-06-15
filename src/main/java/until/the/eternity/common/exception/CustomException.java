@@ -3,7 +3,6 @@ package until.the.eternity.common.exception;
 import lombok.Getter;
 import until.the.eternity.common.exception.enums.ErrorCode;
 
-
 @Getter
 public class CustomException extends RuntimeException {
     private final ErrorCode errorCode;

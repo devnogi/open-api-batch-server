@@ -69,7 +69,8 @@ public class AuctionHistoryService {
 
     @Transactional(readOnly = true)
     public AuctionHistory findByIdOrElseThrow(Long id) {
-        return repository.findById(id)
+        return repository
+                .findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
     }
 }
