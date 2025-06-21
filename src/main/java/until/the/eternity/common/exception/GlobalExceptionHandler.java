@@ -22,6 +22,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ApiResponse<?>> handleException(Exception exception) {
+        log.error("An unexpected error occurred: {}", exception.getMessage(), exception);
         ExceptionResponse exResponse = ExceptionResponse.from(SERVER_ERROR);
         ApiResponse<?> response = ApiResponse.error(exResponse.code(), exResponse.message());
         return ResponseEntity.status(exResponse.status()).body(response);
