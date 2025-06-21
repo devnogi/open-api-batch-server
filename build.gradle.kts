@@ -3,7 +3,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     java
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "3.5.0"
     id("io.spring.dependency-management") version "1.1.4"
     id("org.asciidoctor.jvm.convert") version "4.0.2"
     id("com.diffplug.spotless") version "6.25.0"
@@ -56,7 +56,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:${property("jwtTokenVersion")}")
 
     // Swagger
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("swaggerVersion")}")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
     // P6Spy
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:${property("p6spyVersion")}")
