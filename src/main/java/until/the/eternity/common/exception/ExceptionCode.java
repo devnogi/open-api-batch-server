@@ -1,11 +1,11 @@
-package until.the.eternity.dcs.common.exception;
+package until.the.eternity.common.exception;
 
 import org.springframework.http.HttpStatus;
 
 public interface ExceptionCode {
-	HttpStatus getStatus();
+    HttpStatus getStatus();
 
-	String getCode();
+    String getCode();
 
-	String getMessage();
+    String getMessage();
 }
