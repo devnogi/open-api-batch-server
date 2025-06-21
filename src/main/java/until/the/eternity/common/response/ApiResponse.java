@@ -1,9 +1,8 @@
-package until.the.eternity.dcs.common.response;
-
-import lombok.Builder;
-import lombok.Getter;
+package until.the.eternity.common.response;
 
 import java.time.Instant;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 public class ApiResponse<T> {
