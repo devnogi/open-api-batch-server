@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
-import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
-import until.the.eternity.auction.domain.dto.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
+import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchCondition;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
@@ -42,7 +42,7 @@ public class AuctionHistoryService {
     }
 
     private void fetchAndSaveAuctionHistory(ItemCategory category) {
-        List<AuctionHistoryDto> dtoList = fetcher.fetch(category);
+        List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
 
         if (dtoList == null || dtoList.isEmpty()) {
             log.info("[{}] No auction history data received", category.getSubCategory());

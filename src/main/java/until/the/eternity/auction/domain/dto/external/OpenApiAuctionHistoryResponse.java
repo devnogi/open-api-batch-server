@@ -1,11 +1,11 @@
-package until.the.eternity.auction.domain.dto;
+package until.the.eternity.auction.domain.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.Data;
 
 @Data
-public class AuctionHistoryDto {
+public class OpenApiAuctionHistoryResponse {
     @JsonProperty("item_name")
     private String itemName;
 
@@ -25,5 +25,5 @@ public class AuctionHistoryDto {
     private String auctionBuyId;
 
     @JsonProperty("item_option")
-    private List<ItemOptionDto> itemOptionDtos;
+    private List<OpenApiItemOptionResponse> openApiItemOptionResponses;
 }

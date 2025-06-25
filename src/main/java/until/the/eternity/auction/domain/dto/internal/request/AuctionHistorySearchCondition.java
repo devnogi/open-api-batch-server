@@ -1,4 +1,4 @@
-package until.the.eternity.auction.domain.dto;
+package until.the.eternity.auction.domain.dto.internal.request;
 
 import lombok.Data;
 

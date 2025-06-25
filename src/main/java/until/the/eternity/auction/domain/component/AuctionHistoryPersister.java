@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
+import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.model.ItemOption;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
@@ -19,10 +19,10 @@ public class AuctionHistoryPersister {
 
     private final AuctionHistoryRepository auctionHistoryRepository;
 
-    public void saveIfNotExists(List<AuctionHistoryDto> dtoList, ItemCategory category) {
+    public void saveIfNotExists(List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
         List<String> incomingIds =
                 dtoList.stream()
-                        .map(AuctionHistoryDto::getAuctionBuyId)
+                        .map(OpenApiAuctionHistoryResponse::getAuctionBuyId)
                         .collect(Collectors.toList());
 
         List<String> existingIds =
@@ -48,7 +48,7 @@ public class AuctionHistoryPersister {
                 newEntities.size());
     }
 
-    private AuctionHistory convertToEntity(AuctionHistoryDto dto, ItemCategory category) {
+    private AuctionHistory convertToEntity(OpenApiAuctionHistoryResponse dto, ItemCategory category) {
         AuctionHistory auctionHistory =
                 AuctionHistory.builder()
                         .itemName(dto.getItemName())
@@ -62,9 +62,9 @@ public class AuctionHistoryPersister {
                         .build();
 
         // ItemOption도 같이 변환
-        if (dto.getItemOptionDtos() != null) {
+        if (dto.getOpenApiItemOptionResponses() != null) {
             List<ItemOption> itemOptions =
-                    dto.getItemOptionDtos().stream()
+                    dto.getOpenApiItemOptionResponses().stream()
                             .map(
                                     optionDto ->
                                             ItemOption.builder()

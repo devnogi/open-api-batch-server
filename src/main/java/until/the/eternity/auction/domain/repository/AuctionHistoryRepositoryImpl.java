@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import until.the.eternity.auction.domain.dto.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchCondition;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.model.QAuctionHistory;
 
