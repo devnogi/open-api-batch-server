@@ -1,3 +1,8 @@
 package until.the.eternity.auction.domain.dto.internal.response;
 
-public class AuctionHistoryListResponse {}
+import java.util.List;
+
+public record AuctionHistoryListResponse(
+        int count,
+        List<AuctionHistoryDetailResponse<ItemOptionResponse>> auctionHistoryDetailResponses
+) {}
