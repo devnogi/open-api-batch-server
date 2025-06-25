@@ -1,22 +1,10 @@
 package until.the.eternity.auction.domain.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
-public class OpenApiItemOptionResponse {
-    @JsonProperty("option_type")
-    private String optionType;
-
-    @JsonProperty("option_sub_type")
-    private String optionSubType;
-
-    @JsonProperty("option_value")
-    private String optionValue;
-
-    @JsonProperty("option_value2")
-    private String optionValue2;
-
-    @JsonProperty("option_desc")
-    private String optionDesc;
-}
+public record OpenApiItemOptionResponse(
+        @JsonProperty("option_type") String optionType,
+        @JsonProperty("option_sub_type") String optionSubType,
+        @JsonProperty("option_value") String optionValue,
+        @JsonProperty("option_value2") String optionValue2,
+        @JsonProperty("option_desc") String optionDesc) {}

@@ -19,20 +19,26 @@ public class AuctionHistoryPersister {
 
     private final AuctionHistoryRepository auctionHistoryRepository;
 
-    public void saveIfNotExists(List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
+    /** 외부 API 응답(record)을 받아 DB에 중복 없이 저장 */
+    public void saveIfNotExists(
+            List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
+
+        // 들어온 ID 목록
         List<String> incomingIds =
                 dtoList.stream()
-                        .map(OpenApiAuctionHistoryResponse::getAuctionBuyId)
+                        .map(OpenApiAuctionHistoryResponse::auctionBuyId)
                         .collect(Collectors.toList());
 
+        // 이미 DB에 있는 ID 조회
         List<String> existingIds =
                 auctionHistoryRepository.findAllByAuctionBuyIdIn(incomingIds).stream()
                         .map(AuctionHistory::getAuctionBuyId)
-                        .collect(Collectors.toList());
+                        .toList();
 
+        // 신규만 추려서 엔티티 변환
         List<AuctionHistory> newEntities =
                 dtoList.stream()
-                        .filter(dto -> !existingIds.contains(dto.getAuctionBuyId()))
+                        .filter(dto -> !existingIds.contains(dto.auctionBuyId()))
                         .map(dto -> convertToEntity(dto, category))
                         .collect(Collectors.toList());
 
@@ -48,32 +54,35 @@ public class AuctionHistoryPersister {
                 newEntities.size());
     }
 
-    private AuctionHistory convertToEntity(OpenApiAuctionHistoryResponse dto, ItemCategory category) {
+    /** record → JPA 엔티티 변환 */
+    private AuctionHistory convertToEntity(
+            OpenApiAuctionHistoryResponse dto, ItemCategory category) {
+
         AuctionHistory auctionHistory =
                 AuctionHistory.builder()
-                        .itemName(dto.getItemName())
-                        .itemDisplayName(dto.getItemDisplayName())
-                        .itemCount(dto.getItemCount())
-                        .auctionPricePerUnit(dto.getAuctionPricePerUnit())
-                        .dateAuctionBuy(OffsetDateTime.parse(dto.getDateAuctionBuy()).toInstant())
-                        .auctionBuyId(dto.getAuctionBuyId())
+                        .itemName(dto.itemName())
+                        .itemDisplayName(dto.itemDisplayName())
+                        .itemCount(dto.itemCount())
+                        .auctionPricePerUnit(dto.auctionPricePerUnit())
+                        .dateAuctionBuy(OffsetDateTime.parse(dto.dateAuctionBuy()).toInstant())
+                        .auctionBuyId(dto.auctionBuyId())
                         .itemSubCategory(category.getSubCategory())
                         .itemTopCategory(category.getTopCategory())
                         .build();
 
-        // ItemOption도 같이 변환
-        if (dto.getOpenApiItemOptionResponses() != null) {
+        // 옵션 정보 매핑
+        if (dto.openApiItemOptionResponses() != null) {
             List<ItemOption> itemOptions =
-                    dto.getOpenApiItemOptionResponses().stream()
+                    dto.openApiItemOptionResponses().stream()
                             .map(
-                                    optionDto ->
+                                    opt ->
                                             ItemOption.builder()
-                                                    .optionType(optionDto.getOptionType())
-                                                    .optionSubType(optionDto.getOptionSubType())
-                                                    .optionValue(optionDto.getOptionValue())
-                                                    .optionValue2(optionDto.getOptionValue2())
-                                                    .optionDesc(optionDto.getOptionDesc())
-                                                    .auctionHistory(auctionHistory) // 연관관계 설정
+                                                    .optionType(opt.optionType())
+                                                    .optionSubType(opt.optionSubType())
+                                                    .optionValue(opt.optionValue())
+                                                    .optionValue2(opt.optionValue2())
+                                                    .optionDesc(opt.optionDesc())
+                                                    .auctionHistory(auctionHistory)
                                                     .build())
                             .collect(Collectors.toList());
 

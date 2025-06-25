@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.service.AuctionHistoryService;
 
@@ -18,7 +18,7 @@ public class AuctionHistoryController {
 
     @GetMapping("/auction-history/search")
     public ResponseEntity<Page<AuctionHistory>> search(
-            AuctionHistorySearchCondition condition, Pageable pageable) {
+            AuctionHistorySearchRequest condition, Pageable pageable) {
 
         Page<AuctionHistory> auctionHistories = auctionHistoryService.search(condition, pageable);
 

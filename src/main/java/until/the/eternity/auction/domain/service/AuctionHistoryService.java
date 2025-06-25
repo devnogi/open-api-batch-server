@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
-import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
@@ -62,7 +62,7 @@ public class AuctionHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionHistory> search(AuctionHistorySearchCondition condition, Pageable pageable) {
+    public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
         return repository.search(condition, pageable);
     }
 
