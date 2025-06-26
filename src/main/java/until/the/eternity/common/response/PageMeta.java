@@ -14,7 +14,7 @@ public record PageMeta(
 
     public static PageMeta of(Page<?> page) {
         return new PageMeta(
-                page.getNumber(),
+                page.getNumber() + 1,
                 page.getSize(),
                 page.getTotalPages(),
                 page.getTotalElements(),
