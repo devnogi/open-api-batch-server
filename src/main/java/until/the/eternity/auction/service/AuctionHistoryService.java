@@ -1,4 +1,4 @@
-package until.the.eternity.auction.domain.service;
+package until.the.eternity.auction.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auction.domain.model.AuctionHistory;
-import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
+import until.the.eternity.auction.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
 @Service

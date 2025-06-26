@@ -1,4 +1,4 @@
-package until.the.eternity.auction.domain.repository;
+package until.the.eternity.auction.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

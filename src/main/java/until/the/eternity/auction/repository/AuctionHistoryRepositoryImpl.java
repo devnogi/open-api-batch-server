@@ -1,4 +1,4 @@
-package until.the.eternity.auction.domain.repository;
+package until.the.eternity.auction.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;

@@ -8,7 +8,7 @@ import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryRespo
 import until.the.eternity.auction.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auction.domain.mapper.OpenApiAuctionHistoryAssembler;
 import until.the.eternity.auction.domain.model.AuctionHistory;
-import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
+import until.the.eternity.auction.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
 @RequiredArgsConstructor

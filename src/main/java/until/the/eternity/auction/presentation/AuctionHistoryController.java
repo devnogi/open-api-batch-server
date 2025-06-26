@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auction.domain.model.AuctionHistory;
-import until.the.eternity.auction.domain.service.AuctionHistoryService;
+import until.the.eternity.auction.service.AuctionHistoryService;
 
 @RestController
 @RequiredArgsConstructor

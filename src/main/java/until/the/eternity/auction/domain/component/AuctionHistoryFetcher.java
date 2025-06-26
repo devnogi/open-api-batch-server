@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
-import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
+import until.the.eternity.auction.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
 @Slf4j
