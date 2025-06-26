@@ -54,7 +54,7 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
 
             return ApiResponse.success(body);
         } catch (Exception e) {
-            logger.warn("Exception occurred while processing response body", e);
+            logger.debug("Exception occurred in beforeBodyWrite: ", e);
             // Swagger에서 500 방지를 위한 fallback 처리
             return body;
         }

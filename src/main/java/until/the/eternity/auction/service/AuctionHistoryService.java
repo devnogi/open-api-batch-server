@@ -1,21 +1,25 @@
-package until.the.eternity.auction.domain.service;
+package until.the.eternity.auction.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auction.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auction.domain.component.AuctionHistoryPersister;
-import until.the.eternity.auction.domain.dto.AuctionHistoryDto;
-import until.the.eternity.auction.domain.dto.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
+import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
+import until.the.eternity.auction.domain.dto.internal.response.AuctionHistoryDetailResponse;
+import until.the.eternity.auction.domain.dto.internal.response.ItemOptionResponse;
+import until.the.eternity.auction.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auction.domain.model.AuctionHistory;
-import until.the.eternity.auction.domain.repository.AuctionHistoryRepository;
+import until.the.eternity.auction.repository.AuctionHistoryRepository;
+import until.the.eternity.common.dto.PageRequestDto;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.common.response.PageResponseDto;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +29,12 @@ public class AuctionHistoryService {
     private final AuctionHistoryRepository repository;
     private final AuctionHistoryFetcher fetcher;
     private final AuctionHistoryPersister persister;
+    private final AuctionHistoryMapper mapper;
 
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 0 */2 * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             try {
@@ -42,7 +47,7 @@ public class AuctionHistoryService {
     }
 
     private void fetchAndSaveAuctionHistory(ItemCategory category) {
-        List<AuctionHistoryDto> dtoList = fetcher.fetch(category);
+        List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
 
         if (dtoList == null || dtoList.isEmpty()) {
             log.info("[{}] No auction history data received", category.getSubCategory());
@@ -62,11 +67,22 @@ public class AuctionHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionHistory> search(AuctionHistorySearchCondition condition, Pageable pageable) {
-        return repository.search(condition, pageable);
+    public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
+            AuctionHistorySearchRequest requestDto, PageRequestDto pageRequestDto) {
+
+        // 조건 검색 + 페이징
+        Page<AuctionHistory> page = repository.search(requestDto, pageRequestDto.toPageable());
+
+        // Entity → DTO 변환
+        Page<AuctionHistoryDetailResponse<ItemOptionResponse>> dtoPage = page.map(mapper::toDto);
+
+        // PageResponseDto로 래핑해 반환
+        return PageResponseDto.of(dtoPage);
     }
 
     public AuctionHistory findByIdOrElseThrow(Long id) {
-        return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("에러 발생생"));
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("AuctionHistory not found: " + id));
     }
 }

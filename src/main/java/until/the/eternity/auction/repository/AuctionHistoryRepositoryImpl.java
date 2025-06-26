@@ -1,4 +1,4 @@
-package until.the.eternity.auction.domain.repository;
+package until.the.eternity.auction.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import until.the.eternity.auction.domain.dto.AuctionHistorySearchCondition;
+import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.domain.model.QAuctionHistory;
 
@@ -17,7 +17,7 @@ public class AuctionHistoryRepositoryImpl implements AuctionHistoryRepositoryCus
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<AuctionHistory> search(AuctionHistorySearchCondition condition, Pageable pageable) {
+    public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
         QAuctionHistory ah = QAuctionHistory.auctionHistory;
 
         BooleanBuilder builder = new BooleanBuilder();

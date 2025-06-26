@@ -1,4 +1,4 @@
-package until.the.eternity.auction.domain.repository;
+package until.the.eternity.auction.repository;
 
 import java.util.List;
 import java.util.Optional;
