@@ -6,5 +6,4 @@ public record ItemOptionResponse(
         String optionSubType,
         String optionValue,
         String optionValue2,
-        String optionDesc
-) {}
+        String optionDesc) {}

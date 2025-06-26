@@ -29,7 +29,7 @@ public class AuctionHistoryService {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 0 */2 * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             try {
