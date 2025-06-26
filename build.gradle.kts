@@ -58,6 +58,12 @@ dependencies {
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
+    // Map Struct
+    implementation("org.mapstruct:mapstruct:1.5.5.Final") // 최신 안정 버전
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    // Spring Boot + MapStruct 통합 시 필요
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
     // P6Spy
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:${property("p6spyVersion")}")
 
@@ -88,6 +94,7 @@ dependencies {
 // QueryDSL Q 클래스 생성 위치
 tasks.withType<JavaCompile> {
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+    options.annotationProcessorPath = configurations.annotationProcessor.get()
 }
 
 // Spotless
