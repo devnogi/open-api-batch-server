@@ -10,7 +10,7 @@ import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySear
 import until.the.eternity.auction.domain.dto.internal.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auction.domain.dto.internal.response.ItemOptionResponse;
 import until.the.eternity.auction.service.AuctionHistoryService;
-import until.the.eternity.common.dto.PageRequestDto;
+import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
 @RestController

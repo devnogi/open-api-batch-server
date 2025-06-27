@@ -17,8 +17,8 @@ import until.the.eternity.auction.domain.dto.internal.response.ItemOptionRespons
 import until.the.eternity.auction.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.repository.AuctionHistoryRepository;
-import until.the.eternity.common.dto.PageRequestDto;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
 @Service
