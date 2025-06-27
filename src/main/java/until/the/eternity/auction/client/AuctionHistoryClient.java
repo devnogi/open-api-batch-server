@@ -1,31 +1,27 @@
 package until.the.eternity.auction.client;
 
-import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
 import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
 /**
  * Nexon OPEN API 호출 전담 클라이언트.
  *
- * <p>재시도·예외 처리 정책을 한곳에 모아 두어, 호출자(도메인 서비스)가 단순화된다.
+ * <p>– 전역 WebClient 설정(필터 · 헤더 · 타임아웃 · 재시도)은 {@link
+ * until.the.eternity.config.openapi.OpenApiWebClientConfig} 에서 담당한다. – 이 클래스는 “엔드포인트·쿼리 파라미터·로깅” 만
+ * 책임지는 SRP 구조다.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuctionHistoryClient {
 
-    private final WebClient webClient;
-
-    @Value("${openapi.nexon.api-key}")
-    private String nexonApiKey;
+    /** `OpenApiWebClientConfig.openApiWebClient()` 로 만든 빈이 주입된다. */
+    private final WebClient openApiWebClient;
 
     /**
      * 카테고리·커서 기반 경매 히스토리 조회.
@@ -38,26 +34,22 @@ public class AuctionHistoryClient {
             ItemCategory category, String cursor) {
 
         try {
-            return webClient
+            return openApiWebClient
                     .get()
                     .uri(
-                            uriBuilder -> {
-                                uriBuilder
-                                        .path("/auction/history")
-                                        .queryParam(
-                                                "auction_item_category", category.getSubCategory());
-                                if (cursor != null) {
-                                    uriBuilder.queryParam("cursor", cursor);
-                                }
-                                return uriBuilder.build();
-                            })
-                    .header("x-nxopen-api-key", nexonApiKey)
-                    .header("accept", "application/json")
+                            uriBuilder ->
+                                    uriBuilder
+                                            .path("/auction/history")
+                                            .queryParam(
+                                                    "auction_item_category",
+                                                    category.getSubCategory())
+                                            .queryParamIfPresent(
+                                                    "cursor",
+                                                    Mono.justOrEmpty(cursor).blockOptional())
+                                            .build())
                     .retrieve()
                     .bodyToMono(OpenApiAuctionHistoryListResponse.class)
-                    .retryWhen(
-                            Retry.backoff(3, Duration.ofSeconds(2))
-                                    .filter(this::isRetryableException))
+                    // 필터에서 재시도·타임아웃·에러로깅이 이미 적용됨
                     .onErrorResume(
                             throwable -> {
                                 log.warn(
@@ -72,11 +64,5 @@ public class AuctionHistoryClient {
             log.error("Unexpected exception during auction history fetch", ex);
             return null;
         }
-    }
-
-    /** 5xx 에러일 때만 재시도 */
-    private boolean isRetryableException(Throwable throwable) {
-        return throwable instanceof WebClientResponseException
-                && ((WebClientResponseException) throwable).getStatusCode().is5xxServerError();
     }
 }
