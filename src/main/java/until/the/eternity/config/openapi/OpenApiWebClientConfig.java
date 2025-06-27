@@ -1,4 +1,4 @@
-package until.the.eternity.config;
+package until.the.eternity.config.openapi;
 
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
