@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import until.the.eternity.auction.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auction.domain.dto.internal.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auction.domain.dto.internal.response.ItemOptionResponse;
-import until.the.eternity.auction.service.AuctionHistoryService;
+import until.the.eternity.auction.domain.service.AuctionHistoryService;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 

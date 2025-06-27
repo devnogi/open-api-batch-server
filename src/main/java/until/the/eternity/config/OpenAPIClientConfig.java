@@ -10,28 +10,27 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-import reactor.util.retry.RetryBackoffSpec;
 
 @Slf4j
 @Configuration
 public class OpenAPIClientConfig {
 
-    @Value("${openapi.nexon.api-key}")
-    private String apiKey;
+    private final String apiKey;
+    private final OpenApiRetryPolicy retryPolicy;
+
+    public OpenAPIClientConfig(
+            @Value("${openapi.nexon.api-key}") String apiKey, OpenApiRetryPolicy retryPolicy) {
+        this.apiKey = apiKey;
+        this.retryPolicy = retryPolicy;
+    }
 
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
                 .exchangeStrategies(
                         ExchangeStrategies.builder()
-                                .codecs(
-                                        configurer ->
-                                                configurer
-                                                        .defaultCodecs()
-                                                        .maxInMemorySize(5 * 1024 * 1024))
+                                .codecs(c -> c.defaultCodecs().maxInMemorySize(5 * 1024 * 1024))
                                 .build())
                 .baseUrl("https://open.api.nexon.com/mabinogi/v1")
                 .filter(retryFilter()) // 🔁 재시도 필터
@@ -42,6 +41,7 @@ public class OpenAPIClientConfig {
                 .build();
     }
 
+    /** 재시도 필터 – 5xx 응답 시 정책에 따라 retry. */
     private ExchangeFilterFunction retryFilter() {
         return (request, next) ->
                 next.exchange(request)
@@ -52,24 +52,15 @@ public class OpenAPIClientConfig {
                                     }
                                     return Mono.just(response);
                                 })
-                        .retryWhen(getRetrySpec());
+                        .retryWhen(retryPolicy.retrySpec());
     }
 
-    private RetryBackoffSpec getRetrySpec() {
-        return Retry.backoff(3, Duration.ofSeconds(2)) // 최대 3회, 2초부터 지수 백오프
-                .filter(
-                        throwable ->
-                                throwable instanceof WebClientResponseException
-                                        && ((WebClientResponseException) throwable)
-                                                .getStatusCode()
-                                                .is5xxServerError())
-                .onRetryExhaustedThrow((spec, signal) -> signal.failure());
-    }
-
+    /** 호출 타임아웃(5초) 필터 */
     private ExchangeFilterFunction timeoutFilter() {
         return (request, next) -> next.exchange(request).timeout(Duration.ofSeconds(5));
     }
 
+    /** 오류 로깅 필터 */
     private ExchangeFilterFunction errorLoggingFilter() {
         return ExchangeFilterFunction.ofResponseProcessor(
                 clientResponse -> {

@@ -1,4 +1,4 @@
-package until.the.eternity.auction.service;
+package until.the.eternity.auction.domain.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class AuctionHistoryService {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 */3 * * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             try {
