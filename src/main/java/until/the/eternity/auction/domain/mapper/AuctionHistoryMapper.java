@@ -11,10 +11,6 @@ import until.the.eternity.auction.domain.model.ItemOption;
 @Mapper(componentModel = "spring")
 public interface AuctionHistoryMapper {
 
-    // DTO → Entity
-    @Mapping(target = "itemOptions", source = "itemOptions")
-    AuctionHistory toEntity(AuctionHistoryDetailResponse<ItemOptionResponse> dto);
-
     // Entity → DTO
     @Mapping(target = "itemOptions", source = "itemOptions")
     AuctionHistoryDetailResponse<ItemOptionResponse> toDto(AuctionHistory entity);

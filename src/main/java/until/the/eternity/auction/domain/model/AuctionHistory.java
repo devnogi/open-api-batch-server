@@ -44,4 +44,9 @@ public class AuctionHistory {
 
     @Column(name = "item_top_category", nullable = false)
     private String itemTopCategory;
+
+    public void addOption(ItemOption option) {
+        option.setAuctionHistory(this);
+        itemOptions.add(option);
+    }
 }

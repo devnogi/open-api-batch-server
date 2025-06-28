@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auction.domain.dto.external.OpenApiAuctionHistoryResponse;
-import until.the.eternity.auction.domain.mapper.AuctionHistoryMapper;
-import until.the.eternity.auction.domain.mapper.OpenApiAuctionHistoryAssembler;
+import until.the.eternity.auction.domain.mapper.OpenApiAuctionHistoryMapper;
 import until.the.eternity.auction.domain.model.AuctionHistory;
 import until.the.eternity.auction.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
@@ -17,8 +16,7 @@ import until.the.eternity.common.enums.ItemCategory;
 public class AuctionHistoryPersister {
 
     private final AuctionHistoryRepository auctionHistoryRepository;
-    private final AuctionHistoryMapper auctionHistoryMapper;
-    private final OpenApiAuctionHistoryAssembler assembler;
+    private final OpenApiAuctionHistoryMapper entityMapper;
 
     public void saveIfNotExists(
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
@@ -26,19 +24,12 @@ public class AuctionHistoryPersister {
         List<String> incomingIds =
                 dtoList.stream().map(OpenApiAuctionHistoryResponse::auctionBuyId).toList();
 
-        List<String> existingIds =
-                auctionHistoryRepository.findAllByAuctionBuyIdIn(incomingIds).stream()
-                        .map(AuctionHistory::getAuctionBuyId)
-                        .toList();
+        List<String> existingIds = auctionHistoryRepository.findExistingIds(incomingIds);
 
         List<AuctionHistory> newEntities =
                 dtoList.stream()
                         .filter(dto -> !existingIds.contains(dto.auctionBuyId()))
-                        .map(
-                                dto -> {
-                                    var detail = assembler.toDetailResponse(dto, category);
-                                    return auctionHistoryMapper.toEntity(detail);
-                                })
+                        .map(dto -> entityMapper.toEntity(dto, category))
                         .toList();
 
         if (newEntities.isEmpty()) {
@@ -48,8 +39,9 @@ public class AuctionHistoryPersister {
 
         auctionHistoryRepository.saveAll(newEntities);
         log.info(
-                "[{}] Saved {} new auction history records",
+                "[{}] Saved {} new auction history records (with {} options)",
                 category.getSubCategory(),
-                newEntities.size());
+                newEntities.size(),
+                newEntities.stream().mapToInt(h -> h.getItemOptions().size()).sum());
     }
 }

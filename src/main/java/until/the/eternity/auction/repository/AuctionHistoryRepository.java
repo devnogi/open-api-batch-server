@@ -29,4 +29,12 @@ public interface AuctionHistoryRepository
     Optional<AuctionHistory> findById(@Param("id") Long id);
 
     boolean existsByAuctionBuyIdIn(List<String> ids);
+
+    @Query(
+            """
+           select a.auctionBuyId
+             from AuctionHistory a
+            where a.auctionBuyId in :ids
+           """)
+    List<String> findExistingIds(@Param("ids") List<String> ids);
 }
