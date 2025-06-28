@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.util.List;
 import org.mapstruct.*;
 import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHistoryResponse;
-import until.the.eternity.auctionhistory.domain.dto.external.OpenApiItemOptionResponse;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
-import until.the.eternity.itemoption.domain.entity.ItemOption;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.itemoption.domain.dto.external.OpenApiItemOptionResponse;
+import until.the.eternity.itemoption.domain.entity.ItemOption;
 
 @Mapper(componentModel = "spring", uses = OpenApiItemOptionMapper.class)
 public interface OpenApiAuctionHistoryMapper {
@@ -17,7 +17,9 @@ public interface OpenApiAuctionHistoryMapper {
             source = "dateAuctionBuy",
             target = "dateAuctionBuy",
             qualifiedByName = "stringToInstant") // String → Instant
-    @Mapping(source = "openApiItemOptionResponses", target = "itemOptions")
+    @Mapping(source = "openApiItemOptionResponses",
+            target = "itemOptions",
+            qualifiedByName = "stringToInstant")
     @Mapping(
             target = "itemTopCategory",
             expression = "java(ItemCategory.findTopCategory(dto.itemSubCategory()))")
@@ -27,6 +29,11 @@ public interface OpenApiAuctionHistoryMapper {
 
     @Named("stringToInstant")
     default Instant stringToInstant(String value) {
+        return Instant.parse(value); // ISO‑8601 포맷 전제
+    }
+
+    @Named("stringToInstant")
+    default List<> stringToInstant(String value) {
         return Instant.parse(value); // ISO‑8601 포맷 전제
     }
 

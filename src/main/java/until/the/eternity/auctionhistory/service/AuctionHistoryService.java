@@ -14,8 +14,8 @@ import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHisto
 import until.the.eternity.auctionhistory.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.domain.dto.internal.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.domain.dto.internal.response.ItemOptionResponse;
-import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
+import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
@@ -34,7 +34,7 @@ public class AuctionHistoryService {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             try {

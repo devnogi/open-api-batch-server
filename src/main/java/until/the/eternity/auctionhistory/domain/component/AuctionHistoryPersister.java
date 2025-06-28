@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHistoryResponse;
-import until.the.eternity.auctionhistory.domain.mapper.OpenApiAuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
+import until.the.eternity.auctionhistory.domain.mapper.OpenApiAuctionHistoryMapper;
 import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 

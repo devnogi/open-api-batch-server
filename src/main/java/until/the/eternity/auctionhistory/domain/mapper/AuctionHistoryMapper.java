@@ -8,6 +8,10 @@ import until.the.eternity.auctionhistory.domain.dto.internal.response.ItemOption
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.itemoption.domain.entity.ItemOption;
 
+/**
+ * AuctionHistory Entity to internal.responseDto transfer mapper class 데이터 흐름은 external.responseDto
+ * -> entity -> internal.responseDto 단방향으로 흐름
+ */
 @Mapper(componentModel = "spring")
 public interface AuctionHistoryMapper {
 

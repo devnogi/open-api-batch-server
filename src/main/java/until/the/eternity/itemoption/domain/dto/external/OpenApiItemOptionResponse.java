@@ -1,4 +1,4 @@
-package until.the.eternity.auctionhistory.domain.dto.external;
+package until.the.eternity.itemoption.domain.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -2,6 +2,7 @@ package until.the.eternity.auctionhistory.domain.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import until.the.eternity.itemoption.domain.dto.external.OpenApiItemOptionResponse;
 
 public record OpenApiAuctionHistoryResponse(
         @JsonProperty("item_name") String itemName,
