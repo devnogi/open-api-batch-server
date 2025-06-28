@@ -9,9 +9,10 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.mapper.OpenApiAuctionHistoryMapper;
 import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.itemoption.domain.entity.ItemOption;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class AuctionHistoryPersister {
 
@@ -29,7 +30,7 @@ public class AuctionHistoryPersister {
         List<AuctionHistory> newEntities =
                 dtoList.stream()
                         .filter(dto -> !existingIds.contains(dto.auctionBuyId()))
-                        .map(dto -> entityMapper.toEntity(dto, category))
+                        .map(dto -> entityMapper.toEntity(dto, category).linkItemOptions())
                         .toList();
 
         if (newEntities.isEmpty()) {
@@ -37,11 +38,32 @@ public class AuctionHistoryPersister {
             return;
         }
 
+        // ✅ 매핑 확인용 디버깅 로그
+        for (AuctionHistory history : newEntities) {
+            log.debug(
+                    "Mapped AuctionHistory: auctionBuyId={}, itemOptions={}",
+                    history.getAuctionBuyId(),
+                    history.getItemOptions() != null ? history.getItemOptions().size() : 0);
+
+            if (history.getItemOptions() != null) {
+                for (ItemOption option : history.getItemOptions()) {
+                    log.debug(
+                            " - ItemOption: optionType={}, auctionHistorySet={}",
+                            option.getOptionType(),
+                            option.getAuctionHistory() != null);
+                }
+            }
+        }
+
         auctionHistoryRepository.saveAll(newEntities);
+
         log.info(
                 "[{}] Saved {} new auction history records (with {} options)",
                 category.getSubCategory(),
                 newEntities.size(),
-                newEntities.stream().mapToInt(h -> h.getItemOptions().size()).sum());
+                newEntities.stream()
+                        .filter(h -> h.getItemOptions() != null)
+                        .mapToInt(h -> h.getItemOptions().size())
+                        .sum());
     }
 }

@@ -10,5 +10,5 @@ public interface OpenApiItemOptionMapper {
 
     @Mapping(target = "id", ignore = true) // PK 자동 생성
     @Mapping(target = "auctionHistory", ignore = true)
-    ItemOption toEntity(OpenApiItemOptionResponse dto);
+    ItemOption toEntity(OpenApiItemOptionResponse itemOption);
 }

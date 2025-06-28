@@ -46,8 +46,12 @@ public class AuctionHistory {
     @Column(name = "item_top_category", nullable = false)
     private String itemTopCategory;
 
-    public void addOption(ItemOption option) {
-        option.setAuctionHistory(this);
-        itemOptions.add(option);
+    public AuctionHistory linkItemOptions() {
+        if (this.itemOptions != null) {
+            for (ItemOption o : this.itemOptions) {
+                o.setAuctionHistory(this);
+            }
+        }
+        return this;
     }
 }
