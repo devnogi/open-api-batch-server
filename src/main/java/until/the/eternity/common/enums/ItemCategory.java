@@ -1,5 +1,9 @@
 package until.the.eternity.common.enums;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -119,4 +123,24 @@ public enum ItemCategory {
 
     private final String subCategory;
     private final String topCategory;
+
+    /** 성능을 위해 모든 enum 값을 <subCategory, ItemCategory> 매핑으로 캐싱해 둡니다. */
+    private static final Map<String, ItemCategory> CACHE =
+            Arrays.stream(values())
+                    .collect(Collectors.toMap(ItemCategory::getSubCategory, Function.identity()));
+
+    /**
+     * 주어진 하위 카테고리(subCategory)에 대응하는 상위 카테고리(topCategory)를 반환합니다.
+     *
+     * @param subCategory 하위 카테고리(예: "검", "포션" 등)
+     * @return 상위 카테고리(예: "근거리 장비", "소모품" 등)
+     * @throws IllegalArgumentException 존재하지 않는 하위 카테고리인 경우
+     */
+    public static String findTopCategory(String subCategory) {
+        ItemCategory itemCategory = CACHE.get(subCategory);
+        if (itemCategory == null) {
+            throw new IllegalArgumentException("Unknown subCategory: " + subCategory);
+        }
+        return itemCategory.getTopCategory();
+    }
 }

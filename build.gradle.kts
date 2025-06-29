@@ -86,6 +86,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+    testImplementation("org.mockito:mockito-inline:5.11.0")   // final/record 목킹용
+    testImplementation("org.assertj:assertj-core:3.25.3")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:${property("testContainersVersion")}")
     testImplementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:${property("flywayTestExtensionVersion")}")

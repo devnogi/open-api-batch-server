@@ -1,0 +1,27 @@
+package until.the.eternity.auctionhistory.domain.mapper;
+
+import java.time.Instant;
+import org.mapstruct.*;
+import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHistoryResponse;
+import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
+import until.the.eternity.common.enums.ItemCategory;
+
+@Mapper(componentModel = "spring", uses = OpenApiItemOptionMapper.class)
+public interface OpenApiAuctionHistoryMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(
+            source = "dateAuctionBuy",
+            target = "dateAuctionBuy",
+            qualifiedByName = "stringToInstant")
+    @Mapping(source = "openApiItemOptionResponses", target = "itemOptions")
+    @Mapping(
+            target = "itemTopCategory",
+            expression = "java(ItemCategory.findTopCategory(dto.itemSubCategory()))")
+    AuctionHistory toEntity(OpenApiAuctionHistoryResponse dto, @Context ItemCategory itemCategory);
+
+    @Named("stringToInstant")
+    default Instant stringToInstant(String value) {
+        return Instant.parse(value);
+    }
+}

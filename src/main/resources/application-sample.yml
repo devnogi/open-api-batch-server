@@ -39,8 +39,6 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
     locations: classpath:db/migration
-  resources:
-    static-locations: classpath:/static/
   mvc:
     contentnegotiation:
       # URL 확장자에 의한 컨텐트 타입 결정
@@ -90,9 +88,13 @@ logging:
 
 openapi:
   nexon:
+    base-url: https://open.api.nexon.com/mabinogi/v1
     api-key: ${NEXON_API_KEY}
+    max-in-memory-size-mb: 5
+    default-timeout-seconds: 5
   auction-history:
     delay-ms: 1000
+    cron: "0 0 */1 * * *"  # 1시간마다 실행
 
 ---
 spring:
