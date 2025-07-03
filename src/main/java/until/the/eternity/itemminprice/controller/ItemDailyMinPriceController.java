@@ -3,14 +3,11 @@ package until.the.eternity.itemminprice.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import until.the.eternity.itemminprice.domain.dto.response.ItemDailyMinPriceResponseDto;
-import until.the.eternity.itemminprice.domain.entity.ItemDailyMinPrice;
-import until.the.eternity.itemminprice.domain.mapper.ItemDailyMinPriceMapper;
 import until.the.eternity.itemminprice.service.ItemDailyMinPriceService;
 
 @Slf4j
@@ -21,7 +18,6 @@ import until.the.eternity.itemminprice.service.ItemDailyMinPriceService;
 public class ItemDailyMinPriceController {
 
     private final ItemDailyMinPriceService itemDailyMinPriceService;
-    private final ItemDailyMinPriceMapper itemDailyMinPriceMapper;
 
     @PostMapping("/batch")
     @Operation(
@@ -32,12 +28,11 @@ public class ItemDailyMinPriceController {
         return ResponseEntity.ok().build();
     }
 
+    // TODO: 페이지네이션을 해야되나 고민 중 (의상 구매를 할 때는 최저가로 볼 거 같기도 한데)
     @GetMapping
     @Operation(summary = "최저가 전체 조회", description = "item_daily_min_price 테이블의 모든 데이터를 반환합니다.")
     public ResponseEntity<List<ItemDailyMinPriceResponseDto>> getAll() {
-        List<ItemDailyMinPrice> entities = itemDailyMinPriceService.findAll();
-        List<ItemDailyMinPriceResponseDto> dtos =
-                entities.stream().map(itemDailyMinPriceMapper::toDto).collect(Collectors.toList());
+        List<ItemDailyMinPriceResponseDto> dtos = itemDailyMinPriceService.findAll();
         return ResponseEntity.ok(dtos);
     }
 }
