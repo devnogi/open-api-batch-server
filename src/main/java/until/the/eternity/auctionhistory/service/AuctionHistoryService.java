@@ -1,11 +1,8 @@
 package until.the.eternity.auctionhistory.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.component.AuctionHistoryFetcher;
@@ -21,6 +18,8 @@ import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,22 +30,22 @@ public class AuctionHistoryService {
     private final AuctionHistoryPersister persister;
     private final AuctionHistoryMapper mapper;
 
-    @Value("${openapi.auction-history.delay-ms}")
-    private long delayMs;
+    @Transactional(readOnly = true)
+    public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
+            AuctionHistorySearchRequest requestDto, PageRequestDto pageRequestDto) {
 
-    @Scheduled(cron = "0 0 */3 * * *")
-    public void fetchAndSaveAuctionHistoryAll() {
-        for (ItemCategory category : ItemCategory.values()) {
-            try {
-                fetchAndSaveAuctionHistory(category);
-            } catch (Exception e) {
-                log.error("Error during processing category [{}]", category.getSubCategory(), e);
-            }
-            delayBetweenRequests();
-        }
+        Page<AuctionHistory> page = repository.search(requestDto, pageRequestDto.toPageable());
+        Page<AuctionHistoryDetailResponse<ItemOptionResponse>> dtoPage = page.map(mapper::toDto);
+        return PageResponseDto.of(dtoPage);
     }
 
-    private void fetchAndSaveAuctionHistory(ItemCategory category) {
+    public AuctionHistory findByIdOrElseThrow(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("AuctionHistory not found: " + id));
+    }
+
+    /** 하나의 카테고리에 대해 API 데이터를 fetch & 저장하는 로직 */
+    public void fetchAndSaveAuctionHistory(ItemCategory category) {
         List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
 
         if (dtoList == null || dtoList.isEmpty()) {
@@ -55,34 +54,5 @@ public class AuctionHistoryService {
         }
 
         persister.saveIfNotExists(dtoList, category);
-    }
-
-    private void delayBetweenRequests() {
-        try {
-            Thread.sleep(delayMs);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("Interrupted during delay between requests", e);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
-            AuctionHistorySearchRequest requestDto, PageRequestDto pageRequestDto) {
-
-        // 조건 검색 + 페이징
-        Page<AuctionHistory> page = repository.search(requestDto, pageRequestDto.toPageable());
-
-        // Entity → DTO 변환
-        Page<AuctionHistoryDetailResponse<ItemOptionResponse>> dtoPage = page.map(mapper::toDto);
-
-        // PageResponseDto로 래핑해 반환
-        return PageResponseDto.of(dtoPage);
-    }
-
-    public AuctionHistory findByIdOrElseThrow(Long id) {
-        return repository
-                .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("AuctionHistory not found: " + id));
     }
 }

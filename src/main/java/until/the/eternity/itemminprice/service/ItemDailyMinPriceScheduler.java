@@ -16,6 +16,6 @@ public class ItemDailyMinPriceScheduler {
     public void scheduleMinPriceUpsert() {
         long start = System.currentTimeMillis();
         itemDailyMinPriceService.upsertTodayMinPrices();
-        log.info("[Scheduler] Upsert completed in {} ms", System.currentTimeMillis() - start);
+        log.info("[Min Price Scheduler] Upsert completed in {} ms", System.currentTimeMillis() - start);
     }
 }

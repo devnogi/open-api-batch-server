@@ -1,10 +1,11 @@
 package until.the.eternity.config.openapi;
 
-import java.time.Duration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
+
+import java.time.Duration;
 
 /**
  * Nexon OPEN API 전용 재시도(Back-off) 정책.

@@ -1,8 +1,5 @@
 package until.the.eternity.auctionhistory.domain.component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,6 +8,10 @@ import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHisto
 import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 외부 경매 히스토리를 수집한 뒤 DB에 존재하지 않는 범위까지만 반환한다.
