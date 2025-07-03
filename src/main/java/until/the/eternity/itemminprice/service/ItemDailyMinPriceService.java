@@ -17,4 +17,5 @@ public class ItemDailyMinPriceService {
     public void upsertTodayMinPrices() {
         itemDailyMinPriceRepository.upsertTodayMinPrices();
     }
+
 }
