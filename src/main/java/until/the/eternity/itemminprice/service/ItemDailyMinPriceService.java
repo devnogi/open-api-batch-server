@@ -1,9 +1,11 @@
 package until.the.eternity.itemminprice.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import until.the.eternity.itemminprice.domain.entity.ItemDailyMinPrice;
 import until.the.eternity.itemminprice.repository.ItemDailyMinPriceRepository;
 
 @Slf4j
@@ -18,4 +20,8 @@ public class ItemDailyMinPriceService {
         itemDailyMinPriceRepository.upsertTodayMinPrices();
     }
 
+    @Transactional(readOnly = true)
+    public List<ItemDailyMinPrice> findAll() {
+        return itemDailyMinPriceRepository.findAll();
+    }
 }
