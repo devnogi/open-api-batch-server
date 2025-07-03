@@ -1,5 +1,6 @@
 package until.the.eternity.auctionhistory.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,8 +18,6 @@ import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,8 @@ public class AuctionHistoryService {
     }
 
     public AuctionHistory findByIdOrElseThrow(Long id) {
-        return repository.findById(id)
+        return repository
+                .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("AuctionHistory not found: " + id));
     }
 

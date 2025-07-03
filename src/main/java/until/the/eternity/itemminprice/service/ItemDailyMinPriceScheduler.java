@@ -12,10 +12,12 @@ public class ItemDailyMinPriceScheduler {
 
     private final ItemDailyMinPriceService itemDailyMinPriceService;
 
-    @Scheduled(cron = "0 */2 * * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "${openapi.min-price.cron}", zone = "Asia/Seoul")
     public void scheduleMinPriceUpsert() {
         long start = System.currentTimeMillis();
         itemDailyMinPriceService.upsertTodayMinPrices();
-        log.info("[Min Price Scheduler] Upsert completed in {} ms", System.currentTimeMillis() - start);
+        log.info(
+                "[Min Price Scheduler] Upsert completed in {} ms",
+                System.currentTimeMillis() - start);
     }
 }

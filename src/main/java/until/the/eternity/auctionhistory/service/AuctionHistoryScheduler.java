@@ -17,7 +17,7 @@ public class AuctionHistoryScheduler {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "0 0 */3 * * *") // 3시간마다
+    @Scheduled(cron = "${openapi.auction-history.cron}", zone = "Asia/Seoul")
     public void fetchAndSaveAuctionHistoryAll() {
         for (ItemCategory category : ItemCategory.values()) {
             try {

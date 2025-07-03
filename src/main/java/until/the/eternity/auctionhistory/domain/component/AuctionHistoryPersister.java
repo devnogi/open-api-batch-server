@@ -1,5 +1,6 @@
 package until.the.eternity.auctionhistory.domain.component;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,8 +10,6 @@ import until.the.eternity.auctionhistory.domain.mapper.OpenApiAuctionHistoryMapp
 import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.itemoption.domain.entity.ItemOption;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor

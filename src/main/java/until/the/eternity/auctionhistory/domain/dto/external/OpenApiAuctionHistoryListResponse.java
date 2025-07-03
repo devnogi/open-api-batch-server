@@ -1,7 +1,6 @@
 package until.the.eternity.auctionhistory.domain.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public record OpenApiAuctionHistoryListResponse(

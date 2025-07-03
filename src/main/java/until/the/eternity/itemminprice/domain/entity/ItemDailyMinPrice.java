@@ -2,10 +2,9 @@ package until.the.eternity.itemminprice.domain.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(
