@@ -12,7 +12,7 @@ import lombok.*;
         indexes = {
             @Index(
                     name = "idx_item_daily_min_price_item_name_date_auction_buy",
-                    columnList = "item_name, created_date")
+                    columnList = "item_name, date_auction_buy")
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
