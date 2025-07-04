@@ -6,7 +6,7 @@ import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-/** 외부 API용 WebClient 설정값 홀더. - jakarta.validation.* 사용 (Spring Boot 3.x 이상) */
+/** 외부 API용 WebClient 설정값 홀더 application.yml 사용) */
 @Validated
 @ConfigurationProperties(prefix = "openapi.nexon")
 public record OpenApiWebClientProperties(

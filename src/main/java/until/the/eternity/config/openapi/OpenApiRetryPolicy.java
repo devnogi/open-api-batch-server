@@ -6,11 +6,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
-/**
- * Nexon OPEN API 전용 재시도(Back-off) 정책.
- *
- * <p>변경이 잦은 정책 로직을 Config에서 분리해 SOLID 원칙을 지킨다.
- */
+/** Nexon OPEN API 전용 재시도(Back-off) 정책. */
 @Component
 public class OpenApiRetryPolicy {
 
