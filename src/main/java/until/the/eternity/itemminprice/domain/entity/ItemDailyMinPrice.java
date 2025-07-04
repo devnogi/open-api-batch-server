@@ -11,8 +11,8 @@ import lombok.*;
         name = "item_daily_min_price",
         indexes = {
             @Index(
-                    name = "idx_item_daily_min_price_item_name_week_start_date",
-                    columnList = "item_name, created_at")
+                    name = "idx_item_daily_min_price_item_name_date_auction_buy",
+                    columnList = "item_name, created_date")
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,14 +31,18 @@ public class ItemDailyMinPrice {
     private String itemName;
 
     @Column(name = "min_price", nullable = false)
-    @Schema(description = "기록된 최저 단가", example = "120000")
+    @Schema(description = "기록된 최저 단가 (거래내역이 없으면 레코드 자체를 생성하지 않음)", example = "120000")
     private Long minPrice;
 
     @Column(name = "date_auction_buy", nullable = false)
-    @Schema(description = "해당 가격이 발견된 시각 (거래 발생 시각)", example = "2025-07-01T14:35:00")
-    private LocalDateTime dateAuctionBuy;
+    @Schema(description = "거래 일자 (해당 데이터가 저장된 일시보다 9시간 전 일자)", example = "2025-07-01")
+    private LocalDate dateAuctionBuy;
 
     @Column(name = "created_at", nullable = false)
-    @Schema(description = "해당 데이터가 저장된 일자", example = "2025-07-01")
-    private LocalDate createdAt;
+    @Schema(description = "해당 데이터가 저장된 일시", example = "2025-07-01T14:35:00")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    @Schema(description = "해당 데이터가 수정된 일시", example = "2025-07-01T15:35:00")
+    private LocalDateTime updatedAt;
 }

@@ -17,28 +17,23 @@ public interface ItemDailyMinPriceRepository extends JpaRepository<ItemDailyMinP
     @Query(
             value =
                     """
-        INSERT INTO item_daily_min_price (
-            item_name,
-            min_price,
-            date_auction_buy,
-            created_at
-        )
-        SELECT
-            ah.item_name,
-            MIN(ah.auction_price_per_unit) AS min_price,
-            MIN(ah.date_auction_buy)       AS date_auction_buy,
-            CURDATE()                      AS created_at
-        FROM auction_history ah
-        /* 직전 9시간(서버‑타임존 기준)의 거래만 집계 */
-        WHERE ah.date_auction_buy >= DATE_SUB(NOW(), INTERVAL 9 HOUR)
-        GROUP BY ah.item_name
-        ON DUPLICATE KEY UPDATE
-            min_price = LEAST(item_daily_min_price.min_price, VALUES(min_price)),
-            date_auction_buy = IF(
-                VALUES(min_price) < item_daily_min_price.min_price,
-                VALUES(date_auction_buy),
-                item_daily_min_price.date_auction_buy
-            );
+                    INSERT INTO item_daily_min_price (
+                        item_name,
+                        min_price,
+                        date_auction_buy,
+                        updated_at
+                    )
+                    SELECT
+                        ah.item_name,
+                        MIN(ah.auction_price_per_unit) AS current_min_price,
+                        DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR)),
+                        CURRENT_TIMESTAMP
+                    FROM auction_history ah
+                    WHERE DATE(ah.date_auction_buy) = DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR))
+                    GROUP BY ah.item_name
+                    ON DUPLICATE KEY UPDATE
+                                         min_price = VALUES(min_price),
+                                         updated_at = CURRENT_TIMESTAMP;
         """,
             nativeQuery = true)
     void upsertTodayMinPrices();

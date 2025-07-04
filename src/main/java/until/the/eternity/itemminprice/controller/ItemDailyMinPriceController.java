@@ -28,7 +28,7 @@ public class ItemDailyMinPriceController {
         return ResponseEntity.ok().build();
     }
 
-    // TODO: 페이지네이션을 해야되나 고민 중 (의상 구매를 할 때는 최저가로 볼 거 같기도 한데)
+    // TODO: 페이지네이션을 해야되나 고민 중 의상 구매를 할 때는 최저가로 볼 거 같기도 한데 그런 경우에는 특수한 경우라서)
     @GetMapping
     @Operation(summary = "최저가 전체 조회", description = "item_daily_min_price 테이블의 모든 데이터를 반환합니다.")
     public ResponseEntity<List<ItemDailyMinPriceResponseDto>> getAll() {
