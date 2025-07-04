@@ -1,47 +1,59 @@
 package until.the.eternity.auctionhistory.repository;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionhistory.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
-import until.the.eternity.auctionhistory.domain.entity.QAuctionHistory;
 
+/** AuctionHistoryRepository Interface 구현체 */
+@Repository
 @RequiredArgsConstructor
-public class AuctionHistoryRepositoryImpl implements AuctionHistoryRepositoryCustom {
+public class AuctionHistoryRepositoryImpl implements AuctionHistoryRepository {
 
-    private final JPAQueryFactory queryFactory;
+    private final AuctionHistoryJpaRepository jpaRepository;
+    private final AuctionHistoryQueryDslRepository queryDslRepository;
+
+    @Override
+    public List<AuctionHistory> findAllByAuctionBuyIds(List<String> auctionBuyIds) {
+        return jpaRepository.findAllByAuctionBuyIdIn(auctionBuyIds);
+    }
 
     @Override
     public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
-        QAuctionHistory ah = QAuctionHistory.auctionHistory;
+        return queryDslRepository.search(condition, pageable);
+    }
 
-        BooleanBuilder builder = new BooleanBuilder();
+    @Override
+    public Optional<AuctionHistory> findByIdWithOptions(Long id) {
+        return jpaRepository.findWithItemOptionsById(id);
+    }
 
-        if (condition.getItemName() != null && !condition.getItemName().isBlank()) {
-            builder.and(ah.itemName.containsIgnoreCase(condition.getItemName()));
-        }
+    @Override
+    public boolean existsByAuctionBuyIds(List<String> ids) {
+        return jpaRepository.existsByAuctionBuyIdIn(ids);
+    }
 
-        if (condition.getItemSubCategory() != null && !condition.getItemSubCategory().isBlank()) {
-            builder.and(ah.itemSubCategory.eq(condition.getItemSubCategory()));
-        }
+    @Override
+    public List<String> findExistingIds(List<String> ids) {
+        return jpaRepository.findExistingIds(ids);
+    }
 
-        List<AuctionHistory> content =
-                queryFactory
-                        .selectFrom(ah)
-                        .leftJoin(ah.itemOptions)
-                        .fetchJoin()
-                        .where(builder)
-                        .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize())
-                        .fetch();
+    @Override
+    public boolean existsByAuctionBuyIdIn(List<String> ids) {
+        return jpaRepository.existsByAuctionBuyIdIn(ids);
+    }
 
-        long total = queryFactory.select(ah.count()).from(ah).where(builder).fetchOne();
+    @Override
+    public Optional<AuctionHistory> findById(Long id) {
+        return jpaRepository.findById(id);
+    }
 
-        return new PageImpl<>(content, pageable, total);
+    @Override
+    public void saveAll(List<AuctionHistory> newEntities) {
+        jpaRepository.saveAll(newEntities);
     }
 }

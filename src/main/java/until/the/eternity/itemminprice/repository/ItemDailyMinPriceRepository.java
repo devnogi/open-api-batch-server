@@ -9,8 +9,8 @@ import until.the.eternity.itemminprice.domain.entity.ItemDailyMinPrice;
 public interface ItemDailyMinPriceRepository extends JpaRepository<ItemDailyMinPrice, Long> {
 
     /**
-     * 오늘(서버 타임존 기준) 거래된 각 아이템의 최저가를 item_daily_min_price 테이블에 upsert. 실시간 API가 아니라 9시 전
-     * 정보가 들어온다... 최저가 갱신도 9시간 전을 기준으로 한다.
+     * 오늘(서버 타임존 기준) 거래된 각 아이템의 최저가를 item_daily_min_price 테이블에 upsert. 실시간 API가 아니라 9시 전 정보가 들어온다...
+     * 최저가 갱신도 9시간 전을 기준으로 한다.
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

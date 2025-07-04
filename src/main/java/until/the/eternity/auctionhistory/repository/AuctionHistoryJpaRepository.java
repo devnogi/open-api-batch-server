@@ -10,15 +10,15 @@ import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 
 @Repository
-interface AuctionHistoryJpaRepository extends
-        JpaRepository<AuctionHistory, Long>,
-        JpaSpecificationExecutor<AuctionHistory> {
+interface AuctionHistoryJpaRepository
+        extends JpaRepository<AuctionHistory, Long>, JpaSpecificationExecutor<AuctionHistory> {
 
     List<AuctionHistory> findAllByAuctionBuyIdIn(List<String> auctionBuyIds);
 
     boolean existsByAuctionBuyIdIn(List<String> ids);
 
-    @Query("""
+    @Query(
+            """
            select a.auctionBuyId
              from AuctionHistory a
             where a.auctionBuyId in :ids

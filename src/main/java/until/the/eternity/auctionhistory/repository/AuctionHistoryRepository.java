@@ -4,37 +4,25 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import until.the.eternity.auctionhistory.domain.dto.internal.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 
-@Repository
-public interface AuctionHistoryRepository
-        extends JpaRepository<AuctionHistory, Long>,
-                JpaSpecificationExecutor<AuctionHistory>,
-                AuctionHistoryRepositoryCustom {
-    List<AuctionHistory> findAllByAuctionBuyIdIn(List<String> auctionBuyIds);
+/** 경매장 거래 내역 POJO Repository - Mock 또는 Stub 으로 대체해 단위 테스트 용이성 확보 */
+public interface AuctionHistoryRepository {
 
-    @Override
-    Page<AuctionHistory> findAll(Specification<AuctionHistory> spec, Pageable pageable);
+    List<AuctionHistory> findAllByAuctionBuyIds(List<String> auctionBuyIds);
 
-    @Query(
-            "SELECT ah FROM AuctionHistory ah "
-                    + "LEFT JOIN FETCH ah.itemOptions "
-                    + "WHERE ah.id = :id")
-    Optional<AuctionHistory> findById(@Param("id") Long id);
+    Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable);
+
+    Optional<AuctionHistory> findByIdWithOptions(Long id);
+
+    boolean existsByAuctionBuyIds(List<String> ids);
+
+    List<String> findExistingIds(List<String> ids);
 
     boolean existsByAuctionBuyIdIn(List<String> ids);
 
-    @Query(
-            """
-           select a.auctionBuyId
-             from AuctionHistory a
-            where a.auctionBuyId in :ids
-           """)
-    List<String> findExistingIds(@Param("ids") List<String> ids);
+    Optional<AuctionHistory> findById(Long id);
+
+    void saveAll(List<AuctionHistory> newEntities);
 }

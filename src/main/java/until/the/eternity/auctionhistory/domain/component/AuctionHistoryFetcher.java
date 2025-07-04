@@ -12,11 +12,6 @@ import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHisto
 import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 import until.the.eternity.common.enums.ItemCategory;
 
-/**
- * 외부 경매 히스토리를 수집한 뒤 DB에 존재하지 않는 범위까지만 반환한다.
- *
- * <p>API 호출 · 재시도 로직은 {@link AuctionHistoryClient} 로 위임하여 SRP와 DIP를 지킴.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
