@@ -45,6 +45,7 @@ public class AuctionHistoryService {
     }
 
     /** 하나의 카테고리에 대해 API 데이터를 fetch & 저장하는 로직 */
+    @Transactional
     public void fetchAndSaveAuctionHistory(ItemCategory category) {
         List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
 
