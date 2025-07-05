@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import until.the.eternity.auctionhistory.domain.component.AuctionHistoryFetcherImpl;
+import until.the.eternity.auctionhistory.domain.component.AuctionHistoryFetcher;
 import until.the.eternity.auctionhistory.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auctionhistory.domain.dto.internal.request.AuctionHistorySearchRequest;
@@ -25,7 +25,7 @@ import until.the.eternity.common.response.PageResponseDto;
 public class AuctionHistoryService {
 
     private final AuctionHistoryRepository repository;
-    private final AuctionHistoryFetcherImpl fetcher;
+    private final AuctionHistoryFetcher fetcher;
     private final AuctionHistoryPersister persister;
     private final AuctionHistoryMapper mapper;
 
@@ -40,12 +40,16 @@ public class AuctionHistoryService {
 
     @Transactional(readOnly = true)
     public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(Long id) {
-        AuctionHistory auctionHistory = repository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("AuctionHistory not found: " + id));
+        AuctionHistory auctionHistory =
+                repository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "AuctionHistory not found: " + id));
         return mapper.toDto(auctionHistory);
     }
 
-    /** 하나의 카테고리에 대해 API 데이터를 fetch & 저장하는 로직 */
     @Transactional
     public void fetchAndSaveAuctionHistory(ItemCategory category) {
         List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);

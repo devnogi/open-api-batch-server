@@ -14,7 +14,7 @@ import until.the.eternity.itemminprice.service.ItemDailyMinPriceService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/item-min-prices")
-@Tag(name = "ItemDailyMinPrice", description = "아이템 일간 최저가 API")
+@Tag(name = "아이템 일간 최저가 API", description = "아이템 일간 최저가 API")
 public class ItemDailyMinPriceController {
 
     private final ItemDailyMinPriceService itemDailyMinPriceService;

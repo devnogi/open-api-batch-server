@@ -24,6 +24,7 @@ public class AuctionHistoryController {
     private final AuctionHistoryScheduler scheduler;
 
     @GetMapping("/search")
+    @Operation(summary = "경매장 거래 내역 검색", description = "Nexon Open API 경매장 거래 내역 검색")
     public ResponseEntity<PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>>> search(
             @ModelAttribute PageRequestDto pageDto,
             @ModelAttribute @Valid AuctionHistorySearchRequest requestDto) {
@@ -33,6 +34,7 @@ public class AuctionHistoryController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "경매장 거래 내역 단건 조회", description = "Nexon Open API 경매장 거래 내역 조회")
     public ResponseEntity<AuctionHistoryDetailResponse<ItemOptionResponse>> findById(
             @PathVariable Long id) {
         AuctionHistoryDetailResponse<ItemOptionResponse> result = service.findByIdOrElseThrow(id);

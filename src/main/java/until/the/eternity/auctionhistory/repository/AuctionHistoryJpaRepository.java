@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 
 @Repository
-interface AuctionHistoryJpaRepository
+public interface AuctionHistoryJpaRepository
         extends JpaRepository<AuctionHistory, Long>, JpaSpecificationExecutor<AuctionHistory> {
 
     List<AuctionHistory> findAllByAuctionBuyIdIn(List<String> auctionBuyIds);
