@@ -12,27 +12,27 @@ import until.the.eternity.common.enums.ItemCategory;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AuctionHistoryFetcherImpl {
+public class AuctionHistoryFetcherImpl implements AuctionHistoryFetcher {
 
-    private final AuctionHistoryClient auctionHistoryClient;
+    private final AuctionHistoryClient client;
     private final AuctionHistoryDuplicateChecker duplicateChecker;
 
+    @Override
     public List<OpenApiAuctionHistoryResponse> fetch(ItemCategory category) {
 
         List<OpenApiAuctionHistoryResponse> result = new ArrayList<>();
         String cursor = null;
 
         do {
-            var response = auctionHistoryClient.fetchAuctionHistory(category, cursor);
+            var response = client.fetchAuctionHistory(category, cursor);
             if (response == null || response.auctionHistory() == null) break;
 
             var batch = response.auctionHistory();
-            // 기존 데이터와 ID 중복 시 fetch 중단
             if (duplicateChecker.hasDuplicate(batch)) break;
 
             result.addAll(batch);
             cursor = response.nextCursor();
-        } while (cursor != null); // 커서가 null 응답이 오면 fetch 중단
+        } while (cursor != null);
 
         log.debug("[{}] fetched {} entries", category.getSubCategory(), result.size());
         return result;
