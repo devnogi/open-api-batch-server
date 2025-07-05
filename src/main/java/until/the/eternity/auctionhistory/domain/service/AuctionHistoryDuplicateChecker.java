@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepository;
+import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 
 @Component
 @RequiredArgsConstructor
 public class AuctionHistoryDuplicateChecker {
 
-    private final AuctionHistoryRepository repository;
+    private final AuctionHistoryRepositoryPort repository;
 
     /**
      * 주어진 DTO 컬렉션 안에 이미 저장된 auctionBuyId 가 있는지 추후 거대한 뿔피리 및 실시간 거래 정보 API를 활용하면 공통 component로 변경 고려

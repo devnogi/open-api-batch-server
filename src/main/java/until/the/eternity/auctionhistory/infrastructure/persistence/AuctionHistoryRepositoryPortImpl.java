@@ -7,13 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
-import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepository;
+import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 
 /** AuctionHistoryRepository Interface 구현체 */
 @Repository
 @RequiredArgsConstructor
-public class AuctionHistoryRepositoryImpl implements AuctionHistoryRepository {
+public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositoryPort {
 
     private final AuctionHistoryJpaRepository jpaRepository;
     private final AuctionHistoryQueryDslRepository queryDslRepository;

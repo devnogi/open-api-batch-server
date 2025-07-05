@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.service.AuctionHistoryDuplicateChecker;
-import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcher;
+import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcherPort;
 import until.the.eternity.auctionhistory.infrastructure.client.AuctionHistoryClient;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
@@ -14,7 +14,7 @@ import until.the.eternity.common.enums.ItemCategory;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AuctionHistoryFetcherImpl implements AuctionHistoryFetcher {
+public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
 
     private final AuctionHistoryClient client;
     private final AuctionHistoryDuplicateChecker duplicateChecker;

@@ -8,7 +8,7 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 
 /** 경매장 거래 내역 POJO Repository - Mock 또는 Stub 으로 대체해 단위 테스트 용이성 확보 */
-public interface AuctionHistoryRepository {
+public interface AuctionHistoryRepositoryPort {
 
     List<AuctionHistory> findAllByAuctionBuyIds(List<String> auctionBuyIds);
 

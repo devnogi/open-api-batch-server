@@ -4,6 +4,6 @@ import java.util.List;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
-public interface AuctionHistoryFetcher {
+public interface AuctionHistoryFetcherPort {
     List<OpenApiAuctionHistoryResponse> fetch(ItemCategory category);
 }
