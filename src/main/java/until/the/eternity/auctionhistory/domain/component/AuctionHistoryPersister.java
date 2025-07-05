@@ -38,7 +38,7 @@ public class AuctionHistoryPersister {
             return;
         }
 
-        // ✅ 매핑 확인용 디버깅 로그
+        // 매핑 확인용 디버깅 로그
         for (AuctionHistory history : newEntities) {
             log.debug(
                     "Mapped AuctionHistory: auctionBuyId={}, itemOptions={}",
