@@ -3,9 +3,9 @@ package until.the.eternity.auctionhistory.domain.mapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import until.the.eternity.auctionhistory.domain.dto.internal.response.AuctionHistoryDetailResponse;
-import until.the.eternity.auctionhistory.domain.dto.internal.response.ItemOptionResponse;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.itemoption.domain.entity.ItemOption;
 
 /**
