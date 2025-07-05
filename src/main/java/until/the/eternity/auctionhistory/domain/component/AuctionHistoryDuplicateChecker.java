@@ -11,7 +11,7 @@ import until.the.eternity.auctionhistory.repository.AuctionHistoryRepository;
 @RequiredArgsConstructor
 public class AuctionHistoryDuplicateChecker {
 
-    private final AuctionHistoryRepository auctionHistoryRepository;
+    private final AuctionHistoryRepository repository;
 
     /**
      * 주어진 DTO 컬렉션 안에 이미 저장된 auctionBuyId 가 있는지
@@ -20,6 +20,14 @@ public class AuctionHistoryDuplicateChecker {
     public boolean hasDuplicate(Collection<OpenApiAuctionHistoryResponse> dtos) {
         if (dtos.isEmpty()) return false;
         List<String> ids = dtos.stream().map(OpenApiAuctionHistoryResponse::auctionBuyId).toList();
-        return auctionHistoryRepository.existsByAuctionBuyIdIn(ids);
+        return repository.existsByAuctionBuyIdIn(ids);
+    }
+
+    public List<String> findExistingIds(List<String> incomingIds) {
+        return repository.findExistingIds(incomingIds);
+    }
+
+    public boolean isDuplicate(String id, List<String> existingIds) {
+        return existingIds.contains(id);
     }
 }
