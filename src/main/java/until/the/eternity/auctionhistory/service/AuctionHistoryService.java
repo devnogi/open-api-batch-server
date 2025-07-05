@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import until.the.eternity.auctionhistory.domain.component.AuctionHistoryFetcher;
+import until.the.eternity.auctionhistory.domain.component.AuctionHistoryFetcherImpl;
 import until.the.eternity.auctionhistory.domain.component.AuctionHistoryPersister;
 import until.the.eternity.auctionhistory.domain.dto.external.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auctionhistory.domain.dto.internal.request.AuctionHistorySearchRequest;
@@ -25,7 +25,7 @@ import until.the.eternity.common.response.PageResponseDto;
 public class AuctionHistoryService {
 
     private final AuctionHistoryRepository repository;
-    private final AuctionHistoryFetcher fetcher;
+    private final AuctionHistoryFetcherImpl fetcher;
     private final AuctionHistoryPersister persister;
     private final AuctionHistoryMapper mapper;
 
