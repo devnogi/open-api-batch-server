@@ -32,39 +32,33 @@ public class AuctionHistoryPersister {
         List<AuctionHistory> newEntities = dtoList.stream()
                 .filter(dto -> !duplicateChecker.isDuplicate(dto.auctionBuyId(), existingIds))
                 .map(dto -> mapper.toEntity(dto, category).linkItemOptions())
-                .toList();
+                .toList(); // MapStruct의 AfterMapping 실행 이슈로 linkItemOptions()로 처리
 
         if (newEntities.isEmpty()) {
             log.info("[{}] No new auction history to save", category.getSubCategory());
             return;
         }
 
-        logEachEntityDebug(newEntities);
-
         repository.saveAll(newEntities);
-
-        log.info("[{}] Saved {} new auction history records (with {} options)",
-                category.getSubCategory(),
-                newEntities.size(),
-                newEntities.stream()
-                        .filter(h -> h.getItemOptions() != null)
-                        .mapToInt(h -> h.getItemOptions().size())
-                        .sum());
+        logSummary(category, newEntities);
     }
 
-    private void logEachEntityDebug(List<AuctionHistory> newEntities) {
-        for (AuctionHistory history : newEntities) {
-            log.debug("Mapped AuctionHistory: auctionBuyId={}, itemOptions={}",
-                    history.getAuctionBuyId(),
-                    history.getItemOptions() != null ? history.getItemOptions().size() : 0);
+    private void logSummary(ItemCategory category, List<AuctionHistory> entities) {
+        int optionCnt = entities.stream()
+                .mapToInt(e -> e.getItemOptions() == null ? 0 : e.getItemOptions().size())
+                .sum();
 
-            if (history.getItemOptions() != null) {
-                for (ItemOption option : history.getItemOptions()) {
-                    log.debug(" - ItemOption: optionType={}, auctionHistorySet={}",
-                            option.getOptionType(),
-                            option.getAuctionHistory() != null);
-                }
-            }
+        log.info("[{}] Saved {} new auction history records (with {} options)",
+                category.getSubCategory(), entities.size(), optionCnt);
+
+        if (log.isDebugEnabled()) {
+            entities.forEach(this::logEntityDebug);
         }
+    }
+
+    private void logEntityDebug(AuctionHistory history) {
+        log.debug("Mapped AuctionHistory: auctionBuyId={}, itemOptions={}",
+                history.getAuctionBuyId(),
+                history.getItemOptions() == null ? 0 : history.getItemOptions().size());
     }
 }
