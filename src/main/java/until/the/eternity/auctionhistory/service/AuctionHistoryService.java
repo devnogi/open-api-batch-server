@@ -40,13 +40,8 @@ public class AuctionHistoryService {
 
     @Transactional(readOnly = true)
     public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(Long id) {
-        AuctionHistory auctionHistory =
-                repository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "AuctionHistory not found: " + id));
+        AuctionHistory auctionHistory = repository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("AuctionHistory not found: " + id));
         return mapper.toDto(auctionHistory);
     }
 
@@ -54,12 +49,6 @@ public class AuctionHistoryService {
     @Transactional
     public void fetchAndSaveAuctionHistory(ItemCategory category) {
         List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
-
-        if (dtoList == null || dtoList.isEmpty()) {
-            log.info("[{}] No auction history data received", category.getSubCategory());
-            return;
-        }
-
         persister.saveIfNotExists(dtoList, category);
     }
 }
