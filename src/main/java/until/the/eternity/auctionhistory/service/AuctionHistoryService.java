@@ -38,10 +38,16 @@ public class AuctionHistoryService {
         return PageResponseDto.of(dtoPage);
     }
 
-    public AuctionHistory findByIdOrElseThrow(Long id) {
-        return repository
-                .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("AuctionHistory not found: " + id));
+    @Transactional(readOnly = true)
+    public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(Long id) {
+        AuctionHistory auctionHistory =
+                repository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "AuctionHistory not found: " + id));
+        return mapper.toDto(auctionHistory);
     }
 
     /** 하나의 카테고리에 대해 API 데이터를 fetch & 저장하는 로직 */

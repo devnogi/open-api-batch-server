@@ -20,15 +20,22 @@ import until.the.eternity.common.response.PageResponseDto;
 @Tag(name = "경매장 거래 내역 API", description = "경매장 거래 내역 API")
 public class AuctionHistoryController {
 
-    private final AuctionHistoryService auctionHistoryService;
-    private final AuctionHistoryScheduler auctionHistoryScheduler;
+    private final AuctionHistoryService service;
+    private final AuctionHistoryScheduler scheduler;
 
     @GetMapping("/search")
     public ResponseEntity<PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>>> search(
             @ModelAttribute PageRequestDto pageDto,
             @ModelAttribute @Valid AuctionHistorySearchRequest requestDto) {
         PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> result =
-                auctionHistoryService.search(requestDto, pageDto);
+                service.search(requestDto, pageDto);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AuctionHistoryDetailResponse<ItemOptionResponse>> findById(
+            @PathVariable Long id) {
+        AuctionHistoryDetailResponse<ItemOptionResponse> result = service.findByIdOrElseThrow(id);
         return ResponseEntity.ok(result);
     }
 
@@ -39,7 +46,7 @@ public class AuctionHistoryController {
             summary = "경매장 거래 내역 배치 실행",
             description = "Nexon Open API 경매장 거래 내역 모든 카테고리 데이터 INSERT 배치 실행")
     public ResponseEntity<Void> triggerMinPriceBatch() {
-        auctionHistoryScheduler.fetchAndSaveAuctionHistoryAll();
+        scheduler.fetchAndSaveAuctionHistoryAll();
         return ResponseEntity.ok().build();
     }
 }
