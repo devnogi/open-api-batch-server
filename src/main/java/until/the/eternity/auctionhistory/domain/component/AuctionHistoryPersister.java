@@ -1,6 +1,7 @@
 package until.the.eternity.auctionhistory.domain.component;
 
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,8 @@ import until.the.eternity.itemoption.domain.entity.ItemOption;
 @Component
 public class AuctionHistoryPersister {
 
-    private final AuctionHistoryRepository auctionHistoryRepository;
-    private final OpenApiAuctionHistoryMapper entityMapper;
+    private final AuctionHistoryRepository repository;
+    private final OpenApiAuctionHistoryMapper mapper;
 
     public void saveIfNotExists(
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
@@ -25,12 +26,12 @@ public class AuctionHistoryPersister {
         List<String> incomingIds =
                 dtoList.stream().map(OpenApiAuctionHistoryResponse::auctionBuyId).toList();
 
-        List<String> existingIds = auctionHistoryRepository.findExistingIds(incomingIds);
+        List<String> existingIds = repository.findExistingIds(incomingIds);
 
         List<AuctionHistory> newEntities =
                 dtoList.stream()
                         .filter(dto -> !existingIds.contains(dto.auctionBuyId()))
-                        .map(dto -> entityMapper.toEntity(dto, category).linkItemOptions())
+                        .map(dto -> mapper.toEntity(dto, category).linkItemOptions())
                         .toList();
 
         if (newEntities.isEmpty()) {
@@ -55,7 +56,7 @@ public class AuctionHistoryPersister {
             }
         }
 
-        auctionHistoryRepository.saveAll(newEntities);
+        repository.saveAll(newEntities);
 
         log.info(
                 "[{}] Saved {} new auction history records (with {} options)",
