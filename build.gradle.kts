@@ -87,7 +87,8 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
-    testImplementation("org.mockito:mockito-inline:5.11.0")   // final/record 목킹용
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito:mockito-inline:5.2.0")   // final/record 목킹용
     testImplementation("org.assertj:assertj-core:3.25.3")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:${property("testContainersVersion")}")
