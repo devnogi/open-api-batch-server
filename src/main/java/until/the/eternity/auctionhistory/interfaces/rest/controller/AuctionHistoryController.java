@@ -1,0 +1,54 @@
+package until.the.eternity.auctionhistory.interfaces.rest.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import until.the.eternity.auctionhistory.application.scheduler.AuctionHistoryScheduler;
+import until.the.eternity.auctionhistory.application.service.AuctionHistoryService;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
+import until.the.eternity.common.request.PageRequestDto;
+import until.the.eternity.common.response.PageResponseDto;
+
+@RequestMapping("/auction-history")
+@RestController
+@RequiredArgsConstructor
+@Tag(name = "경매장 거래 내역 API", description = "경매장 거래 내역 API")
+public class AuctionHistoryController {
+
+    private final AuctionHistoryService service;
+    private final AuctionHistoryScheduler scheduler;
+
+    @GetMapping("/search")
+    @Operation(summary = "경매장 거래 내역 검색", description = "Nexon Open API 경매장 거래 내역 검색")
+    public ResponseEntity<PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>>> search(
+            @ModelAttribute PageRequestDto pageDto,
+            @ModelAttribute @Valid AuctionHistorySearchRequest requestDto) {
+        PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> result =
+                service.search(requestDto, pageDto);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "경매장 거래 내역 단건 조회", description = "Nexon Open API 경매장 거래 내역 조회")
+    public ResponseEntity<AuctionHistoryDetailResponse<ItemOptionResponse>> findById(
+            @PathVariable Long id) {
+        AuctionHistoryDetailResponse<ItemOptionResponse> result = service.findByIdOrElseThrow(id);
+        return ResponseEntity.ok(result);
+    }
+
+    // TODO: 응답 형식도 몇건씩 저장됐는지 결과를 보내줘야하나 고민
+    // TODO: 실행 시 OPEN API Key를 따로 받을지 고민
+    @PostMapping("/batch")
+    @Operation(
+            summary = "경매장 거래 내역 배치 실행",
+            description = "Nexon Open API 경매장 거래 내역 모든 카테고리 데이터 INSERT 배치 실행")
+    public ResponseEntity<Void> triggerMinPriceBatch() {
+        scheduler.fetchAndSaveAuctionHistoryAll();
+        return ResponseEntity.ok().build();
+    }
+}
