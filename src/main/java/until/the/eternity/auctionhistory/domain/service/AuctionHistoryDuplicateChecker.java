@@ -1,11 +1,12 @@
 package until.the.eternity.auctionhistory.domain.service;
 
-import java.util.Collection;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
+
+import java.util.Collection;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor

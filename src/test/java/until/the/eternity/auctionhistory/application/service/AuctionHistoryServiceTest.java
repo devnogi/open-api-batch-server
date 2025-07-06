@@ -1,17 +1,14 @@
 package until.the.eternity.auctionhistory.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import until.the.eternity.auctionhistory.application.service.persister.AuctionHistoryPersister;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
@@ -24,6 +21,13 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOption
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryServiceTest {
