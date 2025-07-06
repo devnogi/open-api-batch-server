@@ -19,8 +19,10 @@ public class AuctionHistoryDuplicateChecker {
     public boolean hasDuplicate(Collection<OpenApiAuctionHistoryResponse> dtos) {
         if (dtos.isEmpty()) return false;
         List<String> ids = dtos.stream().map(OpenApiAuctionHistoryResponse::auctionBuyId).toList();
-        return repository.existsByAuctionBuyIdIn(ids);
+        return repository.existsByAuctionBuyIdIn(ids); // 이 코드가 중복여부만 판단하는게 아니라, 어떤 데이터가 중복인지 알아야돼
     }
+
+    // TODO: 카테고리 별 마지막 거래 일자 이후의 데이터를 중복으로 처리하는 코드 작성
 
     public List<String> findExistingIds(List<String> incomingIds) {
         return repository.findExistingIds(incomingIds);
