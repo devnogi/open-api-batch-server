@@ -1,11 +1,10 @@
 package until.the.eternity.auctionitem.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import until.the.eternity.itemoption.domain.entity.ItemOption;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.*;
+import until.the.eternity.itemoption.domain.entity.ItemOption;
 
 @Entity
 @Table(name = "auction_item")
