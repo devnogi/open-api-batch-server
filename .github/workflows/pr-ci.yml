@@ -43,13 +43,17 @@ jobs:
           path: build/reports/jacoco/test/html/
 
       - name: Extract JaCoCo Coverage Percentage
-        id: jacoco
+        id: coverage
         run: |
-          lineRate=$(grep -oPm1 '(?<=<counter type="LINE" missed=")[^"]*' build/reports/jacoco/test/jacocoTestReport.xml)
-          coveredLineRate=$(grep -oPm1 '(?<=<counter type="LINE" missed="[0-9]+" covered=")[^"]*' build/reports/jacoco/test/jacocoTestReport.xml)
-          total=$((lineRate + coveredLineRate))
-          percent=$(awk "BEGIN { printf \"%.2f\", ($coveredLineRate / $total) * 100 }")
-          echo "COVERAGE=$percent" >> $GITHUB_OUTPUT
+          xml_file="build/reports/jacoco/test/jacocoTestReport.xml"
+          
+          missed=$(awk -F'"' '/<counter type="LINE"/ {print $4}' "$xml_file")
+          covered=$(awk -F'"' '/<counter type="LINE"/ {print $6}' "$xml_file")
+          
+          total=$((missed + covered))
+          percent=$(awk "BEGIN { printf \"%.2f\", ($covered / $total) * 100 }")
+          
+          echo "COVERAGE=$percent" >> "$GITHUB_OUTPUT"
 
       - name: Comment PR with Test and Coverage Result
         if: always()
