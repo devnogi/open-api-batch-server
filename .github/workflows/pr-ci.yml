@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-and-test:
-    name: Build, Test, and Coverage
+    name: Build, Test, and Upload Coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -42,17 +42,23 @@ jobs:
           name: coverage-report
           path: build/reports/jacoco/test/html/
 
+      - name: Upload JaCoCo report to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # public repo라면 생략 가능
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          fail_ci_if_error: true
+          flags: unittests
+          verbose: true
+
       - name: Extract JaCoCo Coverage Percentage
         id: coverage
         run: |
           xml_file="build/reports/jacoco/test/jacocoTestReport.xml"
-          
           missed=$(awk -F'"' '/<counter type="LINE"/ {print $4}' "$xml_file")
           covered=$(awk -F'"' '/<counter type="LINE"/ {print $6}' "$xml_file")
-          
           total=$((missed + covered))
           percent=$(awk "BEGIN { printf \"%.2f\", ($covered / $total) * 100 }")
-          
           echo "COVERAGE=$percent" >> "$GITHUB_OUTPUT"
 
       - name: Comment PR with Test and Coverage Result
@@ -65,23 +71,13 @@ jobs:
             **Build:** ${{ job.status }}
 
             🧪 테스트 실행 with Gradle  
-            📈 **Coverage:** `${{ steps.jacoco.outputs.COVERAGE }}%`
+            📈 **Coverage:** `${{ steps.coverage.outputs.COVERAGE }}%`
 
-            📁 [Test Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            📁 [Coverage Report (HTML)](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            📁 [테스트 결과](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            📁 [커버리지 보고서 (HTML)](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
       - name: Fail PR if tests fail
         if: failure()
         run: |
           echo "❌ Tests failed. Please fix them before merging."
           exit 1
-      - name: Generate Coverage Badge
-        run: |
-          chmod +x .github/scripts/generate-coverage-badge.sh
-          .github/scripts/generate-coverage-badge.sh
-
-      - name: Commit & Push Coverage Badge
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update coverage badge"
-          file_pattern: badges/coverage.svg
