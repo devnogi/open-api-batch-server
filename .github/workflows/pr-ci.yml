@@ -1,0 +1,83 @@
+name: Spring CI for Pull Request
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    name: Build, Test, and Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Tests and Generate Coverage
+        run: ./gradlew clean test jacocoTestReport --no-daemon
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test/
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: build/reports/jacoco/test/html/
+
+      - name: Extract JaCoCo Coverage Percentage
+        id: jacoco
+        run: |
+          lineRate=$(grep -oPm1 '(?<=<counter type="LINE" missed=")[^"]*' build/reports/jacoco/test/jacocoTestReport.xml)
+          coveredLineRate=$(grep -oPm1 '(?<=<counter type="LINE" missed="[0-9]+" covered=")[^"]*' build/reports/jacoco/test/jacocoTestReport.xml)
+          total=$((lineRate + coveredLineRate))
+          percent=$(awk "BEGIN { printf \"%.2f\", ($coveredLineRate / $total) * 100 }")
+          echo "COVERAGE=$percent" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with Test and Coverage Result
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: test-results
+          message: |
+            ### ✅ 테스트 결과 for PR
+            **Build:** ${{ job.status }}
+
+            🧪 테스트 실행 with Gradle  
+            📈 **Coverage:** `${{ steps.jacoco.outputs.COVERAGE }}%`
+
+            📁 [Test Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            📁 [Coverage Report (HTML)](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      - name: Fail PR if tests fail
+        if: failure()
+        run: |
+          echo "❌ Tests failed. Please fix them before merging."
+          exit 1
+      - name: Generate Coverage Badge
+        run: |
+          chmod +x .github/scripts/generate-coverage-badge.sh
+          .github/scripts/generate-coverage-badge.sh
+
+      - name: Commit & Push Coverage Badge
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update coverage badge"
+          file_pattern: badges/coverage.svg
