@@ -12,21 +12,22 @@ if [ ! -f "$REPORT_FILE" ]; then
   exit 1
 fi
 
-missed=$(grep -oPm1 '(?<=<counter type="LINE" missed=")[0-9]+' "$REPORT_FILE")
-covered=$(grep -oPm1 '(?<=<counter type="LINE" missed="[0-9]+" covered=")[0-9]+' "$REPORT_FILE")
+# awk로 missed, covered 값 추출
+read missed covered < <(awk -F'"' '/<counter type="LINE"/ {print $4, $6}' "$REPORT_FILE")
+
 total=$((missed + covered))
 percent=$(awk "BEGIN { printf \"%.2f\", ($covered / $total) * 100 }")
 
-# Determine color
+# 색상 결정
 if (( $(echo "$percent >= 90" | bc -l) )); then
-  color="brightgreen"
+  color="4c1" # brightgreen
 elif (( $(echo "$percent >= 75" | bc -l) )); then
-  color="yellow"
+  color="dfb317" # yellow
 else
-  color="red"
+  color="e05d44" # red
 fi
 
-# Generate SVG badge using shields.io style
+# SVG badge 생성
 cat > "$BADGE_FILE" <<EOF
 <svg xmlns="http://www.w3.org/2000/svg" width="130" height="20">
   <linearGradient id="b" x2="0" y2="100%">
@@ -50,3 +51,5 @@ cat > "$BADGE_FILE" <<EOF
   </g>
 </svg>
 EOF
+
+echo "✅ Coverage badge generated: ${percent}% -> $BADGE_FILE"
