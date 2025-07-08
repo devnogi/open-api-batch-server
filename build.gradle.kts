@@ -7,6 +7,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     id("org.asciidoctor.jvm.convert") version "4.0.2"
     id("com.diffplug.spotless") version "6.25.0"
+    id("jacoco")
 }
 
 group = property("projectGroup") as String
@@ -17,6 +18,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(property("javaVersion") as String))
     }
 }
+
 
 val querydslDir = "$buildDir/generated/querydsl"
 
@@ -95,10 +97,42 @@ dependencies {
     testImplementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:${property("flywayTestExtensionVersion")}")
 }
 
+extensions.configure<JacocoPluginExtension>("jacoco") {
+    toolVersion = "0.8.10"
+}
+
 // QueryDSL Q 클래스 생성 위치
 tasks.withType<JavaCompile> {
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
     options.annotationProcessorPath = configurations.annotationProcessor.get()
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy("jacocoTestReport") // 테스트 끝나면 커버리지 리포트 생성
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    classDirectories.setFrom(
+        fileTree("${buildDir}/classes/java/main") {
+            exclude(
+                "**/config/**",
+                "**/dto/**",
+                "**/entity/**",
+                "**/exception/**"
+            )
+        }
+    )
+
+    sourceDirectories.setFrom(files("src/main/java"))
+    executionData.setFrom(fileTree(buildDir).include("jacoco/test.exec"))
 }
 
 // Spotless
