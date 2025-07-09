@@ -1,6 +1,6 @@
 # 🎮 마비노기 경매장 거래 내역 조회 및 통계 서비스 
 
-![Coverage](https://github.com/devnogi/open-api-batch-server/dev/badges/coverage.svg)
+[![codecov](https://codecov.io/gh/devnogi/open-api-batch-server/branch/dev/graph/badge.svg)](https://codecov.io/gh/devnogi/open-api-batch-server)
 [![License](https://img.shields.io/github/license/devnogi/open-api-batch-server)](LICENSE)
 [![Last Commit](https://img.shields.io/github/last-commit/devnogi/open-api-batch-server)](https://github.com/devnogi/open-api-batch-server)
 
