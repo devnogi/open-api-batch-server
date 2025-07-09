@@ -2,8 +2,8 @@ name: Spring CI for Pull Request
 
 on:
   pull_request:
-    branches: [ main, dev ]
-    types: [opened, synchronize, reopened]
+    branches: [ dev, main ]
+    types: [ opened, synchronize, reopened ]
 
 permissions:
   contents: write
@@ -45,10 +45,9 @@ jobs:
       - name: Upload JaCoCo report to Codecov
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # public repo라면 생략 가능
           files: build/reports/jacoco/test/jacocoTestReport.xml
           fail_ci_if_error: true
-          flags: unittests
+          flags: pr
           verbose: true
 
       - name: Extract JaCoCo Coverage Percentage
