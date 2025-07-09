@@ -55,3 +55,8 @@ spy.log
 
 ### Spring Boot ###
 application.yml
+
+### node ###
+node_modules/
+package-lock.json
+package.json
