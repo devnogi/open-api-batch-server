@@ -24,16 +24,16 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
     public void saveIfNotExists(
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
 
-        List<AuctionHistory> entites =
+        List<AuctionHistory> entities =
                 mapper.toEntityList(duplicateChecker.filterExisting(dtoList, category), category);
 
-        if (entites.isEmpty()) {
+        if (entities.isEmpty()) {
             log.info("[{}] No new auction history to save", category.getSubCategory());
             return;
         }
 
-        repository.saveAll(entites);
-        logSummary(category, entites);
+        repository.saveAll(entities);
+        logSummary(category, entities);
     }
 
     private void logSummary(ItemCategory category, List<AuctionHistory> entities) {

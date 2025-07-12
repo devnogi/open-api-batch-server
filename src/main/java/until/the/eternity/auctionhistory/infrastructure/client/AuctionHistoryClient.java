@@ -34,6 +34,12 @@ public class AuctionHistoryClient {
             ItemCategory category, String cursor) {
 
         try {
+            // TODO: 하드코딩 값 변경
+            log.info(
+                    "Calling 'https://open.api.nexon.com/mabinogi/v1/auction/history?auction_item_category={} with cursor='{}'",
+                    category.getSubCategory(),
+                    cursor == null ? "" : "&cursor=" + cursor);
+
             return openApiWebClient
                     .get()
                     .uri(
