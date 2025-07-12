@@ -2,8 +2,7 @@ package until.the.eternity.auctionhistory.interfaces.external.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import until.the.eternity.itemoption.domain.dto.external.OpenApiItemOptionResponse;
 
@@ -13,8 +12,8 @@ public record OpenApiAuctionHistoryResponse(
         @JsonProperty("auction_item_category") String itemSubCategory,
         @JsonProperty("item_count") long itemCount,
         @JsonProperty("auction_price_per_unit") long auctionPricePerUnit,
-        @JsonProperty( "date_auction_buy")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-        LocalDateTime dateAuctionBuy,
+        @JsonProperty("date_auction_buy")
+                @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
+                Instant dateAuctionBuy,
         @JsonProperty("auction_buy_id") String auctionBuyId,
         @JsonProperty("item_option") List<OpenApiItemOptionResponse> openApiItemOptionResponses) {}

@@ -1,6 +1,6 @@
 package until.the.eternity.auctionhistory.domain.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -28,5 +28,5 @@ public interface AuctionHistoryRepositoryPort {
 
     void saveAll(List<AuctionHistory> newEntities);
 
-    Optional<LocalDateTime> findLatestDateAuctionBuyBySubCategory(ItemCategory itemCategory);
+    Optional<Instant> findLatestDateAuctionBuyBySubCategory(ItemCategory itemCategory);
 }

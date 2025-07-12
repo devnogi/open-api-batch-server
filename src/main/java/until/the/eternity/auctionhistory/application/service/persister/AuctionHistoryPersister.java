@@ -24,29 +24,16 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
     public void saveIfNotExists(
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
 
-        List<String> incomingIds =
-                dtoList.stream().map(OpenApiAuctionHistoryResponse::auctionBuyId).toList();
-
-        List<String> existingIds = duplicateChecker.findExistingIds(incomingIds);
-
-        List<OpenApiAuctionHistoryResponse> entites = duplicateChecker.filterExisting(dtoList, category);
-
-        List<AuctionHistory> newEntities =
-                dtoList.stream()
-                        .filter(
-                                dto ->
-                                        !duplicateChecker.isDuplicate(
-                                                dto.auctionBuyId(), existingIds))
-                        .map(dto -> mapper.toEntity(dto, category).linkItemOptions())
-                        .toList(); // MapStruct의 AfterMapping 실행 이슈로 linkItemOptions()로 처리
+        List<AuctionHistory> entites =
+                mapper.toEntityList(duplicateChecker.filterExisting(dtoList, category), category);
 
         if (entites.isEmpty()) {
             log.info("[{}] No new auction history to save", category.getSubCategory());
             return;
         }
 
-        repository.saveAll(newEntities);
-        logSummary(category, newEntities);
+        repository.saveAll(entites);
+        logSummary(category, entites);
     }
 
     private void logSummary(ItemCategory category, List<AuctionHistory> entities) {
@@ -60,16 +47,5 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
                 category.getSubCategory(),
                 entities.size(),
                 optionCnt);
-
-        if (log.isDebugEnabled()) {
-            entities.forEach(this::logEntityDebug);
-        }
-    }
-
-    private void logEntityDebug(AuctionHistory history) {
-        log.debug(
-                "Mapped AuctionHistory: auctionBuyId={}, itemOptions={}",
-                history.getAuctionBuyId(),
-                history.getItemOptions() == null ? 0 : history.getItemOptions().size());
     }
 }

@@ -1,6 +1,6 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -30,9 +30,9 @@ public interface AuctionHistoryJpaRepository
             """
            select MAX(a.dateAuctionBuy)
              from AuctionHistory a
-            where a.itemSubCategory = :ids
+            where a.itemTopCategory = :topCategory and a.itemSubCategory = :subCategory
            """)
-    Optional<LocalDateTime> findLatestDateAuctionBuyBySubCategory(String subCategory);
+    Optional<Instant> findLatestDateAuctionBuyBySubCategory(String topCategory, String subCategory);
 
     @EntityGraph(attributePaths = "itemOptions")
     Optional<AuctionHistory> findWithItemOptionsById(Long id);

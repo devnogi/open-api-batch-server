@@ -1,9 +1,8 @@
 package until.the.eternity.auctionhistory.domain.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
@@ -25,13 +24,16 @@ public class AuctionHistoryDuplicateChecker {
         return repository.existsByAuctionBuyIdIn(ids); // 이 코드가 중복여부만 판단하는게 아니라, 어떤 데이터가 중복인지 알아야돼
     }
 
-    public List<OpenApiAuctionHistoryResponse> filterExisting(List<OpenApiAuctionHistoryResponse> dtos, ItemCategory category) {
-        LocalDateTime latestDate = repository.findLatestDateAuctionBuyBySubCategory(ItemCategory.findBySubCategory(dtos.getFirst().itemSubCategory()))
-                .orElseThrow(() -> new IllegalStateException("No auction history found")); // TODO: Custom 에러로 변경
-        return dtos
-                .stream()
-                .filter(dto ->
-                        dto.dateAuctionBuy().isAfter(latestDate)).toList();
+    public List<OpenApiAuctionHistoryResponse> filterExisting(
+            List<OpenApiAuctionHistoryResponse> dtos, ItemCategory category) {
+        Instant latestDate =
+                repository
+                        .findLatestDateAuctionBuyBySubCategory(category)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "No auction history found")); // TODO: Custom 에러로 변경
+        return dtos.stream().filter(dto -> dto.dateAuctionBuy().isAfter(latestDate)).toList();
     }
 
     // 기존 데이터와 중복 데이터 검증 로직
