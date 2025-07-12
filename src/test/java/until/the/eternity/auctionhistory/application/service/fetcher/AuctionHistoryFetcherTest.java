@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +36,7 @@ class AuctionHistoryFetcherTest {
                 ItemCategory.SWORD.getSubCategory(), // itemSubCategory
                 1L, // itemCount
                 100L, // auctionPricePerUnit
-                "2025-07-04T15:54:45Z", // dateAuctionBuy
+                Instant.now(), // dateAuctionBuy
                 id, // auctionBuyId
                 null // itemOption은 테스트 결과에 상관이 없으니 null 처리
                 );

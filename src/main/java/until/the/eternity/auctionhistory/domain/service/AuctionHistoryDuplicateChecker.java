@@ -29,10 +29,7 @@ public class AuctionHistoryDuplicateChecker {
         Instant latestDate =
                 repository
                         .findLatestDateAuctionBuyBySubCategory(category)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalStateException(
-                                                "No auction history found")); // TODO: Custom 에러로 변경
+                        .orElse(Instant.MIN); // 기존에 카테고리가 없는 아이템이면 무조건 저장하기 위해서 Instant.MIN 반환
         return dtos.stream().filter(dto -> dto.dateAuctionBuy().isAfter(latestDate)).toList();
     }
 
