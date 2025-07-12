@@ -1,6 +1,8 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,5 +58,10 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     @Override
     public void saveAll(List<AuctionHistory> newEntities) {
         jpaRepository.saveAll(newEntities);
+    }
+
+    @Override
+    public Optional<LocalDateTime> findLatestDateAuctionBuyBySubCategory(String subCategory) {
+        return jpaRepository.findLatestDateAuctionBuyBySubCategory(subCategory);
     }
 }

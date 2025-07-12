@@ -143,4 +143,8 @@ public enum ItemCategory {
         }
         return itemCategory.getTopCategory();
     }
+
+    public static ItemCategory findBySubCategory(String subCategory) {
+        return CACHE.get(subCategory);
+    }
 }
