@@ -3,7 +3,6 @@ package until.the.eternity.auctionhistory.domain.service;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,7 +25,7 @@ public class AuctionHistoryDuplicateChecker {
         return repository.existsByAuctionBuyIdIn(ids); // 이 코드가 중복여부만 판단하는게 아니라, 어떤 데이터가 중복인지 알아야돼
     }
 
-    public List<OpenApiAuctionHistoryResponse> filterExisting(List<OpenApiAuctionHistoryResponse> dtos) {
+    public List<OpenApiAuctionHistoryResponse> filterExisting(List<OpenApiAuctionHistoryResponse> dtos, ItemCategory category) {
         LocalDateTime latestDate = repository.findLatestDateAuctionBuyBySubCategory(ItemCategory.findBySubCategory(dtos.getFirst().itemSubCategory()))
                 .orElseThrow(() -> new IllegalStateException("No auction history found")); // TODO: Custom 에러로 변경
         return dtos

@@ -29,6 +29,8 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
 
         List<String> existingIds = duplicateChecker.findExistingIds(incomingIds);
 
+        List<OpenApiAuctionHistoryResponse> entites = duplicateChecker.filterExisting(dtoList, category);
+
         List<AuctionHistory> newEntities =
                 dtoList.stream()
                         .filter(
@@ -38,7 +40,7 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
                         .map(dto -> mapper.toEntity(dto, category).linkItemOptions())
                         .toList(); // MapStruct의 AfterMapping 실행 이슈로 linkItemOptions()로 처리
 
-        if (newEntities.isEmpty()) {
+        if (entites.isEmpty()) {
             log.info("[{}] No new auction history to save", category.getSubCategory());
             return;
         }
