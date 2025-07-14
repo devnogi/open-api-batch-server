@@ -1,6 +1,5 @@
 package until.the.eternity.auctionhistory.application.service.persister;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,6 +10,8 @@ import until.the.eternity.auctionhistory.domain.service.AuctionHistoryDuplicateC
 import until.the.eternity.auctionhistory.domain.service.persister.AuctionHistoryPersisterPort;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
 
         List<AuctionHistory> entities =
-                mapper.toEntityList(duplicateChecker.filterExisting(dtoList, category), category);
+                mapper.toEntityList(duplicateChecker.filterExisting(dtoList), category);
 
         if (entities.isEmpty()) {
             log.info("[{}] No new auction history to save", category.getSubCategory());

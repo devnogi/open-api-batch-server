@@ -1,11 +1,5 @@
 package until.the.eternity.auctionhistory.application.service.fetcher;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,6 +12,13 @@ import until.the.eternity.auctionhistory.infrastructure.client.AuctionHistoryCli
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.time.Instant;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryFetcherTest {
@@ -88,7 +89,7 @@ class AuctionHistoryFetcherTest {
 
             when(client.fetchAuctionHistory(ItemCategory.SWORD, null)).thenReturn(page1);
             // 기존 데이터와 마지막 페이지 (1페이지) 데이터의 중복이 있다고 가정
-            when(duplicateChecker.hasDuplicate(page1.auctionHistory())).thenReturn(true);
+            when(duplicateChecker.hasDuplicate(page1.auctionHistory().getLast())).thenReturn(true);
 
             var result = fetcher.fetch(ItemCategory.SWORD);
 
