@@ -43,7 +43,7 @@ class AuctionHistoryFetcherTest {
     }
 
     @Nested
-    @DisplayName("정상 흐름")
+    @DisplayName("OPEN API 끝까지 호출 시나리오")
     class NormalFlow {
 
         @Test
@@ -76,7 +76,7 @@ class AuctionHistoryFetcherTest {
     }
 
     @Nested
-    @DisplayName("조기 중단 시나리오")
+    @DisplayName("OPEN API 호출 중단 시나리오")
     class EarlyBreakFlow {
 
         @Test

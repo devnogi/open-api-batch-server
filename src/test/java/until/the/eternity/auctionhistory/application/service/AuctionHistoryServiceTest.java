@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +40,7 @@ class AuctionHistoryServiceTest {
     @InjectMocks private AuctionHistoryService service;
 
     @Test
+    @DisplayName("검색은 무조건 무조건 페이지를 반환한다")
     void search_should_return_paged_response() {
         // given
         AuctionHistorySearchRequest searchRequest = new AuctionHistorySearchRequest();
@@ -65,6 +67,7 @@ class AuctionHistoryServiceTest {
     }
 
     @Test
+    @DisplayName("데이터가 존재하면 findByIdOrElseThrow는 dto를 반환한다")
     void findByIdOrElseThrow_should_return_dto_when_entity_exists() {
         // given
         Long id = 1L;
@@ -85,6 +88,7 @@ class AuctionHistoryServiceTest {
     }
 
     @Test
+    @DisplayName("검색 경매장 거래 내역 ID가 존재하지 않으면 예외처리를 한다")
     void findByIdOrElseThrow_should_throw_exception_when_not_found() {
         // given
         Long id = 999L;
@@ -97,6 +101,7 @@ class AuctionHistoryServiceTest {
     }
 
     @Test
+    @DisplayName("경매장 fetch 및 Save 로직은 fetcher와 persister에 위임한다")
     void fetchAndSaveAuctionHistory_should_delegate_to_fetcher_and_persister() {
         // given
         ItemCategory category = ItemCategory.ETC;
