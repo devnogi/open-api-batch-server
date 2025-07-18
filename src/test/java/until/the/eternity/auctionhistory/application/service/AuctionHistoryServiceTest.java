@@ -40,7 +40,7 @@ class AuctionHistoryServiceTest {
     @InjectMocks private AuctionHistoryService service;
 
     @Test
-    @DisplayName("검색은 무조건 무조건 페이지를 반환한다")
+    @DisplayName("검색은 무조건 페이지를 반환한다")
     void search_should_return_paged_response() {
         // given
         AuctionHistorySearchRequest searchRequest = new AuctionHistorySearchRequest();
