@@ -27,16 +27,21 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
 
         do {
             var response = client.fetchAuctionHistory(category, cursor);
-            if (response == null || response.auctionHistory() == null) break;
+            if (response == null || response.auctionHistory() == null) {
+                break;
+            }
 
             var batch = response.auctionHistory();
-            if (duplicateChecker.hasDuplicate(batch)) break;
-
             result.addAll(batch);
+
+            if (duplicateChecker.hasDuplicate(batch.getLast())) {
+                log.debug("[{}] fetched {} data", category.getSubCategory(), result.size());
+                break;
+            }
+
             cursor = response.nextCursor();
         } while (cursor != null);
 
-        log.debug("[{}] fetched {} entries", category.getSubCategory(), result.size());
         return result;
     }
 }

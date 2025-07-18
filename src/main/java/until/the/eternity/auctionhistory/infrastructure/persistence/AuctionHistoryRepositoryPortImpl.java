@@ -1,5 +1,6 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
+import until.the.eternity.common.enums.ItemCategory;
 
 /** AuctionHistoryRepository Interface 구현체 */
 @Repository
@@ -56,5 +58,11 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     @Override
     public void saveAll(List<AuctionHistory> newEntities) {
         jpaRepository.saveAll(newEntities);
+    }
+
+    @Override
+    public Optional<Instant> findLatestDateAuctionBuyBySubCategory(ItemCategory itemCategory) {
+        return jpaRepository.findLatestDateAuctionBuyBySubCategory(
+                itemCategory.getTopCategory(), itemCategory.getSubCategory());
     }
 }
