@@ -51,19 +51,18 @@ jobs:
           chmod 400 ~/.ssh/my-key.pem
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Upload .env file to server
+      - name: Create .env file from secret
         run: |
-          scp -i ~/.ssh/my-key.pem .env ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/.env
+          mkdir -p ~/deploy
+          echo "${{ secrets.ENV_FILE }}" > ~/deploy/.env
 
-      - name: Deploy on remote server
+      - name: Restart Docker container
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-            docker stop devnogi-open-api-batch-server || true
-            docker rm devnogi-open-api-batch-server || true
-            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-            docker run -d \
-              --name devnogi-open-api-batch-server \
-              --env-file /home/${{ secrets.SERVER_USER }}/.env \
-              -p 8080:8080 \
-              ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-          EOF
+          docker stop devnogi-open-api-batch-server || true
+          docker rm devnogi-open-api-batch-server || true
+          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+          docker run -d \
+            --name devnogi-open-api-batch-server \
+            --env-file ~/deploy/.env \
+            -p 8080:8080 \
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
