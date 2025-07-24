@@ -44,29 +44,26 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Install SSH client
-        run: sudo apt-get install -y openssh-client
-
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 400 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          chmod 400 ~/.ssh/my-key.pem
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy .env to server
+      - name: Upload .env file to server
         run: |
-          scp .env ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/.env
+          scp -i ~/.ssh/my-key.pem .env ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/.env
 
-      - name: SSH into server and deploy
+      - name: Deploy on remote server
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             docker stop devnogi-open-api-batch-server || true
             docker rm devnogi-open-api-batch-server || true
-            docker pull ${{ secrets.DOCKER_REPO }}:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
             docker run -d \
               --name devnogi-open-api-batch-server \
               --env-file /home/${{ secrets.SERVER_USER }}/.env \
               -p 8080:8080 \
-              ${{ secrets.DOCKER_REPO }}:latest
+              ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
           EOF
