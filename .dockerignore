@@ -26,6 +26,7 @@ desktop.ini
 # Gradle 빌드 결과물 및 캐시
 # -----------------------------
 build/
+!build/libs/*.jar
 .gradle/
 !gradle/wrapper/gradle-wrapper.jar
 .gradle/
