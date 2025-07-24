@@ -1,0 +1,65 @@
+name: Build and Deploy Spring Server
+
+on:
+  push:
+    branches: [ dev ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build Docker and Deploy to Oracle Cloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_REPO }}:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_REPO }}:latest
+
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Install SSH client
+        run: sudo apt-get install -y openssh-client
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy .env to server
+        run: |
+          scp .env ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/.env
+
+      - name: SSH into server and deploy
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            docker stop devnogi-open-api-batch-server || true
+            docker rm devnogi-open-api-batch-server || true
+            docker pull ${{ secrets.DOCKER_REPO }}:latest
+            docker run -d \
+              --name devnogi-open-api-batch-server \
+              --env-file /home/${{ secrets.SERVER_USER }}/.env \
+              -p 8080:8080 \
+              ${{ secrets.DOCKER_REPO }}:latest
+          EOF

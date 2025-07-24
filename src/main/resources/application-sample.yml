@@ -47,9 +47,9 @@ spring:
       ignore-accept-header: true
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY:e4f1a5c8d2b7e9f0a6c3d1b8e5f2c7a9d4e6f3b1a2c8d5e9f0b3a7c2d1e8f5a4}
-  access-token-validity: ${JWT_ACCESS_TOKEN_VALIDITY:3600} # seconds (1 hour)
-  refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:86400} # seconds (1 day)
+  secret-key: ${JWT_SECRET_KEY}
+  access-token-validity: ${JWT_ACCESS_TOKEN_VALIDITY} # seconds (1 hour)
+  refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY} # seconds (1 day)
 
 springdoc:
   swagger-ui:
@@ -94,7 +94,7 @@ openapi:
     default-timeout-seconds: 5
   auction-history:
     delay-ms: 1000
-    cron: "0 0 */1 * * *"  # 1시간마다 실행
+    cron: "0 0 */4 * * *"  # 1시간마다 실행
   min-price:
     cron: "0 0 */4 * * *"
 
