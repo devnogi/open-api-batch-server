@@ -39,9 +39,9 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
         
-      - name: Send docker-compose-dev.yml to server
+      - name: Send docker-compose-dev.yaml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose-dev.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/docker-compose-dev.yml
+          scp -i ~/.ssh/my-key.pem docker-compose-dev.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/docker-compose-dev.yaml
 
       - name: Deploy and Restart Container
         run: |
@@ -52,8 +52,8 @@ jobs:
 
             cd /home/${{ secrets.SERVER_USER }}/app
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-            docker compose -f docker-compose-dev.yml down
-            docker compose -f docker-compose-dev.yml up -d
+            docker compose -f docker-compose-dev.yaml down
+            docker compose -f docker-compose-dev.yaml up -d
           EOF
 
       - name: Check Docker container health
