@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-and-deploy:
-    name: Build Docker and Deploy to Oracle Cloud
+    name: Build Docker and Deploy to Remote Server
     runs-on: ubuntu-latest
 
     steps:
@@ -37,12 +37,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-
-      - name: Create .env file
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
 
       - name: Setup SSH key
         run: |
@@ -51,18 +46,13 @@ jobs:
           chmod 400 ~/.ssh/my-key.pem
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create .env file from secret
+      - name: Deploy and Restart via Docker Compose
         run: |
-          mkdir -p ~/deploy
-          echo "${{ secrets.ENV_FILE }}" > ~/deploy/.env
-
-      - name: Restart Docker container
-        run: |
-          docker stop devnogi-open-api-batch-server || true
-          docker rm devnogi-open-api-batch-server || true
-          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-          docker run -d \
-            --name devnogi-open-api-batch-server \
-            --env-file ~/deploy/.env \
-            -p 8080:8080 \
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            set -e
+            echo "${{ secrets.ENV_FILE }}" > ~/app/.env
+            cd ~/app
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+            docker-compose -f docker-compose-dev.yml down
+            docker-compose -f docker-compose-dev.yml up -d
+          EOF
