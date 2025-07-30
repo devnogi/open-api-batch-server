@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   spring-app:
-    image: yourdockerid/my-spring-app:latest
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
     container_name: spring-app
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
