@@ -38,21 +38,33 @@ jobs:
 
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-
-      - name: Setup SSH key
+        
+      - name: Send docker-compose-dev.yml to server
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
-          chmod 400 ~/.ssh/my-key.pem
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          scp -i ~/.ssh/my-key.pem docker-compose-dev.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/docker-compose-dev.yml
 
-      - name: Deploy and Restart via Docker Compose
+      - name: Deploy and Restart Container
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-            set -e
-            echo "${{ secrets.ENV_FILE }}" > ~/app/.env
-            cd ~/app
+          ssh -tt -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            mkdir -p /home/${{ secrets.SERVER_USER }}/app
+
+            echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.SERVER_USER }}/app/.env
+
+            cd /home/${{ secrets.SERVER_USER }}/app
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
-            docker-compose -f docker-compose-dev.yml down
-            docker-compose -f docker-compose-dev.yml up -d
+            docker compose -f docker-compose-dev.yml down
+            docker compose -f docker-compose-dev.yml up -d
+          EOF
+
+      - name: Check Docker container health
+        run: |
+          ssh -tt -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            CONTAINER_ID=$(docker ps -q --filter "ancestor=${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest")
+            if [ -z "$CONTAINER_ID" ]; then
+              echo "ERROR: container does not run"
+              exit 1
+            fi
+
+            echo "SUCCESS: container run success"
+            docker ps --filter "id=$CONTAINER_ID"
           EOF
