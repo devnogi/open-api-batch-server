@@ -1,0 +1,79 @@
+name: Spring CD for Dev Push
+
+on:
+  push:
+    branches: [ dev, main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build Docker and Deploy to Remote Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build JAR
+        run: ./gradlew clean bootJar
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest .
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+
+      - name: Setup SSH key and config
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          chmod 400 ~/.ssh/my-key.pem
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo -e "Host *\n  ServerAliveInterval 60\n  ServerAliveCountMax 3" >> ~/.ssh/config
+
+      - name: Create app directory on server
+        run: |
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /home/${{ secrets.SERVER_USER }}/app"
+
+      - name: Deploy and Restart Container
+        run: |
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            mkdir -p /home/${{ secrets.SERVER_USER }}/app
+            cd /home/${{ secrets.SERVER_USER }}/app
+
+            echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.SERVER_USER }}/app/.env
+
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+            docker compose -f docker-compose-dev.yaml down
+            docker compose -f docker-compose-dev.yaml up -d
+
+            echo "✅ Docker Compose finished. Containers should be up."
+          EOF
+
+      - name: Check Docker container health
+        run: |
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            CONTAINER_ID=$(docker ps -q --filter "ancestor=${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest")
+            if [ -z "$CONTAINER_ID" ]; then
+              echo "❌ ERROR: container does not run"
+              exit 1
+            fi
+
+            echo "✅ SUCCESS: container is running"
+            docker ps --filter "id=$CONTAINER_ID"
+          EOF
