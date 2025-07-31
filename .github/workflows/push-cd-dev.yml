@@ -56,8 +56,6 @@ jobs:
           ssh -tt -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             mkdir -p /home/${{ secrets.SERVER_USER }}/app
 
-            echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.SERVER_USER }}/app/.env
-
             cd /home/${{ secrets.SERVER_USER }}/app
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
             docker compose -f docker-compose-dev.yaml down
