@@ -49,10 +49,7 @@ jobs:
       - name: Create app directory on server
         run: |
           ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /home/${{ secrets.SERVER_USER }}/app"
-      
-      - name: Send docker-compose-dev.yaml to server
-        run: |
-          scp -i ~/.ssh/my-key.pem docker-compose-dev.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/docker-compose-dev.yaml
+    
 
       - name: Deploy and Restart Container
         run: |

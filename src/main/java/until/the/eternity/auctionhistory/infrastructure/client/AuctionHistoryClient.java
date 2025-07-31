@@ -1,9 +1,12 @@
 package until.the.eternity.auctionhistory.infrastructure.client;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.common.enums.ItemCategory;
@@ -34,38 +37,48 @@ public class AuctionHistoryClient {
             ItemCategory category, String cursor) {
 
         try {
-            // TODO: 하드코딩 값 변경
-            log.info(
-                    "Calling 'https://open.api.nexon.com/mabinogi/v1/auction/history?auction_item_category={} with cursor='{}'",
-                    category.getSubCategory(),
-                    cursor == null ? "" : "&cursor=" + cursor);
+            // URI 구성
+            UriComponents uriComponents =
+                    UriComponentsBuilder.newInstance()
+                            .path("/auction/history")
+                            .queryParam("auction_item_category", category.getSubCategory())
+                            .queryParamIfPresent("cursor", Optional.ofNullable(cursor))
+                            .build();
+
+            log.info("Calling Nexon OPEN API URI: {}", uriComponents.toUriString());
 
             return openApiWebClient
                     .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/auction/history")
-                                            .queryParam(
-                                                    "auction_item_category",
-                                                    category.getSubCategory())
-                                            .queryParamIfPresent(
-                                                    "cursor",
-                                                    Mono.justOrEmpty(cursor).blockOptional())
-                                            .build())
+                    .uri(uriComponents.toUri())
                     .retrieve()
+                    .onStatus(
+                            status -> status.is4xxClientError() || status.is5xxServerError(),
+                            clientResponse ->
+                                    clientResponse
+                                            .bodyToMono(String.class)
+                                            .flatMap(
+                                                    errorBody -> {
+                                                        log.error(
+                                                                "Received error response: status={}, body={}",
+                                                                clientResponse.statusCode(),
+                                                                errorBody);
+                                                        return Mono.error(
+                                                                new RuntimeException(
+                                                                        "API response error: "
+                                                                                + errorBody));
+                                                    }))
                     .bodyToMono(OpenApiAuctionHistoryListResponse.class)
-                    // 필터에서 재시도·타임아웃·에러로깅이 이미 적용됨
                     .onErrorResume(
                             throwable -> {
-                                log.warn(
-                                        "Failed to fetch auction history [category={} cursor={}]: {}",
+                                log.error(
+                                        "Exception while calling auction history API [category={}, cursor={}]",
                                         category,
                                         cursor,
-                                        throwable.toString());
+                                        throwable);
                                 return Mono.empty(); // graceful fail
                             })
                     .block();
+
         } catch (Exception ex) {
             log.error("Unexpected exception during auction history fetch", ex);
             return null;
