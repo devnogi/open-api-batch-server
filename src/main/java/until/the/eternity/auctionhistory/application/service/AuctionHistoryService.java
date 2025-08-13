@@ -55,4 +55,9 @@ public class AuctionHistoryService {
         List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
         persister.saveIfNotExists(dtoList, category);
     }
+
+    @Transactional
+    public void saveAll(List<AuctionHistory> entities) {
+        repository.saveAll(entities);
+    }
 }
