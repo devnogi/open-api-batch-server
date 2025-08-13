@@ -27,7 +27,12 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
 
         do {
             var response = client.fetchAuctionHistory(category, cursor);
-            if (response == null || response.auctionHistory() == null) {
+            log.debug(
+                    "[{}] fetched {} data",
+                    category.getSubCategory(),
+                    response.auctionHistory().size());
+
+            if (response == null || response.auctionHistory().isEmpty()) {
                 break;
             }
 
@@ -35,7 +40,6 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
             result.addAll(batch);
 
             if (duplicateChecker.hasDuplicate(batch.getLast())) {
-                log.debug("[{}] fetched {} data", category.getSubCategory(), result.size());
                 break;
             }
 
