@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,15 +14,12 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuctionHistoryScheduler {
 
-    private final AuctionHistoryService auctionHistoryService;
+    private final AuctionHistoryService service;
     private final AuctionHistoryFetcher fetcher;
     private final AuctionHistoryPersister persister;
 
@@ -32,16 +31,18 @@ public class AuctionHistoryScheduler {
         List<AuctionHistory> newEntities = new ArrayList<>();
         for (ItemCategory category : ItemCategory.values()) {
             try {
-                // todo: fake 코드 제거
                 List<OpenApiAuctionHistoryResponse> fetchedDtos = fetcher.fetch(category);
-                // List<AuctionHistory> entities = persister.saveIfNotExists(fetcher.fetch(category), category);
-                // newEntities.add(entities);
+                List<AuctionHistory> entities = persister.filterOutExisting(fetchedDtos, category);
+                newEntities.addAll(entities);
             } catch (Exception e) {
                 log.error("Error during processing category [{}]", category.getSubCategory(), e);
             }
-            auctionHistoryService.fetchAndSaveAuctionHistory(category);
             delayBetweenRequests();
         }
+        service.saveAll(newEntities);
+        log.info(
+                "AuctionHistoryScheduler saved [{}] new auction history records complete",
+                newEntities.size());
     }
 
     private void delayBetweenRequests() {

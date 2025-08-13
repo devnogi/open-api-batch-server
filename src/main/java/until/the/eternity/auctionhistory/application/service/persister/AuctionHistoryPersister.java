@@ -21,7 +21,7 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
     private final OpenApiAuctionHistoryMapper mapper;
     private final AuctionHistoryDuplicateChecker duplicateChecker;
 
-    public void saveIfNotExists(
+    public List<AuctionHistory> filterOutExisting(
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
 
         List<AuctionHistory> entities =
@@ -29,23 +29,13 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
 
         if (entities.isEmpty()) {
             log.info("[{}] No new auction history to save", category.getSubCategory());
-            return;
+        } else {
+            log.info(
+                    "After remove duplicate existing [{}] [{}] new auction history records left to save",
+                    category.getSubCategory(),
+                    entities.size());
         }
 
-        repository.saveAll(entities);
-        logSummary(category, entities);
-    }
-
-    private void logSummary(ItemCategory category, List<AuctionHistory> entities) {
-        int optionCnt =
-                entities.stream()
-                        .mapToInt(e -> e.getItemOptions() == null ? 0 : e.getItemOptions().size())
-                        .sum();
-
-        log.info(
-                "[{}] Saved {} new auction history records (with {} options)",
-                category.getSubCategory(),
-                entities.size(),
-                optionCnt);
+        return entities;
     }
 }

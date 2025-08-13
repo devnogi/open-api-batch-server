@@ -11,11 +11,9 @@ import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcherPort;
 import until.the.eternity.auctionhistory.domain.service.persister.AuctionHistoryPersisterPort;
-import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
-import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
@@ -48,12 +46,6 @@ public class AuctionHistoryService {
                                         new IllegalArgumentException(
                                                 "AuctionHistory not found: " + id));
         return mapper.toDto(auctionHistory);
-    }
-
-    @Transactional
-    public void fetchAndSaveAuctionHistory(ItemCategory category) {
-        List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
-        persister.saveIfNotExists(dtoList, category);
     }
 
     @Transactional
