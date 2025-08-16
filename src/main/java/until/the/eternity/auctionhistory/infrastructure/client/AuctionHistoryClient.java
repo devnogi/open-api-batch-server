@@ -36,7 +36,7 @@ public class AuctionHistoryClient {
         try {
             // TODO: 하드코딩 값 변경
             log.info(
-                    "Calling 'https://open.api.nexon.com/mabinogi/v1/auction/history?auction_item_category={} with cursor='{}'",
+                    "[SCHEDULE] [{}] Calling auction history API with cursor='{}'",
                     category.getSubCategory(),
                     cursor == null ? "" : "&cursor=" + cursor);
 
@@ -59,7 +59,7 @@ public class AuctionHistoryClient {
                     .onErrorResume(
                             throwable -> {
                                 log.warn(
-                                        "Failed to fetch auction history [category={} cursor={}]: {}",
+                                        "[SCHEDULE] [{}] Failed to fetch auction history [cursor={}]: {}",
                                         category,
                                         cursor,
                                         throwable.toString());
@@ -67,7 +67,7 @@ public class AuctionHistoryClient {
                             })
                     .block();
         } catch (Exception ex) {
-            log.error("Unexpected exception during auction history fetch", ex);
+            log.error("[SCHEDULE] Unexpected exception during auction history fetch", ex);
             return null;
         }
     }

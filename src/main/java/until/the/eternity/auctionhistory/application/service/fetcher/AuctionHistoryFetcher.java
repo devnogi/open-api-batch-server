@@ -28,7 +28,7 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
         do {
             var response = client.fetchAuctionHistory(category, cursor);
             log.debug(
-                    "[{}] fetched {} data",
+                    "[SCHEDULE] [{}] fetched {} data",
                     category.getSubCategory(),
                     response.auctionHistory().size());
 

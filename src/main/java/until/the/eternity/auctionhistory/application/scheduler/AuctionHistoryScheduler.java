@@ -35,13 +35,16 @@ public class AuctionHistoryScheduler {
                 List<AuctionHistory> entities = persister.filterOutExisting(fetchedDtos, category);
                 newEntities.addAll(entities);
             } catch (Exception e) {
-                log.error("Error during processing category [{}]", category.getSubCategory(), e);
+                log.error(
+                        "[SCHEDULE] Error during processing category [{}]",
+                        category.getSubCategory(),
+                        e);
             }
             delayBetweenRequests();
         }
         service.saveAll(newEntities);
         log.info(
-                "AuctionHistoryScheduler saved [{}] new auction history records complete",
+                "[SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
                 newEntities.size());
     }
 
@@ -50,7 +53,7 @@ public class AuctionHistoryScheduler {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn("Interrupted during delay between requests", e);
+            log.warn("[SCHEDULE] Interrupted during delay between requests", e);
         }
     }
 }

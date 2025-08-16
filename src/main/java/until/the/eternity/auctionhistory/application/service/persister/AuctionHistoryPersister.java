@@ -28,10 +28,10 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
                 mapper.toEntityList(duplicateChecker.filterExisting(dtoList), category);
 
         if (entities.isEmpty()) {
-            log.info("[{}] No new auction history to save", category.getSubCategory());
+            log.info("[SCHEDULE] [{}] No new auction history to save", category.getSubCategory());
         } else {
             log.info(
-                    "After remove duplicate existing [{}] [{}] new auction history records left to save",
+                    "[SCHEDULE] [{}] After remove duplicate existing [{}] new auction history records left to save",
                     category.getSubCategory(),
                     entities.size());
         }
