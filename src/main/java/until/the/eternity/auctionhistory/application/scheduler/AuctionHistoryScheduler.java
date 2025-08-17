@@ -36,7 +36,7 @@ public class AuctionHistoryScheduler {
                 newEntities.addAll(entities);
             } catch (Exception e) {
                 log.error(
-                        "[SCHEDULE] Error during processing category [{}]",
+                        ">[SCHEDULE] Error during processing category [{}]",
                         category.getSubCategory(),
                         e);
             }
@@ -44,7 +44,7 @@ public class AuctionHistoryScheduler {
         }
         service.saveAll(newEntities);
         log.info(
-                "[SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
+                ">[SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
                 newEntities.size());
     }
 
@@ -53,7 +53,7 @@ public class AuctionHistoryScheduler {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn("[SCHEDULE] Interrupted during delay between requests", e);
+            log.warn(">[SCHEDULE] Interrupted during delay between requests", e);
         }
     }
 }

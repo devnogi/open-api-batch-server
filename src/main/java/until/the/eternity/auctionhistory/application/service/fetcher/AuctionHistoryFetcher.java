@@ -28,11 +28,12 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
         do {
             var response = client.fetchAuctionHistory(category, cursor);
             log.debug(
-                    "[SCHEDULE] [{}] fetched {} data",
+                    ">[SCHEDULE] [{}] fetched {} data",
                     category.getSubCategory(),
                     response.auctionHistory().size());
 
-            if (response == null || response.auctionHistory().isEmpty()) {
+            if (response.auctionHistory().isEmpty()) {
+                log.debug(">[SCHEDULE] [{}] fetched no data", category.getSubCategory());
                 break;
             }
 
@@ -40,6 +41,9 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
             result.addAll(batch);
 
             if (duplicateChecker.hasDuplicate(batch.getLast())) {
+                log.debug(
+                        ">[SCHEDULE] [{}] has duplicate data, skip this batch",
+                        category.getSubCategory());
                 break;
             }
 
