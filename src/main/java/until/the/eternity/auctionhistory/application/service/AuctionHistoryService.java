@@ -1,6 +1,5 @@
 package until.the.eternity.auctionhistory.application.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -9,13 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
-import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcherPort;
-import until.the.eternity.auctionhistory.domain.service.persister.AuctionHistoryPersisterPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +22,6 @@ import until.the.eternity.common.response.PageResponseDto;
 public class AuctionHistoryService {
 
     private final AuctionHistoryRepositoryPort repository;
-    private final AuctionHistoryFetcherPort fetcher;
-    private final AuctionHistoryPersisterPort persister;
     private final AuctionHistoryMapper mapper;
 
     @Transactional(readOnly = true)
