@@ -1,13 +1,12 @@
 package until.the.eternity.auctionhistory.domain.mapper;
 
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.itemoption.domain.entity.ItemOption;
-
-import java.util.List;
 
 /**
  * AuctionHistory Entity to internal.responseDto transfer mapper class 데이터 흐름은 external.responseDto
