@@ -127,5 +127,59 @@ class AuctionHistoryFetcherTest {
             assertThat(result).isEmpty();
             verify(duplicateChecker, never()).hasDuplicate(any());
         }
+
+        @Test
+        @DisplayName("nextCursor가 빈 문자열이면 수집을 중단한다")
+        void stopWhenNextCursorIsEmptyString() {
+            // given
+            var page1 = new OpenApiAuctionHistoryListResponse(List.of(dummy("1")), ""); // 커서가 비어있음
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
+            when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
+
+            // when
+            var result = fetcher.fetch(ItemCategory.SWORD);
+
+            // then
+            assertThat(result).hasSize(1);
+            verify(client, times(1)).fetchAuctionHistory(eq(ItemCategory.SWORD), any());
+            verifyNoMoreInteractions(client);
+        }
+
+        @Test
+        @DisplayName("중간 페이지의 auctionHistory가 비어있으면 수집을 중단한다")
+        void stopWhenMiddlePageIsEmpty() {
+            // given
+            var page1 = new OpenApiAuctionHistoryListResponse(List.of(dummy("1")), "cursor-1");
+            var emptyPage = new OpenApiAuctionHistoryListResponse(List.of(), "cursor-2"); // 비어있는 페이지
+
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1")).thenReturn(Mono.just(emptyPage));
+            when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
+
+            // when
+            var result = fetcher.fetch(ItemCategory.SWORD);
+
+            // then
+            assertThat(result).hasSize(1);
+            verify(client, times(2)).fetchAuctionHistory(eq(ItemCategory.SWORD), any());
+            verifyNoMoreInteractions(client);
+        }
+
+        @Test
+        @DisplayName("응답 내 auctionHistory 리스트가 null이면 수집을 중단한다")
+        void stopWhenAuctionHistoryListIsNull() {
+            // given
+            var pageWithNullList = new OpenApiAuctionHistoryListResponse(null, "cursor-1");
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(pageWithNullList));
+
+            // when
+            var result = fetcher.fetch(ItemCategory.SWORD);
+
+            // then
+            assertThat(result).isEmpty();
+            verify(client, times(1)).fetchAuctionHistory(eq(ItemCategory.SWORD), any());
+            verifyNoMoreInteractions(client);
+            verify(duplicateChecker, never()).hasDuplicate(any());
+        }
     }
 }

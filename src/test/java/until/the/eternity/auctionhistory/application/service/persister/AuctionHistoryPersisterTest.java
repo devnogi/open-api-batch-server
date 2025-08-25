@@ -101,4 +101,49 @@ class AuctionHistoryPersisterTest {
         verify(duplicateChecker).filterExisting(emptyList);
         verify(mapper).toEntityList(Collections.emptyList(), category);
     }
+
+    @Test
+    @DisplayName("DTO 리스트에 null이 포함되어 있어도 정상적으로 처리한다")
+    void filterOutExisting_WhenDtoListContainsNull_ShouldProcessCorrectly() {
+        // given
+        OpenApiAuctionHistoryResponse dto1 = mock(OpenApiAuctionHistoryResponse.class);
+        List<OpenApiAuctionHistoryResponse> listWithNulls = Arrays.asList(dto1, null);
+        List<OpenApiAuctionHistoryResponse> filteredList = List.of(dto1);
+
+        when(duplicateChecker.filterExisting(listWithNulls)).thenReturn(filteredList);
+        when(mapper.toEntityList(filteredList, category)).thenReturn(entities);
+
+        // when
+        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(listWithNulls, category);
+
+        // then
+        assertThat(actualEntities).isEqualTo(entities);
+        verify(duplicateChecker).filterExisting(listWithNulls);
+        verify(mapper).toEntityList(filteredList, category);
+    }
+
+    @Test
+    @DisplayName("일부 DTO만 중복일 경우, 중복되지 않은 DTO만 변환한다")
+    void filterOutExisting_WhenSomeDtosAreDuplicate_ShouldConvertNonDuplicates() {
+        // given
+        OpenApiAuctionHistoryResponse dto1 = mock(OpenApiAuctionHistoryResponse.class);
+        OpenApiAuctionHistoryResponse dto2 = mock(OpenApiAuctionHistoryResponse.class);
+        OpenApiAuctionHistoryResponse dto3 = mock(OpenApiAuctionHistoryResponse.class);
+        List<OpenApiAuctionHistoryResponse> originalList = Arrays.asList(dto1, dto2, dto3);
+
+        // dto2는 중복이라 가정하고, dto1, dto3만 남김
+        List<OpenApiAuctionHistoryResponse> nonDuplicateList = Arrays.asList(dto1, dto3);
+        List<AuctionHistory> expectedEntities = List.of(mock(AuctionHistory.class));
+
+        when(duplicateChecker.filterExisting(originalList)).thenReturn(nonDuplicateList);
+        when(mapper.toEntityList(nonDuplicateList, category)).thenReturn(expectedEntities);
+
+        // when
+        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(originalList, category);
+
+        // then
+        assertThat(actualEntities).isEqualTo(expectedEntities);
+        verify(duplicateChecker).filterExisting(originalList);
+        verify(mapper).toEntityList(nonDuplicateList, category);
+    }
 }
