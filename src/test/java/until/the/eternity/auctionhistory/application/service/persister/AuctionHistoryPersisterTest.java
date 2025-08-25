@@ -114,7 +114,8 @@ class AuctionHistoryPersisterTest {
         when(mapper.toEntityList(filteredList, category)).thenReturn(entities);
 
         // when
-        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(listWithNulls, category);
+        List<AuctionHistory> actualEntities =
+                auctionHistoryPersister.filterOutExisting(listWithNulls, category);
 
         // then
         assertThat(actualEntities).isEqualTo(entities);
@@ -139,7 +140,8 @@ class AuctionHistoryPersisterTest {
         when(mapper.toEntityList(nonDuplicateList, category)).thenReturn(expectedEntities);
 
         // when
-        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(originalList, category);
+        List<AuctionHistory> actualEntities =
+                auctionHistoryPersister.filterOutExisting(originalList, category);
 
         // then
         assertThat(actualEntities).isEqualTo(expectedEntities);

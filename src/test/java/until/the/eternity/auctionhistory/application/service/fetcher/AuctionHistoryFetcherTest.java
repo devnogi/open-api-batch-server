@@ -150,10 +150,12 @@ class AuctionHistoryFetcherTest {
         void stopWhenMiddlePageIsEmpty() {
             // given
             var page1 = new OpenApiAuctionHistoryListResponse(List.of(dummy("1")), "cursor-1");
-            var emptyPage = new OpenApiAuctionHistoryListResponse(List.of(), "cursor-2"); // 비어있는 페이지
+            var emptyPage =
+                    new OpenApiAuctionHistoryListResponse(List.of(), "cursor-2"); // 비어있는 페이지
 
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1")).thenReturn(Mono.just(emptyPage));
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1"))
+                    .thenReturn(Mono.just(emptyPage));
             when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
 
             // when
@@ -170,7 +172,8 @@ class AuctionHistoryFetcherTest {
         void stopWhenAuctionHistoryListIsNull() {
             // given
             var pageWithNullList = new OpenApiAuctionHistoryListResponse(null, "cursor-1");
-            when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(pageWithNullList));
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, ""))
+                    .thenReturn(Mono.just(pageWithNullList));
 
             // when
             var result = fetcher.fetch(ItemCategory.SWORD);
