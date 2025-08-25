@@ -25,7 +25,7 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
         List<OpenApiAuctionHistoryResponse> result = new ArrayList<>();
         String cursor = "";
 
-        while(true) {
+        while (true) {
             var response = client.fetchAuctionHistory(category, cursor);
             log.debug(
                     "> [SCHEDULE] [{}] fetched '{}' data",
@@ -50,7 +50,9 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
             cursor = response.nextCursor();
 
             if (cursor == null || cursor.isEmpty()) {
-                log.debug("> [SCHEDULE] [{}] response cursor is null, fetched end", category.getSubCategory());
+                log.debug(
+                        "> [SCHEDULE] [{}] response cursor is null, fetched end",
+                        category.getSubCategory());
                 break;
             }
         }

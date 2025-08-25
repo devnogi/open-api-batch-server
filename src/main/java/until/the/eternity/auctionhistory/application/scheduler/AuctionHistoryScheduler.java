@@ -23,9 +23,6 @@ public class AuctionHistoryScheduler {
     private final AuctionHistoryFetcher fetcher;
     private final AuctionHistoryPersister persister;
 
-    @Value("${openapi.auction-history.delay-ms}")
-    private long delayMs;
-
     @Scheduled(cron = "${openapi.auction-history.cron}", zone = "Asia/Seoul")
     public void fetchAndSaveAuctionHistoryAll() {
         List<AuctionHistory> newEntities = new ArrayList<>();
@@ -40,20 +37,10 @@ public class AuctionHistoryScheduler {
                         category.getSubCategory(),
                         e);
             }
-            delayBetweenRequests();
         }
         service.saveAll(newEntities);
         log.info(
                 "> [SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
                 newEntities.size());
-    }
-
-    private void delayBetweenRequests() {
-        try {
-            Thread.sleep(delayMs);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("> [SCHEDULE] Interrupted during delay between requests", e);
-        }
     }
 }
