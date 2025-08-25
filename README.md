@@ -20,8 +20,7 @@
 
 - **Backend**: Java 21, Spring Boot, Data JPA (Hibernate)
 - **Test**: JUnit5, Mockito, K6
-- **Database**: MySQL 8
-- , Redis
+- **Database**: MySQL 8, Redis
 - **DevOps**: Docker Compose, Flyway, GitHub Actions
 - **Deployment**: Oracle Cloud 
 - **Document**: Swagger, Notion
