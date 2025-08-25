@@ -24,14 +24,11 @@ import until.the.eternity.common.enums.ItemCategory;
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryFetcherTest {
 
-    @Mock
-    AuctionHistoryClient client;
+    @Mock AuctionHistoryClient client;
 
-    @Mock
-    AuctionHistoryDuplicateChecker duplicateChecker;
+    @Mock AuctionHistoryDuplicateChecker duplicateChecker;
 
-    @InjectMocks
-    AuctionHistoryFetcher fetcher; // 주입할 대상
+    @InjectMocks AuctionHistoryFetcher fetcher; // 주입할 대상
 
     // 더미 데이터 생성 메소드
     private OpenApiAuctionHistoryResponse dummy(String id) {
@@ -62,7 +59,8 @@ class AuctionHistoryFetcherTest {
             var page2 = new OpenApiAuctionHistoryListResponse(List.of(dummy("3")), null);
 
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1")).thenReturn(Mono.just(page2));
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1"))
+                    .thenReturn(Mono.just(page2));
             // 기존 데이터와 마지막 페이지 (2페이지) 데이터의 중복이 없다고 가정
             when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
 

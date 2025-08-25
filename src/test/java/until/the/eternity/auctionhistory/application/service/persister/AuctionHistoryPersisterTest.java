@@ -22,14 +22,11 @@ import until.the.eternity.common.enums.ItemCategory;
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryPersisterTest {
 
-    @Mock
-    private OpenApiAuctionHistoryMapper mapper;
+    @Mock private OpenApiAuctionHistoryMapper mapper;
 
-    @Mock
-    private AuctionHistoryDuplicateChecker duplicateChecker;
+    @Mock private AuctionHistoryDuplicateChecker duplicateChecker;
 
-    @InjectMocks
-    private AuctionHistoryPersister auctionHistoryPersister;
+    @InjectMocks private AuctionHistoryPersister auctionHistoryPersister;
 
     private List<OpenApiAuctionHistoryResponse> dtoList;
     private List<OpenApiAuctionHistoryResponse> filteredDtoList;
@@ -59,7 +56,8 @@ class AuctionHistoryPersisterTest {
         when(mapper.toEntityList(filteredDtoList, category)).thenReturn(entities);
 
         // when
-        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(dtoList, category);
+        List<AuctionHistory> actualEntities =
+                auctionHistoryPersister.filterOutExisting(dtoList, category);
 
         // then
         assertThat(actualEntities).isEqualTo(entities);
@@ -72,10 +70,12 @@ class AuctionHistoryPersisterTest {
     void filterOutExisting_WhenNoNewRecords_ShouldReturnEmptyList() {
         // given
         when(duplicateChecker.filterExisting(dtoList)).thenReturn(Collections.emptyList());
-        when(mapper.toEntityList(Collections.emptyList(), category)).thenReturn(Collections.emptyList());
+        when(mapper.toEntityList(Collections.emptyList(), category))
+                .thenReturn(Collections.emptyList());
 
         // when
-        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(dtoList, category);
+        List<AuctionHistory> actualEntities =
+                auctionHistoryPersister.filterOutExisting(dtoList, category);
 
         // then
         assertThat(actualEntities).isEmpty();
@@ -89,10 +89,12 @@ class AuctionHistoryPersisterTest {
         // given
         List<OpenApiAuctionHistoryResponse> emptyList = Collections.emptyList();
         when(duplicateChecker.filterExisting(emptyList)).thenReturn(Collections.emptyList());
-        when(mapper.toEntityList(Collections.emptyList(), category)).thenReturn(Collections.emptyList());
+        when(mapper.toEntityList(Collections.emptyList(), category))
+                .thenReturn(Collections.emptyList());
 
         // when
-        List<AuctionHistory> actualEntities = auctionHistoryPersister.filterOutExisting(emptyList, category);
+        List<AuctionHistory> actualEntities =
+                auctionHistoryPersister.filterOutExisting(emptyList, category);
 
         // then
         assertThat(actualEntities).isEmpty();
