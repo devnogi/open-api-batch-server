@@ -28,9 +28,9 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
         while (true) {
             var response = client.fetchAuctionHistory(category, cursor).block();
 
-            if (response == null) {
+            if (response == null || response.auctionHistory() == null) {
                 log.warn(
-                        "> [SCHEDULE] [{}] response is null, something is wrong with open api call",
+                        "> [SCHEDULE] [{}] response or its history is null, something is wrong with open api call",
                         category.getSubCategory());
                 break;
             }
