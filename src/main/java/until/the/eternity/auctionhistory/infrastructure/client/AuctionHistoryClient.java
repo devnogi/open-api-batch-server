@@ -8,13 +8,6 @@ import reactor.core.publisher.Mono;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
-/**
- * Nexon OPEN API 호출 전담 클라이언트.
- *
- * <p>– 전역 WebClient 설정(필터 · 헤더 · 타임아웃 · 재시도)은 {@link
- * until.the.eternity.config.openapi.OpenApiWebClientConfig} 에서 담당한다. – 이 클래스는 “엔드포인트·쿼리 파라미터·로깅” 만
- * 책임지는 SRP 구조다.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,47 +21,40 @@ public class AuctionHistoryClient {
      *
      * @param category 조회할 카테고리
      * @param cursor 다음 페이지 커서(null 가능)
-     * @return 응답 DTO, 호출 실패 시 null
+     * @return 응답 DTO를 담은 Mono, 호출 실패 시 Mono.empty()
      */
-    public OpenApiAuctionHistoryListResponse fetchAuctionHistory(
+    public Mono<OpenApiAuctionHistoryListResponse> fetchAuctionHistory(
             ItemCategory category, String cursor) {
 
-        try {
-            // TODO: 하드코딩 값 변경
-            log.info(
-                    "Calling 'https://open.api.nexon.com/mabinogi/v1/auction/history?auction_item_category={} with cursor='{}'",
-                    category.getSubCategory(),
-                    cursor == null ? "" : "&cursor=" + cursor);
+        log.info(
+                "[SCHEDULE] [{}] Calling Nexon Open API Auction History API with cursor='{}'",
+                category.getSubCategory(),
+                cursor == null ? "" : cursor);
 
-            return openApiWebClient
-                    .get()
-                    .uri(
-                            uriBuilder ->
-                                    uriBuilder
-                                            .path("/auction/history")
-                                            .queryParam(
-                                                    "auction_item_category",
-                                                    category.getSubCategory())
-                                            .queryParamIfPresent(
-                                                    "cursor",
-                                                    Mono.justOrEmpty(cursor).blockOptional())
-                                            .build())
-                    .retrieve()
-                    .bodyToMono(OpenApiAuctionHistoryListResponse.class)
-                    // 필터에서 재시도·타임아웃·에러로깅이 이미 적용됨
-                    .onErrorResume(
-                            throwable -> {
-                                log.warn(
-                                        "Failed to fetch auction history [category={} cursor={}]: {}",
-                                        category,
-                                        cursor,
-                                        throwable.toString());
-                                return Mono.empty(); // graceful fail
-                            })
-                    .block();
-        } catch (Exception ex) {
-            log.error("Unexpected exception during auction history fetch", ex);
-            return null;
-        }
+        return openApiWebClient
+                .get()
+                .uri(
+                        uriBuilder -> {
+                            uriBuilder
+                                    .path("/auction/history")
+                                    .queryParam("auction_item_category", category.getSubCategory());
+                            if (cursor != null) {
+                                uriBuilder.queryParam("cursor", cursor);
+                            }
+                            return uriBuilder.build();
+                        })
+                .retrieve()
+                .bodyToMono(OpenApiAuctionHistoryListResponse.class)
+                // 필터에서 재시도·타임아웃·에러로깅이 이미 적용됨
+                .onErrorResume(
+                        throwable -> {
+                            log.warn(
+                                    "[SCHEDULE] [{}] Failed to fetch Nexon Open API Auction History API with cursor='{}': error='{}', message='{}'",
+                                    category.getSubCategory(),
+                                    cursor,
+                                    throwable.toString(),
+                                    throwable.getMessage());
+                            return Mono.empty(); // graceful fail
+                        });
     }
 }

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.mapper.OpenApiAuctionHistoryMapper;
-import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.domain.service.AuctionHistoryDuplicateChecker;
 import until.the.eternity.auctionhistory.domain.service.persister.AuctionHistoryPersisterPort;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
@@ -17,35 +16,24 @@ import until.the.eternity.common.enums.ItemCategory;
 @Component
 public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
 
-    private final AuctionHistoryRepositoryPort repository;
     private final OpenApiAuctionHistoryMapper mapper;
     private final AuctionHistoryDuplicateChecker duplicateChecker;
 
-    public void saveIfNotExists(
+    public List<AuctionHistory> filterOutExisting(
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
 
         List<AuctionHistory> entities =
                 mapper.toEntityList(duplicateChecker.filterExisting(dtoList), category);
 
         if (entities.isEmpty()) {
-            log.info("[{}] No new auction history to save", category.getSubCategory());
-            return;
+            log.info("> [SCHEDULE] [{}] No new auction history to save", category.getSubCategory());
+        } else {
+            log.info(
+                    "> [SCHEDULE] [{}] After remove duplicate existing '{}' new auction history records left to save",
+                    category.getSubCategory(),
+                    entities.size());
         }
 
-        repository.saveAll(entities);
-        logSummary(category, entities);
-    }
-
-    private void logSummary(ItemCategory category, List<AuctionHistory> entities) {
-        int optionCnt =
-                entities.stream()
-                        .mapToInt(e -> e.getItemOptions() == null ? 0 : e.getItemOptions().size())
-                        .sum();
-
-        log.info(
-                "[{}] Saved {} new auction history records (with {} options)",
-                category.getSubCategory(),
-                entities.size(),
-                optionCnt);
+        return entities;
     }
 }

@@ -25,10 +25,11 @@ public class AuctionHistoryDuplicateChecker {
         return lastDto.dateAuctionBuy().isAfter(latestDate);
     }
 
-    // TODO: 로직 변경 후 점검 중인데, 뭔가 문제가 있는 거 같음
-
     public List<OpenApiAuctionHistoryResponse> filterExisting(
             List<OpenApiAuctionHistoryResponse> dtos) {
+        if (dtos.isEmpty()) {
+            return dtos;
+        }
         Instant latestDate = getLatestAuctionDateOrMin(dtos.getFirst());
         return dtos.stream().filter(dto -> dto.dateAuctionBuy().isAfter(latestDate)).toList();
     }

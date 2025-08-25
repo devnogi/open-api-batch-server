@@ -60,7 +60,7 @@ public enum ItemCategory {
     MARIONETTE("마리오네트", "특수 장비"),
     ECHOSTONE("에코스톤", "특수 장비"),
     EIDOS("에이도스", "특수 장비"),
-    PALLIASH_RELIC("팔리아스 유물", "특수 장비"),
+    RELIC("유물", "특수 장비"),
     ETC_EQUIPMENT("기타 장비", "특수 장비"),
 
     // 설치물

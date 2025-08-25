@@ -21,11 +21,9 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcherPort;
-import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
-import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
@@ -100,21 +98,21 @@ class AuctionHistoryServiceTest {
         verifyNoInteractions(mapper);
     }
 
-    @Test
-    @DisplayName("경매장 fetch 및 Save 로직은 fetcher와 persister에 위임한다")
-    void fetchAndSaveAuctionHistory_should_delegate_to_fetcher_and_persister() {
-        // given
-        ItemCategory category = ItemCategory.ETC;
-        List<OpenApiAuctionHistoryResponse> fetchedDtoList =
-                List.of(mock(OpenApiAuctionHistoryResponse.class));
-
-        when(fetcherPort.fetch(category)).thenReturn(fetchedDtoList);
-
-        // when
-        service.fetchAndSaveAuctionHistory(category);
-
-        // then
-        verify(fetcherPort).fetch(category);
-        verify(persister).saveIfNotExists(fetchedDtoList, category);
-    }
+    //    @Test
+    //    @DisplayName("경매장 fetch 및 Save 로직은 fetcher와 persister에 위임한다")
+    //    void fetchAndSaveAuctionHistory_should_delegate_to_fetcher_and_persister() {
+    //        // given
+    //        ItemCategory category = ItemCategory.ETC;
+    //        List<OpenApiAuctionHistoryResponse> fetchedDtoList =
+    //                List.of(mock(OpenApiAuctionHistoryResponse.class));
+    //
+    //        when(fetcherPort.fetch(category)).thenReturn(fetchedDtoList);
+    //
+    //        // when
+    //        service.fetchAndSaveAuctionHistory(category);
+    //
+    //        // then
+    //        verify(fetcherPort).fetch(category);
+    //        verify(persister).saveIfNotExists(fetchedDtoList, category);
+    //    }
 }

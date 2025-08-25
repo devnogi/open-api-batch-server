@@ -9,13 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
-import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcherPort;
-import until.the.eternity.auctionhistory.domain.service.persister.AuctionHistoryPersisterPort;
-import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
-import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
@@ -25,8 +21,6 @@ import until.the.eternity.common.response.PageResponseDto;
 public class AuctionHistoryService {
 
     private final AuctionHistoryRepositoryPort repository;
-    private final AuctionHistoryFetcherPort fetcher;
-    private final AuctionHistoryPersisterPort persister;
     private final AuctionHistoryMapper mapper;
 
     @Transactional(readOnly = true)
@@ -51,8 +45,7 @@ public class AuctionHistoryService {
     }
 
     @Transactional
-    public void fetchAndSaveAuctionHistory(ItemCategory category) {
-        List<OpenApiAuctionHistoryResponse> dtoList = fetcher.fetch(category);
-        persister.saveIfNotExists(dtoList, category);
+    public void saveAll(List<AuctionHistory> entities) {
+        repository.saveAll(entities);
     }
 }

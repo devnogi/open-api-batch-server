@@ -23,11 +23,25 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
     public List<OpenApiAuctionHistoryResponse> fetch(ItemCategory category) {
 
         List<OpenApiAuctionHistoryResponse> result = new ArrayList<>();
-        String cursor = null;
+        String cursor = "";
 
-        do {
-            var response = client.fetchAuctionHistory(category, cursor);
+        while (true) {
+            var response = client.fetchAuctionHistory(category, cursor).block();
+
             if (response == null || response.auctionHistory() == null) {
+                log.warn(
+                        "> [SCHEDULE] [{}] response or its history is null, something is wrong with open api call",
+                        category.getSubCategory());
+                break;
+            }
+
+            log.debug(
+                    "> [SCHEDULE] [{}] fetched '{}' data",
+                    category.getSubCategory(),
+                    response.auctionHistory().size());
+
+            if (response.auctionHistory().isEmpty()) {
+                log.debug("> [SCHEDULE] [{}] fetched no data", category.getSubCategory());
                 break;
             }
 
@@ -35,12 +49,21 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
             result.addAll(batch);
 
             if (duplicateChecker.hasDuplicate(batch.getLast())) {
-                log.debug("[{}] fetched {} data", category.getSubCategory(), result.size());
+                log.debug(
+                        "> [SCHEDULE] [{}] this fetched data has duplicate data, skip to next item subcategory",
+                        category.getSubCategory());
                 break;
             }
 
             cursor = response.nextCursor();
-        } while (cursor != null);
+
+            if (cursor == null || cursor.isEmpty()) {
+                log.debug(
+                        "> [SCHEDULE] [{}] response cursor is null, fetched end",
+                        category.getSubCategory());
+                break;
+            }
+        }
 
         return result;
     }
