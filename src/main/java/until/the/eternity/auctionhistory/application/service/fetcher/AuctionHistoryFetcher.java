@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.service.fetcher;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,9 +10,6 @@ import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFe
 import until.the.eternity.auctionhistory.infrastructure.client.AuctionHistoryClient;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -24,17 +23,17 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
     public List<OpenApiAuctionHistoryResponse> fetch(ItemCategory category) {
 
         List<OpenApiAuctionHistoryResponse> result = new ArrayList<>();
-        String cursor = null;
+        String cursor = "";
 
-        do {
+        while(true) {
             var response = client.fetchAuctionHistory(category, cursor);
             log.debug(
-                    ">[SCHEDULE] [{}] fetched {} data",
+                    "> [SCHEDULE] [{}] fetched '{}' data",
                     category.getSubCategory(),
                     response.auctionHistory().size());
 
             if (response.auctionHistory().isEmpty()) {
-                log.debug(">[SCHEDULE] [{}] fetched no data", category.getSubCategory());
+                log.debug("> [SCHEDULE] [{}] fetched no data", category.getSubCategory());
                 break;
             }
 
@@ -43,13 +42,18 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
 
             if (duplicateChecker.hasDuplicate(batch.getLast())) {
                 log.debug(
-                        ">[SCHEDULE] [{}] has duplicate data, skip this batch",
+                        "> [SCHEDULE] [{}] this fetched data has duplicate data, skip to next item subcategory",
                         category.getSubCategory());
                 break;
             }
 
             cursor = response.nextCursor();
-        } while (cursor != null);
+
+            if (cursor == null || cursor.isEmpty()) {
+                log.debug("> [SCHEDULE] [{}] response cursor is null, fetched end", category.getSubCategory());
+                break;
+            }
+        }
 
         return result;
     }

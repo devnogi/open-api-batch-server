@@ -8,13 +8,6 @@ import reactor.core.publisher.Mono;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
-/**
- * Nexon OPEN API 호출 전담 클라이언트.
- *
- * <p>– 전역 WebClient 설정(필터 · 헤더 · 타임아웃 · 재시도)은 {@link
- * until.the.eternity.config.openapi.OpenApiWebClientConfig} 에서 담당한다. – 이 클래스는 “엔드포인트·쿼리 파라미터·로깅” 만
- * 책임지는 SRP 구조다.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,11 +27,10 @@ public class AuctionHistoryClient {
             ItemCategory category, String cursor) {
 
         try {
-            // TODO: 하드코딩 값 변경
             log.info(
-                    "[SCHEDULE] [{}] Calling auction history API with cursor='{}'",
+                    "[SCHEDULE] [{}] Calling Nexon Open API Auction History API with cursor='{}'",
                     category.getSubCategory(),
-                    cursor == null ? "" : "&cursor=" + cursor);
+                    cursor == null ? "" : cursor);
 
             return openApiWebClient
                     .get()
@@ -59,15 +51,19 @@ public class AuctionHistoryClient {
                     .onErrorResume(
                             throwable -> {
                                 log.warn(
-                                        "[SCHEDULE] [{}] Failed to fetch auction history [cursor={}]: {}",
+                                        "[SCHEDULE] [{}] Failed to fetch Nexon Open API Auction History API with cursor='{}': error='{}', message='{}', stacktrace='{}'",
                                         category,
                                         cursor,
-                                        throwable.toString());
+                                        throwable.toString(),
+                                        throwable.getMessage(),
+                                        throwable.getStackTrace());
                                 return Mono.empty(); // graceful fail
                             })
                     .block();
         } catch (Exception ex) {
-            log.error("[SCHEDULE] Unexpected exception during auction history fetch", ex);
+            log.error(
+                    "[SCHEDULE] Unexpected exception during Nexon Open API Auction History API fetch",
+                    ex);
             return null;
         }
     }

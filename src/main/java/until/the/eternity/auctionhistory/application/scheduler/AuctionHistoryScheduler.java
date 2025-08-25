@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,9 +13,6 @@ import until.the.eternity.auctionhistory.application.service.persister.AuctionHi
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -37,7 +36,7 @@ public class AuctionHistoryScheduler {
                 newEntities.addAll(entities);
             } catch (Exception e) {
                 log.error(
-                        ">[SCHEDULE] Error during processing category [{}]",
+                        "> [SCHEDULE] Error during processing category [{}]",
                         category.getSubCategory(),
                         e);
             }
@@ -45,7 +44,7 @@ public class AuctionHistoryScheduler {
         }
         service.saveAll(newEntities);
         log.info(
-                ">[SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
+                "> [SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
                 newEntities.size());
     }
 
@@ -54,7 +53,7 @@ public class AuctionHistoryScheduler {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn(">[SCHEDULE] Interrupted during delay between requests", e);
+            log.warn("> [SCHEDULE] Interrupted during delay between requests", e);
         }
     }
 }
