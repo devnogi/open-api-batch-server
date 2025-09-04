@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.List;
 
 public record AuctionHistoryDetailResponse<ItemOptionResponse>(
-        Long id,
         String itemName,
         String itemDisplayName,
         Long itemCount,

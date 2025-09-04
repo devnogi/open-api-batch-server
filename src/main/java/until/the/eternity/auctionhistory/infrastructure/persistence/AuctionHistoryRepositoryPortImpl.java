@@ -31,8 +31,8 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     }
 
     @Override
-    public Optional<AuctionHistory> findByIdWithOptions(Long id) {
-        return jpaRepository.findWithItemOptionsById(id);
+    public Optional<AuctionHistory> findByIdWithOptions(String id) {
+        return jpaRepository.findWithItemOptionsByAuctionBuyId(id);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     }
 
     @Override
-    public Optional<AuctionHistory> findById(Long id) {
+    public Optional<AuctionHistory> findById(String id) {
         return jpaRepository.findById(id);
     }
 

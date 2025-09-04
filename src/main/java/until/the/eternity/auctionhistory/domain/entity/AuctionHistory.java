@@ -16,8 +16,8 @@ import until.the.eternity.itemoption.domain.entity.ItemOption;
 public class AuctionHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "auction_buy_id", nullable = false)
+    private String auctionBuyId;
 
     @Column(name = "item_name", nullable = false)
     private String itemName;
@@ -33,9 +33,6 @@ public class AuctionHistory {
 
     @Column(name = "date_auction_buy", nullable = false)
     private Instant dateAuctionBuy;
-
-    @Column(name = "auction_buy_id", nullable = false, unique = true)
-    private String auctionBuyId;
 
     @OneToMany(mappedBy = "auctionHistory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemOption> itemOptions;

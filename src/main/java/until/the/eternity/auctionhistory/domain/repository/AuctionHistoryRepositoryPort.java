@@ -16,7 +16,7 @@ public interface AuctionHistoryRepositoryPort {
 
     Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable);
 
-    Optional<AuctionHistory> findByIdWithOptions(Long id);
+    Optional<AuctionHistory> findByIdWithOptions(String id);
 
     boolean existsByAuctionBuyIds(List<String> ids);
 
@@ -24,7 +24,7 @@ public interface AuctionHistoryRepositoryPort {
 
     boolean existsByAuctionBuyIdIn(List<String> ids);
 
-    Optional<AuctionHistory> findById(Long id);
+    Optional<AuctionHistory> findById(String id);
 
     void saveAll(List<AuctionHistory> newEntities);
 

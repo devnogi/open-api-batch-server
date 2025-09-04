@@ -33,7 +33,7 @@ public class AuctionHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(Long id) {
+    public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(String id) {
         AuctionHistory auctionHistory =
                 repository
                         .findById(id)

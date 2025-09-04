@@ -12,7 +12,7 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 
 @Repository
 public interface AuctionHistoryJpaRepository
-        extends JpaRepository<AuctionHistory, Long>, JpaSpecificationExecutor<AuctionHistory> {
+        extends JpaRepository<AuctionHistory, String>, JpaSpecificationExecutor<AuctionHistory> {
 
     List<AuctionHistory> findAllByAuctionBuyIdIn(List<String> auctionBuyIds);
 
@@ -35,5 +35,5 @@ public interface AuctionHistoryJpaRepository
     Optional<Instant> findLatestDateAuctionBuyBySubCategory(String topCategory, String subCategory);
 
     @EntityGraph(attributePaths = "itemOptions")
-    Optional<AuctionHistory> findWithItemOptionsById(Long id);
+    Optional<AuctionHistory> findWithItemOptionsByAuctionBuyId(String id);
 }

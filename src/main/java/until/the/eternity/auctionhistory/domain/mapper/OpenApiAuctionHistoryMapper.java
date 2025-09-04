@@ -11,7 +11,6 @@ import until.the.eternity.common.enums.ItemCategory;
 public interface OpenApiAuctionHistoryMapper {
 
     @Named("toEntity(OpenApiAuctionHistoryResponse, ItemCategory)")
-    @Mapping(target = "id", ignore = true)
     @Mapping(
             source = "dateAuctionBuy",
             target = "dateAuctionBuy",

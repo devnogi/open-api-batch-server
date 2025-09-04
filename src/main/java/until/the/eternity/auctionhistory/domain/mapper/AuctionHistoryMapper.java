@@ -20,6 +20,8 @@ public interface AuctionHistoryMapper {
     AuctionHistoryDetailResponse<ItemOptionResponse> toDto(AuctionHistory entity);
 
     // 하위 매핑
+    @Mapping(target = "auctionHistory", ignore = true)
+    @Mapping(target = "auctionItem", ignore = true)
     ItemOption toEntity(ItemOptionResponse dto);
 
     ItemOptionResponse toDto(ItemOption entity);
