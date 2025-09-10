@@ -18,7 +18,9 @@ import java.util.UUID;
 @Builder
 public class ItemOption {
 
-    @Id private String id;
+    @Id
+    @Column(name = "id")
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
