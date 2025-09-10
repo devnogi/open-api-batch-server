@@ -1,6 +1,7 @@
 package until.the.eternity.itemoption.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,12 +17,13 @@ import until.the.eternity.auctionitem.domain.entity.AuctionItem;
 @Builder
 public class ItemOption {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "auction_history_id", nullable = true)
+    @JoinColumn(
+            name = "auction_history_id",
+            referencedColumnName = "auction_buy_id",
+            nullable = false)
     private AuctionHistory auctionHistory;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,6 +44,11 @@ public class ItemOption {
 
     @Column(name = "option_desc", columnDefinition = "TEXT")
     private String optionDesc;
+
+    @PrePersist
+    public void createId() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     public void setAuctionHistory(AuctionHistory auctionHistory) {
 
