@@ -1,13 +1,14 @@
 package until.the.eternity.auctionhistory.domain.service;
 
-import java.time.Instant;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.time.Instant;
+import java.util.List;
 
 @Slf4j
 @Component
