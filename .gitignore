@@ -60,3 +60,6 @@ application.yml
 node_modules/
 package-lock.json
 package.json
+
+### temp directory ###
+/temp/
