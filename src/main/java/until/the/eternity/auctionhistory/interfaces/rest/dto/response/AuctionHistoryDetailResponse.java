@@ -1,11 +1,11 @@
 package until.the.eternity.auctionhistory.interfaces.rest.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.Instant;
 import java.util.List;
 
 public record AuctionHistoryDetailResponse<ItemOptionResponse>(
-        Long id,
         String itemName,
         String itemDisplayName,
         Long itemCount,

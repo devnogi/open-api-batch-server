@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionitem.domain.entity.AuctionItem;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "auction_item_option")
 @Getter
@@ -17,11 +19,14 @@ import until.the.eternity.auctionitem.domain.entity.AuctionItem;
 public class ItemOption {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id")
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "auction_history_id", nullable = true)
+    @JoinColumn(
+            name = "auction_history_id",
+            referencedColumnName = "auction_buy_id",
+            nullable = false)
     private AuctionHistory auctionHistory;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,6 +47,11 @@ public class ItemOption {
 
     @Column(name = "option_desc", columnDefinition = "TEXT")
     private String optionDesc;
+
+    @PrePersist
+    public void createId() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     public void setAuctionHistory(AuctionHistory auctionHistory) {
 

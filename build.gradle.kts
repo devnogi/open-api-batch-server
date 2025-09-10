@@ -20,9 +20,7 @@ java {
 }
 
 
-val querydslDir = "$buildDir/generated/querydsl"
 
-sourceSets["main"].java.srcDirs(querydslDir)
 
 configurations {
     compileOnly {
@@ -101,11 +99,7 @@ extensions.configure<JacocoPluginExtension>("jacoco") {
     toolVersion = "0.8.10"
 }
 
-// QueryDSL Q 클래스 생성 위치
-tasks.withType<JavaCompile> {
-    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
-    options.annotationProcessorPath = configurations.annotationProcessor.get()
-}
+
 
 tasks.test {
     useJUnitPlatform()

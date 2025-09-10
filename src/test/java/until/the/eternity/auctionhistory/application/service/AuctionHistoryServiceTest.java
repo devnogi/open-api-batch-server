@@ -1,11 +1,5 @@
 package until.the.eternity.auctionhistory.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +20,13 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHis
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryServiceTest {
@@ -68,7 +69,7 @@ class AuctionHistoryServiceTest {
     @DisplayName("데이터가 존재하면 findByIdOrElseThrow는 dto를 반환한다")
     void findByIdOrElseThrow_should_return_dto_when_entity_exists() {
         // given
-        Long id = 1L;
+        String id = "test-id";
         AuctionHistory entity = new AuctionHistory();
         AuctionHistoryDetailResponse<ItemOptionResponse> dto =
                 mock(AuctionHistoryDetailResponse.class);
@@ -89,7 +90,7 @@ class AuctionHistoryServiceTest {
     @DisplayName("검색 경매장 거래 내역 ID가 존재하지 않으면 예외처리를 한다")
     void findByIdOrElseThrow_should_throw_exception_when_not_found() {
         // given
-        Long id = 999L;
+        String id = "non-existing-id";
         when(repositoryPort.findById(id)).thenReturn(Optional.empty());
 
         // expect

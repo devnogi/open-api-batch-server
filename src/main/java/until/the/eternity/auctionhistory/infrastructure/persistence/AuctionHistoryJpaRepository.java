@@ -1,8 +1,5 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -10,9 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface AuctionHistoryJpaRepository
-        extends JpaRepository<AuctionHistory, Long>, JpaSpecificationExecutor<AuctionHistory> {
+        extends JpaRepository<AuctionHistory, String>, JpaSpecificationExecutor<AuctionHistory> {
 
     List<AuctionHistory> findAllByAuctionBuyIdIn(List<String> auctionBuyIds);
 
@@ -35,5 +36,5 @@ public interface AuctionHistoryJpaRepository
     Optional<Instant> findLatestDateAuctionBuyBySubCategory(String topCategory, String subCategory);
 
     @EntityGraph(attributePaths = "itemOptions")
-    Optional<AuctionHistory> findWithItemOptionsById(Long id);
+    Optional<AuctionHistory> findWithItemOptionsByAuctionBuyId(String id);
 }

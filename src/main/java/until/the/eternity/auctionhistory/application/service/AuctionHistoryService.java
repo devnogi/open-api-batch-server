@@ -1,6 +1,5 @@
 package until.the.eternity.auctionhistory.application.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,8 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHis
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class AuctionHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(Long id) {
+    public AuctionHistoryDetailResponse<ItemOptionResponse> findByIdOrElseThrow(String id) {
         AuctionHistory auctionHistory =
                 repository
                         .findById(id)

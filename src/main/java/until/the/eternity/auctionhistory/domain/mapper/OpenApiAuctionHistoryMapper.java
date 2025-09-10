@@ -1,17 +1,17 @@
 package until.the.eternity.auctionhistory.domain.mapper;
 
-import java.time.Instant;
-import java.util.List;
 import org.mapstruct.*;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
+import java.time.Instant;
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = OpenApiItemOptionMapper.class)
 public interface OpenApiAuctionHistoryMapper {
 
     @Named("toEntity(OpenApiAuctionHistoryResponse, ItemCategory)")
-    @Mapping(target = "id", ignore = true)
     @Mapping(
             source = "dateAuctionBuy",
             target = "dateAuctionBuy",

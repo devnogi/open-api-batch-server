@@ -23,7 +23,7 @@ spring:
       static-locations: classpath:/static/
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:${DB_PORT}/${DB_SCHEMA}
+    url: jdbc:mysql://localhost:${DB_PORT}/${DB_SCHEMA}?rewriteBatchedStatements=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   jpa:

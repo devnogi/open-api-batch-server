@@ -36,7 +36,7 @@ public class AuctionHistoryController {
     @GetMapping("/{id}")
     @Operation(summary = "경매장 거래 내역 단건 조회", description = "Nexon Open API 경매장 거래 내역 조회")
     public ResponseEntity<AuctionHistoryDetailResponse<ItemOptionResponse>> findById(
-            @PathVariable Long id) {
+            @PathVariable String id) {
         AuctionHistoryDetailResponse<ItemOptionResponse> result = service.findByIdOrElseThrow(id);
         return ResponseEntity.ok(result);
     }
