@@ -2,7 +2,6 @@ package until.the.eternity.auctionhistory.infrastructure.persistence;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.entity.QAuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
