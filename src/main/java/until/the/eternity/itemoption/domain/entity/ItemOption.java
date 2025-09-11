@@ -1,14 +1,13 @@
 package until.the.eternity.itemoption.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionitem.domain.entity.AuctionItem;
-
-import java.util.UUID;
 
 @Entity
 @Table(name = "auction_item_option")
@@ -55,15 +54,15 @@ public class ItemOption {
 
     public void setAuctionHistory(AuctionHistory auctionHistory) {
 
-        // 1️⃣ 이전 연관관계 정리
+        // 이전 연관관계 정리
         if (this.auctionHistory != null) {
             this.auctionHistory.getItemOptions().remove(this);
         }
 
-        // 2️⃣ 새 연관관계 설정
+        // 새 연관관계 설정
         this.auctionHistory = auctionHistory;
 
-        // 3️⃣ 반대 쪽 컬렉션 동기화
+        // 반대 쪽 컬렉션 동기화
         if (auctionHistory != null && !auctionHistory.getItemOptions().contains(this)) {
             auctionHistory.getItemOptions().add(this);
         }
