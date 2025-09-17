@@ -1,7 +1,6 @@
 package until.the.eternity.itemminprice.domain.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

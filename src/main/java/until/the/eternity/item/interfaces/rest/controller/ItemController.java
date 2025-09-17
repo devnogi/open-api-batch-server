@@ -2,6 +2,7 @@ package until.the.eternity.item.interfaces.rest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import until.the.eternity.common.response.ApiResponse;
 import until.the.eternity.item.application.service.ItemService;
 import until.the.eternity.item.interfaces.rest.dto.ItemCategoryResponse;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

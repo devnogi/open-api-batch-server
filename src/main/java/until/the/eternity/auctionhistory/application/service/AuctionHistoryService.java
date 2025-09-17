@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.service;
 
+import jakarta.persistence.EntityManager;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,8 +16,6 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOption
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +23,7 @@ public class AuctionHistoryService {
 
     private final AuctionHistoryRepositoryPort repository;
     private final AuctionHistoryMapper mapper;
+    private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
@@ -48,5 +49,7 @@ public class AuctionHistoryService {
     @Transactional
     public void saveAll(List<AuctionHistory> entities) {
         repository.saveAll(entities);
+        entityManager.flush();
+        entityManager.clear();
     }
 }
