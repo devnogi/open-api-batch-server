@@ -1,5 +1,6 @@
 package until.the.eternity.auctionhistory.application.service;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class AuctionHistoryService {
 
     private final AuctionHistoryRepositoryPort repository;
     private final AuctionHistoryMapper mapper;
+    private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
@@ -48,5 +50,7 @@ public class AuctionHistoryService {
     @Transactional
     public void saveAll(List<AuctionHistory> entities) {
         repository.saveAll(entities);
+        entityManager.flush();
+        entityManager.clear();
     }
 }
