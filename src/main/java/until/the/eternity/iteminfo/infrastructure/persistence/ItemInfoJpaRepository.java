@@ -9,7 +9,6 @@ import java.util.List;
 public interface ItemInfoJpaRepository
         extends JpaRepository<ItemInfo, String>, JpaSpecificationExecutor<ItemInfo> {
 
-    List<ItemInfo> findAll();
 
     List<ItemInfo> findByTopCategory(String topCategory);
 
