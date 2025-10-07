@@ -1,4 +1,4 @@
-package until.the.eternity.item.interfaces.rest.dto;
+package until.the.eternity.iteminfo.interfaces.rest.dto.response;
 
 import java.util.Arrays;
 import java.util.List;

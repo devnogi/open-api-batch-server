@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
-import until.the.eternity.iteminfo.domain.repository.ItemInfoRepository;
+import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
+import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 
 @Service
@@ -13,15 +14,14 @@ import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse
 @RequiredArgsConstructor
 public class ItemInfoService {
 
-    private final ItemInfoRepository itemInfoRepository;
+    private final ItemInfoRepositoryPort itemInfoRepository;
+
+    public List<ItemCategoryResponse> findItemCategories() {
+        return ItemCategoryResponse.from();
+    }
 
     public List<ItemInfoResponse> findAll() {
         List<ItemInfo> itemInfos = itemInfoRepository.findAll();
-        return ItemInfoResponse.from(itemInfos);
-    }
-
-    public List<ItemInfoResponse> findByItemName(String name) {
-        List<ItemInfo> itemInfos = itemInfoRepository.findByNameContaining(name);
         return ItemInfoResponse.from(itemInfos);
     }
 
