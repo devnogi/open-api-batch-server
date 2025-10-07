@@ -1,5 +1,5 @@
 CREATE TABLE item_info (
-    name VARCHAR(255) NOT NULL COMMENT '아이템의 이름',
+    name VARCHAR(255) NOT NULL PRIMARY KEY COMMENT '아이템의 이름',
     sub_category VARCHAR(25) NOT NULL COMMENT '아이템 하위 카테고리',
     top_category VARCHAR(25) NOT NULL COMMENT '아이템 상위 카테고리',
     description VARCHAR(255) COMMENT '아이템의 설명',
