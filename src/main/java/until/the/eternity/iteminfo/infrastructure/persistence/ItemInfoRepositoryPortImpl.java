@@ -1,10 +1,11 @@
 package until.the.eternity.iteminfo.infrastructure.persistence;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
