@@ -16,4 +16,4 @@ CREATE TABLE item_info (
 ) COMMENT='아이템 정보 테이블';
 
 -- 초기 데이터 적재 쿼리
--- INSERT INTO item_info (name, top_category, sub_category) select distinct item_name, item_sub_category, item_sub_category from auction_history;
+-- INSERT INTO item_info (name, top_category, sub_category) select distinct item_name, item_top_category, item_sub_category from auction_history;
