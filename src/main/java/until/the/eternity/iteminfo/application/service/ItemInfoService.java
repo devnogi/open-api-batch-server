@@ -1,5 +1,6 @@
 package until.the.eternity.iteminfo.application.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,8 +8,6 @@ import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)

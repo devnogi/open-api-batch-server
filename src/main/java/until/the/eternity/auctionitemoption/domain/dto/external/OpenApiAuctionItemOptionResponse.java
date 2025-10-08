@@ -1,8 +1,8 @@
-package until.the.eternity.itemoption.domain.dto.external;
+package until.the.eternity.auctionitemoption.domain.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record OpenApiItemOptionResponse(
+public record OpenApiAuctionItemOptionResponse(
         @JsonProperty("option_type") String optionType,
         @JsonProperty("option_sub_type") String optionSubType,
         @JsonProperty("option_value") String optionValue,

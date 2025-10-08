@@ -1,11 +1,10 @@
 package until.the.eternity.auctionitem.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import until.the.eternity.itemoption.domain.entity.ItemOption;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.*;
+import until.the.eternity.auctionitemoption.domain.entity.AuctionItemOption;
 
 @Entity
 @Table(name = "auction_item")
@@ -36,5 +35,5 @@ public class AuctionItem {
     private LocalDateTime dateAuctionExpire;
 
     @OneToMany(mappedBy = "auctionItem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemOption> itemOptions;
+    private List<AuctionItemOption> auctionItemOptions;
 }
