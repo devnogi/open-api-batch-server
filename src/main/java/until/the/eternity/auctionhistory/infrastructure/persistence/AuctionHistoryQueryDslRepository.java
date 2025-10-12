@@ -39,11 +39,14 @@ class AuctionHistoryQueryDslRepository {
 
     private BooleanBuilder buildPredicate(AuctionHistorySearchRequest c, QAuctionHistory ah) {
         BooleanBuilder builder = new BooleanBuilder();
-        if (c.getItemName() != null && !c.getItemName().isBlank()) {
-            builder.and(ah.itemName.containsIgnoreCase(c.getItemName()));
+        if (c.getItemTopCategory() != null && !c.getItemTopCategory().isBlank()) {
+            builder.and(ah.itemTopCategory.eq(c.getItemTopCategory()));
         }
         if (c.getItemSubCategory() != null && !c.getItemSubCategory().isBlank()) {
             builder.and(ah.itemSubCategory.eq(c.getItemSubCategory()));
+        }
+        if (c.getItemName() != null && !c.getItemName().isBlank()) {
+            builder.and(ah.itemName.containsIgnoreCase(c.getItemName()));
         }
         return builder;
     }
