@@ -1,0 +1,21 @@
+package until.the.eternity.metalwareinfo.application.service;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import until.the.eternity.metalwareinfo.domain.repository.MetalwareInfoRepositoryPort;
+import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoResponse;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class MetalwareInfoService {
+
+    private final MetalwareInfoRepositoryPort metalwareInfoRepository;
+
+    public List<MetalwareInfoResponse> findAll() {
+        List<String> metalwares = metalwareInfoRepository.findAllMetalwares();
+        return MetalwareInfoResponse.from(metalwares);
+    }
+}
