@@ -18,11 +18,11 @@ public class ItemInfoRepositoryPortImpl implements ItemInfoRepositoryPort {
 
     @Override
     public List<ItemInfo> findByTopCategory(String topCategory) {
-        return jpaRepository.findByTopCategory(topCategory);
+        return jpaRepository.findByIdTopCategory(topCategory);
     }
 
     @Override
     public List<ItemInfo> findBySubCategory(String subCategory) {
-        return jpaRepository.findBySubCategory(subCategory);
+        return jpaRepository.findByIdSubCategory(subCategory);
     }
 }
