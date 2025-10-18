@@ -74,9 +74,10 @@ class ItemInfoServiceTest {
     @DisplayName("하위 카테고리로 아이템을 조회하면 해당 카테고리의 아이템 목록을 반환한다")
     void findBySubCategory_should_return_items_by_sub_category() {
         // given
+        String topCategory = "소모품";
         String subCategory = "염색 앰플";
-        ItemInfo item1 = createItemInfo("염색 앰플", "염색 앰플", subCategory);
-        ItemInfo item2 = createItemInfo("지정 색상 염색 앰플", "염색 앰플", subCategory);
+        ItemInfo item1 = createItemInfo("염색 앰플", subCategory, topCategory);
+        ItemInfo item2 = createItemInfo("지정 색상 염색 앰플", subCategory, topCategory);
         when(itemInfoRepository.findBySubCategory(subCategory)).thenReturn(List.of(item1, item2));
 
         // when
