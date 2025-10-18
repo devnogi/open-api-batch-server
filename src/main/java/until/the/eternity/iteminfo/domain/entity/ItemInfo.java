@@ -1,8 +1,8 @@
 package until.the.eternity.iteminfo.domain.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,15 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemInfo {
 
-    @Id
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "sub_category", nullable = false)
-    private String subCategory;
-
-    @Column(name = "top_category", nullable = false)
-    private String topCategory;
+    @EmbeddedId private ItemInfoId id;
 
     @Column(name = "description")
     private String description;
@@ -53,4 +45,17 @@ public class ItemInfo {
 
     @Column(name = "max_alteration_count")
     private Byte maxAlterationCount;
+
+    // Helper methods for backward compatibility
+    public String getName() {
+        return id != null ? id.getName() : null;
+    }
+
+    public String getSubCategory() {
+        return id != null ? id.getSubCategory() : null;
+    }
+
+    public String getTopCategory() {
+        return id != null ? id.getTopCategory() : null;
+    }
 }
