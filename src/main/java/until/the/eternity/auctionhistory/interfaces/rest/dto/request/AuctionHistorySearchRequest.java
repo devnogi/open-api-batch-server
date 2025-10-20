@@ -9,4 +9,4 @@ public record AuctionHistorySearchRequest(
         @Schema(description = "소분류 카테고리", example = "검") String itemSubCategory,
         @Schema(description = "거래 가격", example = "10000000") String auction_price_per_unit,
         @Schema(description = "거래 일자", example = "검") String date_auction_buy,
-        @Schema(description = "거래 금액") PricePerUnitSearchRequest pricePerUnitSearchRequest) {}
+        @Schema(description = "거래 금액") PriceSearchRequest priceSearchRequest) {}
