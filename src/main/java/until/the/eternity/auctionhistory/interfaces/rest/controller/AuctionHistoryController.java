@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import until.the.eternity.auctionhistory.application.scheduler.AuctionHistoryScheduler;
@@ -26,8 +27,8 @@ public class AuctionHistoryController {
     @GetMapping("/search")
     @Operation(summary = "경매장 거래 내역 검색", description = "Nexon Open API 경매장 거래 내역 검색")
     public ResponseEntity<PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>>> search(
-            @ModelAttribute PageRequestDto pageDto,
-            @ModelAttribute @Valid AuctionHistorySearchRequest requestDto) {
+            @ParameterObject @ModelAttribute PageRequestDto pageDto,
+            @ParameterObject @ModelAttribute @Valid AuctionHistorySearchRequest requestDto) {
         PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> result =
                 service.search(requestDto, pageDto);
         return ResponseEntity.ok(result);

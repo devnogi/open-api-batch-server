@@ -1,0 +1,37 @@
+검색 옵션	파라미터명	파라미터 타입	파라미터명2	파라미터 타입3
+밸런스	Balance	tinyint	BalanceStandard	string ('UP'|'DOWN')
+크리티컬	Crtitical	tinyint	CrtiticalStandard	string ('UP'|'DOWN')
+방어력	Defense	tinyint	DefenseStandard	string ('UP'|'DOWN')
+에르그	ErgFrom	tinyint	ErgTo	tinyint
+에르그 등급	ErgRank	string ('S등급'|'A등급'|'B등급')
+마법 방어력	MagicDefense	tinyint	MagicDefenseStandard	string ('UP'|'DOWN')
+마법 보호	MagicProtect	tinyint	MagicProtectStandard	string ('UP'|'DOWN')
+최대 공격력	MaxAttackFrom	int	MaxAttackTo	int
+최대내구력	MaximumDurability	tinyint	MaximumDurabilityStandard	string ('UP'|'DOWN')
+최대 부상률	MaxInjuryRateFrom	tinyint	MaxInjuryRateTo	tinyint
+가격	PriceFrom	long	PriceTo	long
+숙련도	Proficiency	tinyint	ProficiencyStandard	string ('UP'|'DOWN')
+보호	Protect	tinyint	ProtectStandard	string ('UP'|'DOWN')
+남은 거래 횟수	RemainingTransactionCount	tinyint	RemainingTransactionCountStandard	string ('UP'|'DOWN')
+남은 전용 해제 가능 횟수	RemainingUnsealCount	tinyint	RemainingUnsealCountStandard	string ('UP'|'DOWN')
+남은 사용 횟수	RemainingUseCount	tinyint	RemainingUseCountStandard	string ('UP'|'DOWN')
+착용 제한	WearingRestrictions	string
+사용 효과
+색상
+세공 옵션
+세트 효과
+아이템 보호
+아이템 색상
+에코스톤 각성 능력
+에코스톤 고유 능력
+에코스톤 등급
+인챈트
+인챈트 불가능
+일반 개조
+장인 개조
+크기
+토템 효과
+특별 개조
+품질
+피어싱 레벨
+보석 개조
