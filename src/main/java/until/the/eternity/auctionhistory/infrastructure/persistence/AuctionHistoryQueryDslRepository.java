@@ -1,6 +1,7 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
@@ -152,27 +153,31 @@ class AuctionHistoryQueryDslRepository {
 
         // 4. Erg (에르그) - 범위 검색
         if (opt.ergSearch() != null) {
-            BooleanBuilder ergBuilder = new BooleanBuilder(aio.optionType.eq("에르그"));
+            BooleanExpression ergTypeCondition = aio.optionType.eq("에르그");
+            BooleanExpression ergValueCondition = null;
+
             if (opt.ergSearch().ergFrom() != null && opt.ergSearch().ergTo() != null) {
-                ergBuilder.and(
+                ergValueCondition =
                         castOptionValueToInt(aio)
-                                .between(opt.ergSearch().ergFrom(), opt.ergSearch().ergTo()));
+                                .between(opt.ergSearch().ergFrom(), opt.ergSearch().ergTo());
             } else if (opt.ergSearch().ergFrom() != null) {
-                ergBuilder.and(castOptionValueToInt(aio).goe(opt.ergSearch().ergFrom()));
+                ergValueCondition = castOptionValueToInt(aio).goe(opt.ergSearch().ergFrom());
             } else if (opt.ergSearch().ergTo() != null) {
-                ergBuilder.and(castOptionValueToInt(aio).loe(opt.ergSearch().ergTo()));
+                ergValueCondition = castOptionValueToInt(aio).loe(opt.ergSearch().ergTo());
             }
-            if (ergBuilder.hasValue()) {
-                builder.or(ergBuilder);
+
+            if (ergValueCondition != null) {
+                // 명시적으로 괄호를 추가
+                BooleanExpression combined = ergTypeCondition.and(ergValueCondition);
+                builder.or(Expressions.booleanTemplate("({0})", combined));
             }
         }
 
         // 5. ErgRank (에르그 등급) - 문자열 비교
         if (opt.ergRankSearch() != null && opt.ergRankSearch().ergRank() != null) {
-            builder.or(
-                    aio.optionType
-                            .eq("에르그")
-                            .and(aio.optionValue.eq(opt.ergRankSearch().ergRank())));
+            BooleanExpression combined =
+                    aio.optionType.eq("에르그").and(aio.optionValue.eq(opt.ergRankSearch().ergRank()));
+            builder.or(Expressions.booleanTemplate("({0})", combined));
         }
 
         // 6. MagicDefense (마법 방어력)
@@ -197,23 +202,28 @@ class AuctionHistoryQueryDslRepository {
 
         // 8. MaxAttack (공격) - 범위 검색
         if (opt.maxAttackSearch() != null) {
-            BooleanBuilder attackBuilder = new BooleanBuilder(aio.optionType.eq("공격"));
+            BooleanExpression attackTypeCondition = aio.optionType.eq("공격");
+            BooleanExpression attackValueCondition = null;
+
             if (opt.maxAttackSearch().maxAttackFrom() != null
                     && opt.maxAttackSearch().maxAttackTo() != null) {
-                attackBuilder.and(
+                attackValueCondition =
                         castOptionValueToInt(aio)
                                 .between(
                                         opt.maxAttackSearch().maxAttackFrom(),
-                                        opt.maxAttackSearch().maxAttackTo()));
+                                        opt.maxAttackSearch().maxAttackTo());
             } else if (opt.maxAttackSearch().maxAttackFrom() != null) {
-                attackBuilder.and(
-                        castOptionValueToInt(aio).goe(opt.maxAttackSearch().maxAttackFrom()));
+                attackValueCondition =
+                        castOptionValueToInt(aio).goe(opt.maxAttackSearch().maxAttackFrom());
             } else if (opt.maxAttackSearch().maxAttackTo() != null) {
-                attackBuilder.and(
-                        castOptionValueToInt(aio).loe(opt.maxAttackSearch().maxAttackTo()));
+                attackValueCondition =
+                        castOptionValueToInt(aio).loe(opt.maxAttackSearch().maxAttackTo());
             }
-            if (attackBuilder.hasValue()) {
-                builder.or(attackBuilder);
+
+            if (attackValueCondition != null) {
+                // 명시적으로 괄호를 추가
+                BooleanExpression combined = attackTypeCondition.and(attackValueCondition);
+                builder.or(Expressions.booleanTemplate("({0})", combined));
             }
         }
 
@@ -230,24 +240,29 @@ class AuctionHistoryQueryDslRepository {
 
         // 10. MaxInjuryRate (부상률) - 범위 검색
         if (opt.maxInjuryRateSearch() != null) {
-            BooleanBuilder injuryBuilder = new BooleanBuilder(aio.optionType.eq("부상률"));
+            BooleanExpression injuryTypeCondition = aio.optionType.eq("부상률");
+            BooleanExpression injuryValueCondition = null;
+
             if (opt.maxInjuryRateSearch().maxInjuryRateFrom() != null
                     && opt.maxInjuryRateSearch().maxInjuryRateTo() != null) {
-                injuryBuilder.and(
+                injuryValueCondition =
                         castOptionValueToInt(aio)
                                 .between(
                                         opt.maxInjuryRateSearch().maxInjuryRateFrom(),
-                                        opt.maxInjuryRateSearch().maxInjuryRateTo()));
+                                        opt.maxInjuryRateSearch().maxInjuryRateTo());
             } else if (opt.maxInjuryRateSearch().maxInjuryRateFrom() != null) {
-                injuryBuilder.and(
+                injuryValueCondition =
                         castOptionValueToInt(aio)
-                                .goe(opt.maxInjuryRateSearch().maxInjuryRateFrom()));
+                                .goe(opt.maxInjuryRateSearch().maxInjuryRateFrom());
             } else if (opt.maxInjuryRateSearch().maxInjuryRateTo() != null) {
-                injuryBuilder.and(
-                        castOptionValueToInt(aio).loe(opt.maxInjuryRateSearch().maxInjuryRateTo()));
+                injuryValueCondition =
+                        castOptionValueToInt(aio).loe(opt.maxInjuryRateSearch().maxInjuryRateTo());
             }
-            if (injuryBuilder.hasValue()) {
-                builder.or(injuryBuilder);
+
+            if (injuryValueCondition != null) {
+                // 명시적으로 괄호를 추가
+                BooleanExpression combined = injuryTypeCondition.and(injuryValueCondition);
+                builder.or(Expressions.booleanTemplate("({0})", combined));
             }
         }
 
@@ -308,9 +323,9 @@ class AuctionHistoryQueryDslRepository {
         // 16. WearingRestrictions (착용 제한) - 문자열 비교
         if (opt.wearingRestrictionsSearch() != null
                 && opt.wearingRestrictionsSearch().wearingRestrictions() != null) {
-            builder.or(
-                    aio.optionValue.contains(
-                            opt.wearingRestrictionsSearch().wearingRestrictions()));
+            BooleanExpression condition =
+                    aio.optionValue.contains(opt.wearingRestrictionsSearch().wearingRestrictions());
+            builder.or(Expressions.booleanTemplate("({0})", condition));
         }
 
         return builder;
@@ -319,26 +334,31 @@ class AuctionHistoryQueryDslRepository {
     /**
      * 옵션 조건 빌드 헬퍼 (option_type + 숫자 비교 + UP/DOWN)
      *
+     * <p>명시적으로 괄호를 추가하여 가독성과 명확성을 높입니다.
+     *
      * @param aio QueryDSL Q타입
      * @param optionType DB의 option_type 값 (예: "밸런스", "크리티컬")
      * @param value 비교할 숫자 값
      * @param standard UP(이상) / DOWN(이하) / null(같음)
      */
-    private BooleanBuilder buildOptionCondition(
+    private BooleanExpression buildOptionCondition(
             QAuctionItemOption aio, String optionType, Integer value, String standard) {
-        BooleanBuilder condition = new BooleanBuilder(aio.optionType.eq(optionType));
+        BooleanExpression optionTypeCondition = aio.optionType.eq(optionType);
 
         NumberTemplate<Integer> numValue = castOptionValueToInt(aio);
 
+        BooleanExpression valueCondition;
         if ("UP".equals(standard)) {
-            condition.and(numValue.goe(value)); // 이상 (>=)
+            valueCondition = numValue.goe(value); // 이상 (>=)
         } else if ("DOWN".equals(standard)) {
-            condition.and(numValue.loe(value)); // 이하 (<=)
+            valueCondition = numValue.loe(value); // 이하 (<=)
         } else {
-            condition.and(numValue.eq(value)); // 같음
+            valueCondition = numValue.eq(value); // 같음
         }
 
-        return condition;
+        // 명시적으로 괄호를 추가하여 쿼리의 가독성을 높입니다
+        BooleanExpression combined = optionTypeCondition.and(valueCondition);
+        return Expressions.booleanTemplate("({0})", combined);
     }
 
     /**
