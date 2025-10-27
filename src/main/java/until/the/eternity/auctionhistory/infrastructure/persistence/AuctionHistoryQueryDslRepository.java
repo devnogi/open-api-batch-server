@@ -23,6 +23,9 @@ class AuctionHistoryQueryDslRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    /** 옵션 조건 빌드 결과 (조건 BooleanBuilder + 추가된 조건 개수) */
+    record OptionConditionResult(BooleanBuilder builder, int count) {}
+
     /**
      * 경매 거래내역 검색 (옵션 조건 포함)
      *
@@ -40,17 +43,19 @@ class AuctionHistoryQueryDslRepository {
         if (condition.itemOptionSearchRequest() != null) {
             // 서브쿼리용 별도 QAuctionItemOption 인스턴스
             QAuctionItemOption subOption = new QAuctionItemOption("subOption");
-            BooleanBuilder optionBuilder =
+            OptionConditionResult optionResult =
                     buildItemOptionConditions(condition.itemOptionSearchRequest(), subOption);
 
             // 옵션 조건이 실제로 있는 경우에만 서브쿼리 추가
-            if (optionBuilder.hasValue()) {
+            if (optionResult.builder().hasValue() && optionResult.count() > 0) {
                 // 서브쿼리: 옵션 조건을 만족하는 auction_history_id 찾기
+                // GROUP BY + HAVING COUNT로 모든 조건을 만족하는 거래내역만 필터링
                 var subQuery =
                         JPAExpressions.select(subOption.auctionHistory.auctionBuyId)
                                 .from(subOption)
-                                .where(optionBuilder)
-                                .distinct();
+                                .where(optionResult.builder())
+                                .groupBy(subOption.auctionHistory.auctionBuyId)
+                                .having(subOption.count().eq((long) optionResult.count()));
 
                 // 메인 쿼리에 서브쿼리 결과 적용
                 historyBuilder.and(ah.auctionBuyId.in(subQuery));
@@ -116,10 +121,14 @@ class AuctionHistoryQueryDslRepository {
      * 옵션 검색 조건 빌드 (서브쿼리용)
      *
      * <p>주의: 이 메서드는 서브쿼리에서만 사용됩니다. 반환된 BooleanBuilder는 메인 JOIN의 WHERE에 직접 사용하면 안 됩니다!
+     *
+     * @return OptionConditionResult - 조건 BooleanBuilder와 추가된 조건 개수
      */
-    private BooleanBuilder buildItemOptionConditions(
+    private OptionConditionResult buildItemOptionConditions(
             ItemOptionSearchRequest opt, QAuctionItemOption aio) {
         BooleanBuilder builder = new BooleanBuilder();
+        int conditionCount = 0;
+        boolean ergConditionAdded = false; // 에르그 조건 추가 여부 (레벨/랭크 통합)
 
         // 1. Balance (밸런스)
         if (opt.balanceSearch() != null && opt.balanceSearch().balance() != null) {
@@ -129,6 +138,7 @@ class AuctionHistoryQueryDslRepository {
                             "밸런스",
                             opt.balanceSearch().balance(),
                             opt.balanceSearch().balanceStandard()));
+            conditionCount++;
         }
 
         // 2. Critical (크리티컬)
@@ -139,6 +149,7 @@ class AuctionHistoryQueryDslRepository {
                             "크리티컬",
                             opt.criticalSearch().critical(),
                             opt.criticalSearch().criticalStandard()));
+            conditionCount++;
         }
 
         // 3. Defense (방어력)
@@ -149,6 +160,7 @@ class AuctionHistoryQueryDslRepository {
                             "방어력",
                             opt.defenseSearch().defense(),
                             opt.defenseSearch().defenseStandard()));
+            conditionCount++;
         }
 
         // 4. Erg (에르그) - 범위 검색
@@ -170,6 +182,11 @@ class AuctionHistoryQueryDslRepository {
                 // 명시적으로 괄호를 추가
                 BooleanExpression combined = ergTypeCondition.and(ergValueCondition);
                 builder.or(Expressions.booleanTemplate("({0})", combined));
+                // 에르그는 레벨/랭크 통합하여 1개로 카운트
+                if (!ergConditionAdded) {
+                    conditionCount++;
+                    ergConditionAdded = true;
+                }
             }
         }
 
@@ -178,6 +195,11 @@ class AuctionHistoryQueryDslRepository {
             BooleanExpression combined =
                     aio.optionType.eq("에르그").and(aio.optionValue.eq(opt.ergRankSearch().ergRank()));
             builder.or(Expressions.booleanTemplate("({0})", combined));
+            // 에르그는 레벨/랭크 통합하여 1개로 카운트
+            if (!ergConditionAdded) {
+                conditionCount++;
+                ergConditionAdded = true;
+            }
         }
 
         // 6. MagicDefense (마법 방어력)
@@ -188,6 +210,7 @@ class AuctionHistoryQueryDslRepository {
                             "마법 방어력",
                             opt.magicDefenseSearch().magicDefense(),
                             opt.magicDefenseSearch().magicDefenseStandard()));
+            conditionCount++;
         }
 
         // 7. MagicProtect (마법 보호)
@@ -198,6 +221,7 @@ class AuctionHistoryQueryDslRepository {
                             "마법 보호",
                             opt.magicProtectSearch().magicProtect(),
                             opt.magicProtectSearch().magicProtectStandard()));
+            conditionCount++;
         }
 
         // 8. MaxAttack (공격) - 범위 검색
@@ -224,6 +248,7 @@ class AuctionHistoryQueryDslRepository {
                 // 명시적으로 괄호를 추가
                 BooleanExpression combined = attackTypeCondition.and(attackValueCondition);
                 builder.or(Expressions.booleanTemplate("({0})", combined));
+                conditionCount++;
             }
         }
 
@@ -236,6 +261,7 @@ class AuctionHistoryQueryDslRepository {
                             "내구력",
                             opt.maximumDurabilitySearch().maximumDurability(),
                             opt.maximumDurabilitySearch().maximumDurabilityStandard()));
+            conditionCount++;
         }
 
         // 10. MaxInjuryRate (부상률) - 범위 검색
@@ -263,6 +289,7 @@ class AuctionHistoryQueryDslRepository {
                 // 명시적으로 괄호를 추가
                 BooleanExpression combined = injuryTypeCondition.and(injuryValueCondition);
                 builder.or(Expressions.booleanTemplate("({0})", combined));
+                conditionCount++;
             }
         }
 
@@ -274,6 +301,7 @@ class AuctionHistoryQueryDslRepository {
                             "숙련",
                             opt.proficiencySearch().proficiency(),
                             opt.proficiencySearch().proficiencyStandard()));
+            conditionCount++;
         }
 
         // 12. Protect (보호)
@@ -284,6 +312,7 @@ class AuctionHistoryQueryDslRepository {
                             "보호",
                             opt.protectSearch().protect(),
                             opt.protectSearch().protectStandard()));
+            conditionCount++;
         }
 
         // 13. RemainingTransactionCount (남은 거래 횟수)
@@ -296,6 +325,7 @@ class AuctionHistoryQueryDslRepository {
                             opt.remainingTransactionCountSearch().remainingTransactionCount(),
                             opt.remainingTransactionCountSearch()
                                     .remainingTransactionCountStandard()));
+            conditionCount++;
         }
 
         // 14. RemainingUnsealCount (남은 전용 해제 가능 횟수)
@@ -307,6 +337,7 @@ class AuctionHistoryQueryDslRepository {
                             "남은 전용 해제 가능 횟수",
                             opt.remainingUnsealCountSearch().remainingUnsealCount(),
                             opt.remainingUnsealCountSearch().remainingUnsealCountStandard()));
+            conditionCount++;
         }
 
         // 15. RemainingUseCount (남은 사용 횟수)
@@ -318,6 +349,7 @@ class AuctionHistoryQueryDslRepository {
                             "남은 사용 횟수",
                             opt.remainingUseCountSearch().remainingUseCount(),
                             opt.remainingUseCountSearch().remainingUseCountStandard()));
+            conditionCount++;
         }
 
         // 16. WearingRestrictions (착용 제한) - 문자열 비교
@@ -326,9 +358,10 @@ class AuctionHistoryQueryDslRepository {
             BooleanExpression condition =
                     aio.optionValue.contains(opt.wearingRestrictionsSearch().wearingRestrictions());
             builder.or(Expressions.booleanTemplate("({0})", condition));
+            conditionCount++;
         }
 
-        return builder;
+        return new OptionConditionResult(builder, conditionCount);
     }
 
     /**
