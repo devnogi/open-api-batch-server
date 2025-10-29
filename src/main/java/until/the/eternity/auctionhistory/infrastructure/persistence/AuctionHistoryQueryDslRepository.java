@@ -26,12 +26,7 @@ class AuctionHistoryQueryDslRepository {
     /** 옵션 조건 빌드 결과 (조건 BooleanBuilder + 추가된 조건 개수) */
     record OptionConditionResult(BooleanBuilder builder, int count) {}
 
-    /**
-     * 경매 거래내역 검색 (옵션 조건 포함)
-     *
-     * <p>검색 흐름: 1. 옵션 조건을 만족하는 거래내역 ID를 서브쿼리로 찾기 2. 거래내역 조건으로 필터링 3. 해당 거래내역의 모든 옵션을 함께 조회 (LEFT
-     * JOIN)
-     */
+    /** 경매 거래내역 검색 (옵션 조건 포함) */
     public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
         QAuctionHistory ah = QAuctionHistory.auctionHistory;
         QAuctionItemOption aio = QAuctionItemOption.auctionItemOption;
@@ -117,13 +112,7 @@ class AuctionHistoryQueryDslRepository {
         return builder;
     }
 
-    /**
-     * 옵션 검색 조건 빌드 (서브쿼리용)
-     *
-     * <p>주의: 이 메서드는 서브쿼리에서만 사용됩니다. 반환된 BooleanBuilder는 메인 JOIN의 WHERE에 직접 사용하면 안 됩니다!
-     *
-     * @return OptionConditionResult - 조건 BooleanBuilder와 추가된 조건 개수
-     */
+    /** 옵션 검색 조건 빌드 (서브쿼리용) */
     private OptionConditionResult buildItemOptionConditions(
             ItemOptionSearchRequest opt, QAuctionItemOption aio) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -364,16 +353,7 @@ class AuctionHistoryQueryDslRepository {
         return new OptionConditionResult(builder, conditionCount);
     }
 
-    /**
-     * 옵션 조건 빌드 헬퍼 (option_type + 숫자 비교 + UP/DOWN)
-     *
-     * <p>명시적으로 괄호를 추가하여 가독성과 명확성을 높입니다.
-     *
-     * @param aio QueryDSL Q타입
-     * @param optionType DB의 option_type 값 (예: "밸런스", "크리티컬")
-     * @param value 비교할 숫자 값
-     * @param standard UP(이상) / DOWN(이하) / null(같음)
-     */
+    /** 옵션 조건 빌드 헬퍼 (option_type + 숫자 비교 + UP/DOWN) */
     private BooleanExpression buildOptionCondition(
             QAuctionItemOption aio, String optionType, Integer value, String standard) {
         BooleanExpression optionTypeCondition = aio.optionType.eq(optionType);
@@ -394,11 +374,7 @@ class AuctionHistoryQueryDslRepository {
         return Expressions.booleanTemplate("({0})", combined);
     }
 
-    /**
-     * option_value2 또는 option_value를 Integer로 변환하는 NumberTemplate
-     *
-     * <p>COALESCE를 사용하여 null 처리 후 숫자로 비교 (MySQL은 자동 타입 변환 수행)
-     */
+    /** option_value2 또는 option_value를 Integer로 변환하는 NumberTemplate */
     private NumberTemplate<Integer> castOptionValueToInt(QAuctionItemOption aio) {
         return Expressions.numberTemplate(
                 Integer.class, "COALESCE({0}, {1}, 0)", aio.optionValue2, aio.optionValue);
