@@ -8,6 +8,9 @@ services:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .env
+    labels:
+      # Autoheal: unhealthy 상태 시 자동 재시작 활성화
+      autoheal: "true"
     environment:
       SPRING_CONFIG_LOCATION: file:/app/config/application.yaml
       SPRING_PROFILES_ACTIVE: dev
@@ -31,31 +34,41 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./config:/app/config:ro
-    restart: always
+    # Restart Policy:
+    # - always: 항상 재시작 (수동 stop 포함)
+    # - unless-stopped: 수동 stop 제외하고 재시작
+    # - on-failure:5: 실패 시 최대 5번만 재시작 (무한 재시작 루프 방지)
+    restart: on-failure:5
     # JVM Memory Optimization for 1GB RAM Server
-    # 총 컨테이너 메모리: 600MB 이내로 제한
+    # 총 컨테이너 메모리: 700MB 이내로 제한
+    # 목표: 시작 시간 단축 (현재 77초 → 목표 40초 이내)
     command: [
       "java",
       # === Heap Memory Settings ===
-      "-Xms128m",                              # Initial heap: 128MB (시작 시 힙 크기, 작게 시작하여 필요 시 확장)
-      "-Xmx384m",                              # Maximum heap: 384MB (힙 최대 크기, 512MB에서 줄여 다른 메모리 영역에 여유 확보)
+      "-Xms256m",                              # Initial heap: 256MB (시작 시 충분한 힙 확보로 초기화 시간 단축)
+      "-Xmx450m",                              # Maximum heap: 450MB (여유 확보, 384MB에서 증가)
 
       # === Non-Heap Memory Limits ===
-      "-XX:MaxMetaspaceSize=128m",             # Metaspace 최대 크기: 128MB (클래스 메타데이터 저장, 무제한 방지)
-      "-XX:ReservedCodeCacheSize=32m",         # JIT 컴파일된 코드 캐시: 32MB (기본 240MB에서 대폭 축소)
-      "-XX:MaxDirectMemorySize=64m",           # Direct Buffer 메모리: 64MB (NIO 사용 시 필요, 무제한 방지)
-      "-Xss512k",                              # Thread Stack 크기: 512KB (기본 1MB에서 축소, 스레드당 메모리 절약)
+      "-XX:MaxMetaspaceSize=150m",             # Metaspace 최대 크기: 150MB (클래스 메타데이터, 128MB에서 증가)
+      "-XX:ReservedCodeCacheSize=48m",         # JIT 컴파일된 코드 캐시: 48MB (32MB에서 증가, 성능 개선)
+      "-XX:MaxDirectMemorySize=64m",           # Direct Buffer 메모리: 64MB (NIO 사용 시 필요)
+      "-Xss512k",                              # Thread Stack 크기: 512KB (스레드당 메모리 절약)
 
       # === Garbage Collection Settings ===
-      "-XX:+UseSerialGC",                      # Serial GC 사용 (단일 스레드 GC, 메모리 오버헤드 최소화, 작은 힙에 효율적)
-      "-XX:+UseStringDeduplication",           # 중복 문자열 제거 (메모리 절약)
+      "-XX:+UseSerialGC",                      # Serial GC 사용 (단일 스레드 GC, 메모리 오버헤드 최소화)
 
-      # === JIT Compiler Settings ===
-      "-XX:+TieredCompilation",                # 계층적 컴파일 활성화 (빠른 시작 + 최적화)
-      "-XX:TieredStopAtLevel=1",               # C1 컴파일러만 사용 (C2 비활성화로 메모리 절약, 시작 시간 단축)
+      # === JIT Compiler Settings (시작 시간 vs 성능 균형) ===
+      "-XX:+TieredCompilation",                # 계층적 컴파일 활성화
+      "-XX:TieredStopAtLevel=2",               # Level 2까지 컴파일 (Level 1보다 빠른 시작, Level 4보다 적은 메모리)
+      "-XX:CICompilerCount=2",                 # JIT 컴파일러 스레드 2개 (병렬 컴파일로 시작 시간 단축)
+
+      # === Class Loading Optimization ===
+      "-XX:+UseCompressedOops",                # 압축 객체 포인터 (메모리 절약)
+      "-XX:+UseCompressedClassPointers",       # 압축 클래스 포인터 (메모리 절약)
 
       # === Performance & Security ===
       "-Djava.security.egd=file:/dev/./urandom", # 빠른 난수 생성 (시작 시간 단축)
+      "-Dspring.jmx.enabled=false",            # JMX 비활성화 (메모리 절약, 시작 시간 단축)
 
       "-jar",
       "app.jar"
@@ -65,23 +78,54 @@ services:
     deploy:
       resources:
         limits:
-          memory: 600M                         # 컨테이너 최대 메모리: 600MB (OOM 방지)
+          memory: 700M                         # 컨테이너 최대 메모리: 700MB (600MB에서 증가)
         reservations:
-          memory: 400M                         # 예약 메모리: 400MB (최소 보장 메모리)
+          memory: 450M                         # 예약 메모리: 450MB (최소 보장 메모리)
 
     networks:
       - app-network
+    # Health Check: 컨테이너 상태 감지 (autoheal과 연동)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      interval: 30s              # 30초마다 체크
+      timeout: 10s               # 10초 내 응답 없으면 실패
+      retries: 3                 # 3번 연속 실패 시 unhealthy
+      start_period: 120s         # 시작 후 120초는 유예기간 (현재 77초 걸림, 여유있게 설정)
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+  # Autoheal: unhealthy 컨테이너 자동 재시작 서비스
+  # - spring-app이 unhealthy 상태가 되면 자동으로 재시작
+  # - Docker 소켓을 마운트하여 컨테이너 관리 권한 획득
+  # - healthcheck와 독립적으로 동작 (healthcheck가 unhealthy 판정하면 autoheal이 재시작)
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: unless-stopped
+    environment:
+      # AUTOHEAL_INTERVAL: 체크 주기 (초 단위)
+      AUTOHEAL_INTERVAL: 30                    # 30초마다 unhealthy 컨테이너 체크 (healthcheck와 동기화)
+      # AUTOHEAL_START_PERIOD: 컨테이너 시작 후 체크 시작까지 유예 시간 (초)
+      AUTOHEAL_START_PERIOD: 0                 # healthcheck의 start_period를 따르므로 0으로 설정
+      # AUTOHEAL_DEFAULT_STOP_TIMEOUT: 재시작 시 강제 종료까지 대기 시간 (초)
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: 15        # 15초 내 종료 안 되면 강제 kill (Graceful shutdown 대기)
+      # DOCKER_SOCK: Docker 소켓 경로 (컨테이너 제어용)
+      DOCKER_SOCK: /var/run/docker.sock
+    volumes:
+      # Docker 소켓 마운트 (컨테이너 재시작 권한 획득)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - app-network
+    # autoheal은 매우 가벼운 서비스 (메모리 ~10MB)
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+        reservations:
+          memory: 20M
 
 networks:
   app-network:
