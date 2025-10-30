@@ -12,25 +12,55 @@ services:
       # Autoheal: unhealthy 상태 시 자동 재시작 활성화
       autoheal: "true"
     environment:
+      # === Application Configuration ===
       SPRING_CONFIG_LOCATION: file:/app/config/application.yaml
       SPRING_PROFILES_ACTIVE: dev
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       SERVER_PORT: ${SERVER_PORT}
+
+      # === Database Configuration ===
       DB_IP: ${DB_IP}
       DB_PORT: ${DB_PORT}
       DB_SCHEMA: ${DB_SCHEMA}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+
+      # === Security Configuration ===
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_ACCESS_TOKEN_VALIDITY: ${JWT_ACCESS_TOKEN_VALIDITY}
       JWT_REFRESH_TOKEN_VALIDITY: ${JWT_REFRESH_TOKEN_VALIDITY}
+
+      # === External API Configuration ===
       NEXON_OPEN_API_KEY: ${NEXON_OPEN_API_KEY}
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON}"
       AUCTION_HISTORY_MIN_PRICE_CRON: "${AUCTION_HISTORY_MIN_PRICE_CRON}"
+
+      # === Docker Configuration ===
       DOCKER_USERNAME: ${DOCKER_USERNAME}
       DOCKER_REPO: ${DOCKER_REPO}
+
+      # === JVM Configuration (Development Environment) ===
+      # Dockerfile의 기본값(Xmx1024m)을 오버라이드하여 개발 환경에 맞게 조정
+      JAVA_OPTS: >-
+        -Xms256m
+        -Xmx512m
+        -XX:MaxMetaspaceSize=150m
+        -XX:ReservedCodeCacheSize=48m
+        -XX:MaxDirectMemorySize=64m
+        -Xss512k
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -XX:G1HeapRegionSize=2m
+        -XX:InitiatingHeapOccupancyPercent=45
+        -XX:+TieredCompilation
+        -XX:TieredStopAtLevel=2
+        -XX:CICompilerCount=2
+        -XX:+UseCompressedOops
+        -XX:+UseCompressedClassPointers
+        -Djava.security.egd=file:/dev/./urandom
+        -Dspring.jmx.enabled=false
     volumes:
       - ./logs:/app/logs
       - ./config:/app/config:ro
@@ -39,44 +69,6 @@ services:
     # - unless-stopped: 수동 stop 제외하고 재시작
     # - on-failure:5: 실패 시 최대 5번만 재시작 (무한 재시작 루프 방지)
     restart: on-failure:5
-    # JVM Memory Optimization for 1GB RAM Server
-    # 총 컨테이너 메모리: 750MB 이내로 제한 (700MB에서 증가)
-    # 목표: 안정적인 운영 및 GC 성능 개선
-    command: [
-      "java",
-      # === Heap Memory Settings ===
-      "-Xms256m",                              # Initial heap: 256MB (시작 시 충분한 힙 확보로 초기화 시간 단축)
-      "-Xmx512m",                              # Maximum heap: 512MB (450MB에서 증가, GC 성능 개선)
-
-      # === Non-Heap Memory Limits ===
-      "-XX:MaxMetaspaceSize=150m",             # Metaspace 최대 크기: 150MB (클래스 메타데이터, 128MB에서 증가)
-      "-XX:ReservedCodeCacheSize=48m",         # JIT 컴파일된 코드 캐시: 48MB (32MB에서 증가, 성능 개선)
-      "-XX:MaxDirectMemorySize=64m",           # Direct Buffer 메모리: 64MB (NIO 사용 시 필요)
-      "-Xss512k",                              # Thread Stack 크기: 512KB (스레드당 메모리 절약)
-
-      # === Garbage Collection Settings ===
-      # Serial GC → G1GC로 변경 (다중 스레드, 예측 가능한 일시정지 시간)
-      "-XX:+UseG1GC",                          # G1 GC 사용 (저지연, 대용량 힙에 적합)
-      "-XX:MaxGCPauseMillis=200",              # GC 일시정지 목표: 200ms (헬스체크 timeout 내 응답 가능)
-      "-XX:G1HeapRegionSize=2m",               # Region 크기: 2MB (작은 힙에 적합)
-      "-XX:InitiatingHeapOccupancyPercent=45", # 힙 45% 사용 시 GC 시작 (여유있게)
-
-      # === JIT Compiler Settings (시작 시간 vs 성능 균형) ===
-      "-XX:+TieredCompilation",                # 계층적 컴파일 활성화
-      "-XX:TieredStopAtLevel=2",               # Level 2까지 컴파일 (Level 1보다 빠른 시작, Level 4보다 적은 메모리)
-      "-XX:CICompilerCount=2",                 # JIT 컴파일러 스레드 2개 (병렬 컴파일로 시작 시간 단축)
-
-      # === Class Loading Optimization ===
-      "-XX:+UseCompressedOops",                # 압축 객체 포인터 (메모리 절약)
-      "-XX:+UseCompressedClassPointers",       # 압축 클래스 포인터 (메모리 절약)
-
-      # === Performance & Security ===
-      "-Djava.security.egd=file:/dev/./urandom", # 빠른 난수 생성 (시작 시간 단축)
-      "-Dspring.jmx.enabled=false",            # JMX 비활성화 (메모리 절약, 시작 시간 단축)
-
-      "-jar",
-      "app.jar"
-    ]
 
     # Docker Resource Limits (cgroup을 통한 강제 메모리 제한)
     deploy:

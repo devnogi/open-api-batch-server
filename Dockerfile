@@ -72,15 +72,14 @@ COPY --from=extractor --chown=spring:spring /app/application/ ./
 # 사용자 전환
 USER spring:spring
 
-# JVM 메모리 설정 환경변수 (기본값)
+# JVM 메모리 설정 환경변수 (기본값, docker-compose에서 오버라이드 가능)
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
-# 포트 노출
+# 포트 노출 (문서화 목적, 실제 포트는 docker-compose에서 설정)
 EXPOSE 8092
 
-# 헬스체크 추가 (actuator health endpoint)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8092/actuator/health || exit 1
+# 헬스체크는 docker-compose에서 환경별로 관리
+# (개발/스테이징/프로덕션 환경마다 다른 설정 필요)
 
-# 애플리케이션 실행
+# 애플리케이션 실행 (환경변수 JAVA_OPTS 사용)
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
