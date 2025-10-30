@@ -40,13 +40,13 @@ services:
     # - on-failure:5: 실패 시 최대 5번만 재시작 (무한 재시작 루프 방지)
     restart: on-failure:5
     # JVM Memory Optimization for 1GB RAM Server
-    # 총 컨테이너 메모리: 700MB 이내로 제한
-    # 목표: 시작 시간 단축 (현재 77초 → 목표 40초 이내)
+    # 총 컨테이너 메모리: 750MB 이내로 제한 (700MB에서 증가)
+    # 목표: 안정적인 운영 및 GC 성능 개선
     command: [
       "java",
       # === Heap Memory Settings ===
       "-Xms256m",                              # Initial heap: 256MB (시작 시 충분한 힙 확보로 초기화 시간 단축)
-      "-Xmx450m",                              # Maximum heap: 450MB (여유 확보, 384MB에서 증가)
+      "-Xmx512m",                              # Maximum heap: 512MB (450MB에서 증가, GC 성능 개선)
 
       # === Non-Heap Memory Limits ===
       "-XX:MaxMetaspaceSize=150m",             # Metaspace 최대 크기: 150MB (클래스 메타데이터, 128MB에서 증가)
@@ -55,7 +55,11 @@ services:
       "-Xss512k",                              # Thread Stack 크기: 512KB (스레드당 메모리 절약)
 
       # === Garbage Collection Settings ===
-      "-XX:+UseSerialGC",                      # Serial GC 사용 (단일 스레드 GC, 메모리 오버헤드 최소화)
+      # Serial GC → G1GC로 변경 (다중 스레드, 예측 가능한 일시정지 시간)
+      "-XX:+UseG1GC",                          # G1 GC 사용 (저지연, 대용량 힙에 적합)
+      "-XX:MaxGCPauseMillis=200",              # GC 일시정지 목표: 200ms (헬스체크 timeout 내 응답 가능)
+      "-XX:G1HeapRegionSize=2m",               # Region 크기: 2MB (작은 힙에 적합)
+      "-XX:InitiatingHeapOccupancyPercent=45", # 힙 45% 사용 시 GC 시작 (여유있게)
 
       # === JIT Compiler Settings (시작 시간 vs 성능 균형) ===
       "-XX:+TieredCompilation",                # 계층적 컴파일 활성화
@@ -78,18 +82,19 @@ services:
     deploy:
       resources:
         limits:
-          memory: 700M                         # 컨테이너 최대 메모리: 700MB (600MB에서 증가)
+          memory: 750M                         # 컨테이너 최대 메모리: 750MB (700MB에서 증가, G1GC + 헬스체크 안정성)
         reservations:
-          memory: 450M                         # 예약 메모리: 450MB (최소 보장 메모리)
+          memory: 512M                         # 예약 메모리: 512MB (최소 보장 메모리, 450MB에서 증가)
 
     networks:
       - app-network
     # Health Check: 컨테이너 상태 감지 (autoheal과 연동)
+    # curl 대신 wget 사용 (Alpine Linux에 기본 설치되어 있음)
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT}/actuator/health"]
       interval: 30s              # 30초마다 체크
-      timeout: 10s               # 10초 내 응답 없으면 실패
-      retries: 3                 # 3번 연속 실패 시 unhealthy
+      timeout: 15s               # 15초 내 응답 없으면 실패 (GC 대응, 10s에서 증가)
+      retries: 4                 # 4번 연속 실패 시 unhealthy (3에서 증가, 더 여유있게)
       start_period: 120s         # 시작 후 120초는 유예기간 (현재 77초 걸림, 여유있게 설정)
     logging:
       driver: "json-file"
