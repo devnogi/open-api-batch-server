@@ -1,51 +1,126 @@
+# =============================================================================
+# .dockerignore - Docker 이미지 빌드 시 제외할 파일/디렉토리
+# =============================================================================
+# Multi-stage build를 사용하므로 빌드 산출물은 Docker 내부에서 생성됨
+# 따라서 로컬 빌드 결과물을 모두 제외하여 컨텍스트 크기를 최소화
+# =============================================================================
+
 # -----------------------------
-# default
+# VCS (Version Control System)
 # -----------------------------
 .git
 .gitignore
-*.log
-*.md
-.DS_Store
-*.iml
+.gitattributes
+.github
 
 # -----------------------------
-# IDE 관련
+# 문서 및 설명 파일
+# -----------------------------
+*.md
+README*
+CHANGELOG*
+LICENSE*
+docs/
+
+# -----------------------------
+# IDE 및 에디터 관련
 # -----------------------------
 .idea/
 .vscode/
+.eclipse/
+.settings/
+*.iml
 *.swp
+*.swo
+*~
+.project
+.classpath
 
 # -----------------------------
-# OS/툴 관련 캐시
+# OS 관련 임시 파일
 # -----------------------------
+.DS_Store
 Thumbs.db
 ehthumbs.db
 desktop.ini
 
 # -----------------------------
-# Gradle 빌드 결과물 및 캐시
+# Gradle 빌드 결과물 및 캐시 (multi-stage build에서 자체 빌드)
 # -----------------------------
 build/
-!build/libs/*.jar
 .gradle/
-!gradle/wrapper/gradle-wrapper.jar
-.gradle/
+bin/
+out/
+target/
+
+# Gradle wrapper는 필요하므로 제외하지 않음
+# !gradle/wrapper/gradle-wrapper.jar 불필요 (Dockerfile에서 gradle 이미지 사용)
 
 # -----------------------------
-# 환경/인증 관련 (보안 목적)
+# 환경 설정 및 보안 관련
 # -----------------------------
 .env
+.env.*
+*.local
 *.pem
 *.crt
 *.key
+*.p12
+*.jks
+application-local.yml
+application-dev.yml
+application-secret.yml
 
 # -----------------------------
-# 테스트/커버리지
+# 테스트 및 커버리지
 # -----------------------------
 test-results/
 test-output/
 jacoco*.exec
 coverage/
+.nyc_output/
 *.html
 *.xml
+!src/**/*.xml
 *.json
+!src/**/*.json
+
+# -----------------------------
+# 로그 파일
+# -----------------------------
+*.log
+logs/
+*.log.*
+
+# -----------------------------
+# Docker 관련
+# -----------------------------
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+
+# -----------------------------
+# CI/CD 관련
+# -----------------------------
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# -----------------------------
+# 임시 파일 및 백업
+# -----------------------------
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+.cache/
+
+# -----------------------------
+# Node.js (프론트엔드 관련 - 있을 경우)
+# -----------------------------
+node_modules/
+npm-debug.log
+yarn-error.log
