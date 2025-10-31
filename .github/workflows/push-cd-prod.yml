@@ -1,15 +1,15 @@
-name: CI/CD for Development Server
+name: CI/CD for Production Server
 
 on:
   push:
-    branches: [ dev ]  # Only dev branch
+    branches: [ main ]  # Only main branch
 
 permissions:
   contents: read
 
 jobs:
-  ci-cd-dev:
-    name: Test, Build, and Deploy to Dev Server
+  ci-cd-prod:
+    name: Test, Build, and Deploy to Production Server
     runs-on: ubuntu-latest
 
     steps:
@@ -47,8 +47,8 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml
-          fail_ci_if_error: false
-          flags: dev
+          fail_ci_if_error: true  # Stricter for production
+          flags: prod
           verbose: true
 
       # ========================================
@@ -69,8 +69,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -82,29 +83,29 @@ jobs:
       - name: Setup SSH key and config
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
           chmod 400 ~/.ssh/my-key.pem
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
           echo -e "Host *\n  ServerAliveInterval 60\n  ServerAliveCountMax 3" >> ~/.ssh/config
 
       - name: Create app directory on server
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /home/${{ secrets.SERVER_USER }}/app/logs"
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /home/${{ secrets.PROD_SERVER_USER }}/app/logs"
 
       - name: Copy docker-compose.yaml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
+          scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
 
-      - name: Deploy to Dev Server
+      - name: Deploy to Production Server
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-            cd /home/${{ secrets.SERVER_USER }}/app
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+            cd /home/${{ secrets.PROD_SERVER_USER }}/app
 
-            # Write .env.dev content to .env
-            echo "${{ secrets.ENV_FILE_DEV }}" > .env
+            # Write .env.prod content to .env
+            echo "${{ secrets.ENV_FILE_PROD }}" > .env
 
-            # Pull latest dev image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
+            # Pull latest production image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
 
             # Stop and remove existing containers
             docker compose down
@@ -112,16 +113,16 @@ jobs:
             # Start new containers
             docker compose up -d
 
-            echo "✅ Dev deployment complete"
+            echo "✅ Production deployment complete"
           EOF
 
       # ========================================
-      # Health Check Stage
+      # Health Check Stage (Stricter for Production)
       # ========================================
       - name: Comprehensive Health Check
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-            echo "=== Starting Health Check ==="
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+            echo "=== Starting Production Health Check ==="
 
             # 1. Check if container is running
             CONTAINER_ID=$(docker ps -q --filter "name=spring-app")
@@ -135,7 +136,7 @@ jobs:
 
             # 2. Wait for Docker health check
             echo "Waiting for container to become healthy..."
-            for i in {1..30}; do
+            for i in {1..36}; do
               HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' spring-app 2>/dev/null || echo "no-healthcheck")
 
               if [ "$HEALTH_STATUS" == "healthy" ]; then
@@ -146,11 +147,11 @@ jobs:
                 break
               fi
 
-              echo "Current health status: $HEALTH_STATUS ($i/30)"
+              echo "Current health status: $HEALTH_STATUS ($i/36)"
               sleep 10
 
-              if [ $i -eq 30 ]; then
-                echo "❌ Container failed to become healthy after 5 minutes"
+              if [ $i -eq 36 ]; then
+                echo "❌ Container failed to become healthy after 6 minutes"
                 docker logs spring-app --tail 100
                 exit 1
               fi
@@ -158,8 +159,8 @@ jobs:
 
             # 3. Check Spring Boot actuator health endpoint
             echo "Checking actuator health endpoint..."
-            for i in {1..20}; do
-              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.SERVER_PORT || 8080 }}/actuator/health || echo "")
+            for i in {1..30}; do
+              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.PROD_SERVER_PORT || 8080 }}/actuator/health || echo "")
 
               if echo "$HEALTH_RESPONSE" | grep -q '"status":"UP"'; then
                 echo "✅ Application health check passed"
@@ -167,16 +168,26 @@ jobs:
                 break
               fi
 
-              echo "Waiting for application to start... ($i/20)"
+              echo "Waiting for application to start... ($i/30)"
               sleep 10
 
-              if [ $i -eq 20 ]; then
-                echo "❌ Application health check failed after 3+ minutes"
+              if [ $i -eq 30 ]; then
+                echo "❌ Application health check failed after 5 minutes"
                 echo "Last response: $HEALTH_RESPONSE"
                 docker logs spring-app --tail 100
                 exit 1
               fi
             done
+
+            # 4. Smoke test: Check if API responds
+            echo "Running smoke test..."
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.PROD_SERVER_PORT || 8080 }}/actuator/health)
+            if [ "$HTTP_CODE" == "200" ]; then
+              echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
+            else
+              echo "❌ Smoke test failed (HTTP $HTTP_CODE)"
+              exit 1
+            fi
 
             echo "=== Health Check Complete ==="
             docker ps --filter "name=spring-app"
@@ -185,7 +196,19 @@ jobs:
       - name: Display deployment info
         if: success()
         run: |
-          echo "✅ Deployment successful!"
-          echo "🔗 Dev Server: http://${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PORT || 8080 }}"
-          echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev"
+          echo "✅ Production deployment successful!"
+          echo "🔗 Production Server: http://${{ secrets.PROD_SERVER_HOST }}:${{ secrets.PROD_SERVER_PORT || 8080 }}"
+          echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod"
           echo "📦 Commit: ${{ github.sha }}"
+          echo "⚠️  Please verify the production deployment manually"
+
+      # ========================================
+      # Rollback on Failure (Optional)
+      # ========================================
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed! Consider manual rollback if needed."
+          echo "To rollback, SSH to server and run:"
+          echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod-<previous-sha>"
+          echo "  docker compose down && docker compose up -d"
