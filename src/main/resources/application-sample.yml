@@ -23,16 +23,21 @@ spring:
       static-locations: classpath:/static/
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:${DB_PORT}/${DB_SCHEMA}?rewriteBatchedStatements=true
+    url: jdbc:mysql://${DB_IP}:${DB_PORT}/${DB_SCHEMA}?rewriteBatchedStatements=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   jpa:
     open-in-view: false
+    show-sql: false
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
         default_batch_fetch_size: 100
+        order_inserts: true
+        order_updates: true
+        jdbc:
+          batch_size: 100
   flyway:
     enabled: true
     encoding: UTF-8
@@ -70,41 +75,17 @@ decorator:
 
 logging:
   config: classpath:logback/logback-display.xml
-
----
-spring:
-  config:
-    activate:
-      on-profile: default
-
-decorator:
-  datasource:
-    p6spy:
-      enable-logging: true
-
-logging:
   level:
     until.the.eternity: DEBUG
 
 openapi:
   nexon:
     base-url: https://open.api.nexon.com/mabinogi/v1
-    api-key: ${NEXON_API_KEY}
+    api-key: ${NEXON_OPEN_API_KEY}
     max-in-memory-size-mb: 5
     default-timeout-seconds: 5
   auction-history:
-    delay-ms: 1000
-    cron: "0 0 */4 * * *"  # 1시간마다 실행
+    delay-ms: ${AUCTION_HISTORY_DELAY_MS}
+    cron: ${AUCTION_HISTORY_CRON}
   min-price:
-    cron: "0 0 */4 * * *"
-
-
----
-spring:
-  config:
-    activate:
-      on-profile: prod
-
-springdoc:
-  swagger-ui:
-    enabled: false
+    cron: ${AUCTION_HISTORY_MIN_PRICE_CRON}
