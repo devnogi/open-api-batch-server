@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   spring-app:
-    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-latest}
     container_name: spring-app
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
@@ -13,8 +13,8 @@ services:
       autoheal: "true"
     environment:
       # === Application Configuration ===
-      SPRING_CONFIG_LOCATION: file:/app/config/application.yaml
-      SPRING_PROFILES_ACTIVE: dev
+      # SPRING_CONFIG_LOCATION: file:/app/config/application.yaml  # Optional: use external config
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       SERVER_PORT: ${SERVER_PORT}
@@ -41,58 +41,58 @@ services:
       DOCKER_USERNAME: ${DOCKER_USERNAME}
       DOCKER_REPO: ${DOCKER_REPO}
 
-      # === JVM Configuration (Development Environment) ===
-      # Dockerfile의 기본값(Xmx1024m)을 오버라이드하여 개발 환경에 맞게 조정
+      # === JVM Configuration ===
+      # All JVM options are now configurable via .env file
       JAVA_OPTS: >-
-        -Xms256m
-        -Xmx512m
-        -XX:MaxMetaspaceSize=150m
-        -XX:ReservedCodeCacheSize=48m
-        -XX:MaxDirectMemorySize=64m
-        -Xss512k
+        -Xms${JAVA_OPTS_XMS}
+        -Xmx${JAVA_OPTS_XMX}
+        -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE}
+        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE}
+        -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE}
+        -Xss${JAVA_OPTS_XSS}
         -XX:+UseG1GC
-        -XX:MaxGCPauseMillis=200
-        -XX:G1HeapRegionSize=2m
-        -XX:InitiatingHeapOccupancyPercent=45
+        -XX:MaxGCPauseMillis=${JAVA_OPTS_MAX_GC_PAUSE_MILLIS}
+        -XX:G1HeapRegionSize=${JAVA_OPTS_G1_HEAP_REGION_SIZE}
+        -XX:InitiatingHeapOccupancyPercent=${JAVA_OPTS_INITIATING_HEAP_OCCUPANCY_PERCENT}
         -XX:+TieredCompilation
-        -XX:TieredStopAtLevel=2
-        -XX:CICompilerCount=2
+        -XX:TieredStopAtLevel=${JAVA_OPTS_TIERED_STOP_AT_LEVEL}
+        -XX:CICompilerCount=${JAVA_OPTS_CI_COMPILER_COUNT}
         -XX:+UseCompressedOops
         -XX:+UseCompressedClassPointers
         -Djava.security.egd=file:/dev/./urandom
         -Dspring.jmx.enabled=false
     volumes:
       - ./logs:/app/logs
-      - ./config:/app/config:ro
+      # - ./config:/app/config:ro  # Optional: mount external config directory
     # Restart Policy:
     # - always: 항상 재시작 (수동 stop 포함)
     # - unless-stopped: 수동 stop 제외하고 재시작
-    # - on-failure:5: 실패 시 최대 5번만 재시작 (무한 재시작 루프 방지)
-    restart: on-failure:5
+    # - on-failure:N: 실패 시 최대 N번만 재시작 (무한 재시작 루프 방지)
+    restart: on-failure:${RESTART_POLICY_MAX_RETRIES}
 
     # Docker Resource Limits (cgroup을 통한 강제 메모리 제한)
     deploy:
       resources:
         limits:
-          memory: 750M                         # 컨테이너 최대 메모리: 750MB (700MB에서 증가, G1GC + 헬스체크 안정성)
+          memory: ${DOCKER_MEMORY_LIMIT}       # 컨테이너 최대 메모리 (hard limit, OOM killer threshold)
         reservations:
-          memory: 512M                         # 예약 메모리: 512MB (최소 보장 메모리, 450MB에서 증가)
+          memory: ${DOCKER_MEMORY_RESERVATION} # 예약 메모리 (soft limit, guaranteed minimum)
 
     networks:
       - app-network
     # Health Check: 컨테이너 상태 감지 (autoheal과 연동)
-    # curl 대신 wget 사용 (Alpine Linux에 기본 설치되어 있음)
+    # wget 사용 (Alpine Linux에 기본 설치되어 있음)
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT}/actuator/health"]
-      interval: 30s              # 30초마다 체크
-      timeout: 15s               # 15초 내 응답 없으면 실패 (GC 대응, 10s에서 증가)
-      retries: 4                 # 4번 연속 실패 시 unhealthy (3에서 증가, 더 여유있게)
-      start_period: 120s         # 시작 후 120초는 유예기간 (현재 77초 걸림, 여유있게 설정)
+      interval: ${HEALTHCHECK_INTERVAL}        # 체크 주기
+      timeout: ${HEALTHCHECK_TIMEOUT}          # 응답 타임아웃
+      retries: ${HEALTHCHECK_RETRIES}          # 연속 실패 횟수
+      start_period: ${HEALTHCHECK_START_PERIOD} # 시작 유예 기간
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: ${LOGGING_MAX_SIZE}          # 로그 파일 최대 크기
+        max-file: "${LOGGING_MAX_FILE}"        # 로그 파일 보관 개수
 
   # Autoheal: unhealthy 컨테이너 자동 재시작 서비스
   # - spring-app이 unhealthy 상태가 되면 자동으로 재시작
@@ -104,11 +104,11 @@ services:
     restart: unless-stopped
     environment:
       # AUTOHEAL_INTERVAL: 체크 주기 (초 단위)
-      AUTOHEAL_INTERVAL: 30                    # 30초마다 unhealthy 컨테이너 체크 (healthcheck와 동기화)
+      AUTOHEAL_INTERVAL: ${AUTOHEAL_INTERVAL}  # unhealthy 컨테이너 체크 주기 (healthcheck interval과 동기화 권장)
       # AUTOHEAL_START_PERIOD: 컨테이너 시작 후 체크 시작까지 유예 시간 (초)
-      AUTOHEAL_START_PERIOD: 0                 # healthcheck의 start_period를 따르므로 0으로 설정
+      AUTOHEAL_START_PERIOD: ${AUTOHEAL_START_PERIOD} # healthcheck의 start_period를 따르므로 0으로 설정
       # AUTOHEAL_DEFAULT_STOP_TIMEOUT: 재시작 시 강제 종료까지 대기 시간 (초)
-      AUTOHEAL_DEFAULT_STOP_TIMEOUT: 15        # 15초 내 종료 안 되면 강제 kill (Graceful shutdown 대기)
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: ${AUTOHEAL_DEFAULT_STOP_TIMEOUT} # graceful shutdown 대기 시간
       # DOCKER_SOCK: Docker 소켓 경로 (컨테이너 제어용)
       DOCKER_SOCK: /var/run/docker.sock
     volumes:
@@ -120,9 +120,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 50M
+          memory: ${AUTOHEAL_MEMORY_LIMIT}
         reservations:
-          memory: 20M
+          memory: ${AUTOHEAL_MEMORY_RESERVATION}
 
 networks:
   app-network:

@@ -1,14 +1,9 @@
-# =============================================================================
 # Multi-Stage Dockerfile for Spring Boot Application
-# =============================================================================
 # Stage 1: Build Stage - Gradle을 사용하여 애플리케이션 빌드
 # Stage 2: Extract Stage - Spring Boot Layered JAR 추출
 # Stage 3: Runtime Stage - 최종 런타임 이미지
-# =============================================================================
 
-# -----------------------------------------------------------------------------
 # Stage 1: Build Stage
-# -----------------------------------------------------------------------------
 FROM gradle:8.5-jdk21-alpine AS builder
 
 # 작업 디렉토리 설정
@@ -34,9 +29,7 @@ RUN gradle clean bootJar -x test --no-daemon
 RUN mkdir -p /app/build/extracted && \
     cp /app/build/libs/*.jar /app/build/app.jar
 
-# -----------------------------------------------------------------------------
 # Stage 2: Extract Layers
-# -----------------------------------------------------------------------------
 FROM eclipse-temurin:21-jre-alpine AS extractor
 
 WORKDIR /app
@@ -47,9 +40,7 @@ COPY --from=builder /app/build/app.jar app.jar
 # Spring Boot Layered JAR 추출 (레이어 최적화)
 RUN java -Djarmode=layertools -jar app.jar extract
 
-# -----------------------------------------------------------------------------
 # Stage 3: Final Runtime Stage
-# -----------------------------------------------------------------------------
 FROM eclipse-temurin:21-jre-alpine
 
 # 메타데이터 추가
@@ -72,14 +63,8 @@ COPY --from=extractor --chown=spring:spring /app/application/ ./
 # 사용자 전환
 USER spring:spring
 
-# JVM 메모리 설정 환경변수 (기본값, docker-compose에서 오버라이드 가능)
+# JVM 메모리 설정 환경변수 (기본값, docker-compose에서 오버라이드 중)
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
-
-# 포트 노출 (문서화 목적, 실제 포트는 docker-compose에서 설정)
-EXPOSE 8092
-
-# 헬스체크는 docker-compose에서 환경별로 관리
-# (개발/스테이징/프로덕션 환경마다 다른 설정 필요)
 
 # 애플리케이션 실행 (환경변수 JAVA_OPTS 사용)
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
