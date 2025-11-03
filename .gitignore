@@ -53,12 +53,13 @@ spy.log
 ### Environment Variables
 # Exclude actual .env file (contains real secrets)
 .env
+.env.local
 .env.dev
 .env.prod
 
 # Include environment templates (placeholder values only)
 # - .env.sample: Template with all available variables
-# - .env: Local development configuration template
+# - .env.local.sample: Local development configuration template
 # - .env.dev: Development server configuration template
 # - .env.prod: Production server configuration template
 # NOTE: These template files should ONLY contain placeholder values, never real secrets!

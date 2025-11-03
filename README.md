@@ -42,3 +42,62 @@
 - **Git branch 전략**: Git-flow [관련 블로그](https://velog.io/@kw2577/Git-branch-%EC%A0%84%EB%9E%B5)
 
 <br>
+
+### 🐳 로컬 개발 환경 (Docker)
+
+로컬에서 코드를 수정하면서 개발할 때는 Docker Hub에 푸시하지 않고 로컬 빌드로 실행할 수 있습니다.
+
+#### 1. 환경 설정
+
+```bash
+# .env.local.sample을 복사하여 .env.local 생성
+cp .env.local.sample .env.local
+
+# .env.local 파일을 열어서 필요한 값들을 수정
+# - NEXON_OPEN_API_KEY: Nexon Open API 키 입력
+# - DB_PASSWORD: 로컬 MySQL 비밀번호 입력
+# - 기타 필요한 설정 수정
+```
+
+#### 2. 로컬에서 Docker로 실행
+
+```bash
+# 로컬 코드를 빌드하고 Docker 컨테이너로 실행
+docker-compose -f docker-compose.local.yml up --build
+
+# 백그라운드 실행
+docker-compose -f docker-compose.local.yml up -d --build
+
+# 로그 확인
+docker-compose -f docker-compose.local.yml logs -f spring-app
+
+# 중지
+docker-compose -f docker-compose.local.yml down
+```
+
+#### 3. 코드 수정 후 재실행
+
+```bash
+# 코드 수정 후 다시 빌드하여 실행
+docker-compose -f docker-compose.local.yml up --build
+
+# 또는 기존 컨테이너 정리 후 재실행
+docker-compose -f docker-compose.local.yml down
+docker-compose -f docker-compose.local.yml up --build
+```
+
+#### 4. 환경별 실행 방법
+
+| 환경 | Docker Compose 파일 | 설명 |
+|------|---------------------|------|
+| **로컬 개발** | `docker-compose.local.yml` | 로컬 코드 빌드, 낮은 리소스 사용 |
+| **개발/운영 서버** | `docker-compose.yaml` | Docker Hub 이미지 사용 |
+
+#### 5. 참고사항
+
+- **로컬 개발**: 코드 수정 시마다 `--build` 옵션으로 재빌드 필요
+- **메모리 설정**: 로컬 환경은 메모리 사용량이 낮게 설정되어 있음 (512MB)
+- **데이터베이스**: `DB_IP=host.docker.internal`로 호스트 머신의 MySQL에 접근
+- **포트**: 기본 8080 포트 사용 (`.env.local`에서 변경 가능)
+
+<br>
