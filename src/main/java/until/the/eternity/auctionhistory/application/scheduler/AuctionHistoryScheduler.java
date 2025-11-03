@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.application.service.AuctionHistoryService;
@@ -22,14 +23,34 @@ public class AuctionHistoryScheduler {
     private final AuctionHistoryFetcher fetcher;
     private final AuctionHistoryPersister persister;
 
+    @Value("${openapi.auction-history.delay-ms}")
+    private long delayMs;
+
     @Scheduled(cron = "${openapi.auction-history.cron}", zone = "Asia/Seoul")
     public void fetchAndSaveAuctionHistoryAll() {
         List<AuctionHistory> newEntities = new ArrayList<>();
-        for (ItemCategory category : ItemCategory.values()) {
+        ItemCategory[] categories = ItemCategory.values();
+
+        for (int i = 0; i < categories.length; i++) {
+            ItemCategory category = categories[i];
             try {
+                log.debug("> [SCHEDULE] Processing category [{}]", category.getSubCategory());
                 List<OpenApiAuctionHistoryResponse> fetchedDtos = fetcher.fetch(category);
                 List<AuctionHistory> entities = persister.filterOutExisting(fetchedDtos, category);
                 newEntities.addAll(entities);
+
+                // 마지막 카테고리가 아닌 경우에만 delay 적용
+                if (i < categories.length - 1) {
+                    log.debug("> [SCHEDULE] Waiting {}ms before processing next category", delayMs);
+                    Thread.sleep(delayMs);
+                }
+            } catch (InterruptedException e) {
+                log.error(
+                        "> [SCHEDULE] Thread interrupted during delay for category [{}]",
+                        category.getSubCategory(),
+                        e);
+                Thread.currentThread().interrupt();
+                break;
             } catch (Exception e) {
                 log.error(
                         "> [SCHEDULE] Error during processing category [{}]",
