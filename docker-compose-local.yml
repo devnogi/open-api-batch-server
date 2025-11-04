@@ -13,6 +13,7 @@ services:
     image: open-api-batch-server:local
     container_name: spring-app-local
     ports:
+      -
       - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     env_file:
       - .env.local  # 로컬 환경 변수 파일
