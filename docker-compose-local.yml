@@ -1,7 +1,7 @@
 version: "3.8"
 
 # 로컬 개발 환경용 Docker Compose 설정
-# 사용법: docker-compose -f docker-compose.local.yml --env-file .env.local up --build
+# 사용법: docker-compose -f docker-compose-local.yml --env-file .env.local up --build
 # 참고: 쉘 환경 변수가 .env.local 파일의 값을 오버라이드할 수 있으므로 --env-file 옵션을 명시하는 것이 좋습니다
 
 services:
@@ -26,11 +26,12 @@ services:
       SERVER_PORT: ${SERVER_PORT:-8080}
 
       # === Database Configuration ===
-      DB_IP: ${DB_IP:-localhost}
-      DB_PORT: ${DB_PORT:-3306}
+      # Docker 네트워크 내부 연결 설정 (고정값)
+      DB_IP: mysql  # Docker 서비스 이름
+      DB_PORT: 3306  # Docker 네트워크 내부 포트
       DB_SCHEMA: ${DB_SCHEMA:-devnogi}
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_USER: root  # MySQL 컨테이너의 root 사용자
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-password}
 
       # === Security Configuration ===
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-secret-key-change-in-production}
@@ -80,19 +81,59 @@ services:
       - app-network
       - my-network  # MySQL 컨테이너와 통신을 위해 추가
 
+    # MySQL이 준비될 때까지 대기
+    depends_on:
+      mysql:
+        condition: service_healthy
+
     # Health Check
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT:-8080}/actuator/health"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: ${HEALTHCHECK_TIMEOUT:-10s}
       retries: ${HEALTHCHECK_RETRIES:-3}
-      start_period: ${HEALTHCHECK_START_PERIOD:-60s}
+      start_period: ${HEALTHCHECK_START_PERIOD:-90s}  # MySQL 초기화 시간 고려하여 증가
 
     logging:
       driver: "json-file"
       options:
         max-size: ${LOGGING_MAX_SIZE:-10m}
         max-file: "${LOGGING_MAX_FILE:-3}"
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: open-api-batch-mysql
+    restart: unless-stopped
+    env_file:
+      - .env.local  # 환경 변수 파일 로드
+    ports:
+      - "${MYSQL_EXTERNAL_PORT:-3306}:3306"  # 외부 접속용 포트 (호스트에서 접근 시)
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_SCHEMA:-devnogi}
+      # MYSQL_USER는 root를 지정할 수 없으므로 제거
+      # root 사용자는 MYSQL_ROOT_PASSWORD로 자동 생성됨
+      LANG: C.UTF_8
+      TZ: Asia/Seoul
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my-network
+    # MySQL Health Check
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --skip-character-set-client-handshake
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+      - --default-time-zone=+09:00  # MySQL 레벨 타임존 설정
+      - --explicit_defaults_for_timestamp=1  # TIMESTAMP 기본값 명시 허용
 
   # Autoheal: unhealthy 컨테이너 자동 재시작
   autoheal:
@@ -115,9 +156,11 @@ services:
         reservations:
           memory: ${AUTOHEAL_MEMORY_RESERVATION:-20m}
 
+volumes:
+  mysql_data:
+
 networks:
   app-network:
     driver: bridge
   my-network:
-    external: true  # 외부에서 생성된 네트워크 사용
-    name: open-api-batch-server_my-network
+    driver: bridge

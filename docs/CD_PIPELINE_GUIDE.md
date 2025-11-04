@@ -277,7 +277,7 @@ jobs:
 
 **Step 3-3: docker-compose.yaml 복사**
 ```yaml
-- name: Copy docker-compose.yaml to server
+- name: Copy docker-compose-dev.yaml to server
   run: |
     scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
 ```
@@ -1396,7 +1396,7 @@ ssh-keyscan -H 138.2.126.248 >> ~/.ssh/known_hosts
 **6. docker-compose.yaml 복사**
 ```bash
 scp -i ~/.ssh/my-key.pem \
-  docker-compose.yaml \
+  docker-compose-dev.yaml \
   ubuntu@138.2.126.248:/home/ubuntu/app/
 ```
 
@@ -1727,7 +1727,7 @@ docker logs autoheal
 docker inspect spring-app | grep -A 5 Labels
 # "autoheal": "true" 있어야 함
 
-# 4. docker-compose.yaml 확인
+# 4. docker-compose-dev.yaml 확인
 # spring-app에 다음이 있어야 함:
 labels:
   autoheal: "true"

@@ -63,27 +63,27 @@ cp .env.local.sample .env.local
 
 ```bash
 # 로컬 코드를 빌드하고 Docker 컨테이너로 실행
-docker-compose -f docker-compose.local.yml up --build
+docker-compose -f docker-compose-local.yml up --build
 
 # 백그라운드 실행
-docker-compose -f docker-compose.local.yml up -d --build
+docker-compose -f docker-compose-local.yml up -d --build
 
 # 로그 확인
-docker-compose -f docker-compose.local.yml logs -f spring-app
+docker-compose -f docker-compose-local.yml logs -f spring-app
 
 # 중지
-docker-compose -f docker-compose.local.yml down
+docker-compose -f docker-compose-local.yml down
 ```
 
 #### 3. 코드 수정 후 재실행
 
 ```bash
 # 코드 수정 후 다시 빌드하여 실행
-docker-compose -f docker-compose.local.yml up --build
+docker-compose -f docker-compose-local.yml up --build
 
 # 또는 기존 컨테이너 정리 후 재실행
-docker-compose -f docker-compose.local.yml down
-docker-compose -f docker-compose.local.yml up --build
+docker-compose -f docker-compose-local.yml down
+docker-compose -f docker-compose-local.yml up --build
 ```
 
 #### 4. 환경별 실행 방법
