@@ -91,7 +91,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /home/${{ secrets.SERVER_USER }}/app/logs"
 
-      - name: Copy docker-compose.yaml to server
+      - name: Copy docker-compose-dev.yaml to server
         run: |
           scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
 
