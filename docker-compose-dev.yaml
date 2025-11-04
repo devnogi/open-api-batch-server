@@ -65,7 +65,7 @@ services:
         -Djava.security.egd=file:/dev/./urandom
         -Dspring.jmx.enabled=false
     volumes:
-      - ./logs:/app/logs
+      - app-logs:/app/logs  # Named volume 사용 (권한 문제 해결)
       # - ./config:/app/config:ro  # Optional: mount external config directory
     # Restart Policy:
     # - always: 항상 재시작 (수동 stop 포함)
@@ -126,6 +126,10 @@ services:
           memory: ${AUTOHEAL_MEMORY_LIMIT}
         reservations:
           memory: ${AUTOHEAL_MEMORY_RESERVATION}
+
+volumes:
+  app-logs:
+    driver: local
 
 networks:
   app-network:

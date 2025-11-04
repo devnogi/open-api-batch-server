@@ -5,8 +5,9 @@
                     class="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
     <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
-    <property name="LOG_FILE_PATH" value="./logs"/>
-    <property name="ARCHIVE_FILE_PATH" value="./logs/archive"/>
+    <!-- 환경 변수 LOG_DIR 사용, 기본값은 /app/logs -->
+    <property name="LOG_FILE_PATH" value="${LOG_DIR:-/app/logs}"/>
+    <property name="ARCHIVE_FILE_PATH" value="${LOG_DIR:-/app/logs}/archive"/>
     <property name="LOG_FILE_NAME" value="log_data"/>
     <property name="ERROR_LOG_FILE_NAME" value="log_data_error"/>
     <property name="CONSOLE_LOG_PATTERN"
