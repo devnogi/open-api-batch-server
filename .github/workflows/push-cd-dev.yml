@@ -93,7 +93,7 @@ jobs:
 
       - name: Copy docker-compose-dev.yaml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
+          scp -i ~/.ssh/my-key.pem docker-compose-dev.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
 
       - name: Deploy to Dev Server
         run: |
