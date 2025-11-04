@@ -4,7 +4,8 @@
 # Stage 3: Runtime Stage - 최종 런타임 이미지
 
 # Stage 1: Build Stage
-FROM gradle:8.5-jdk21-alpine AS builder
+# alpine 제거하여 ARM64(Apple Silicon)와 AMD64(Intel/AMD) 모두 지원
+FROM gradle:8.5-jdk21 AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app

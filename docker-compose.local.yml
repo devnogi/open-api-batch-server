@@ -1,7 +1,8 @@
 version: "3.8"
 
 # 로컬 개발 환경용 Docker Compose 설정
-# 사용법: docker-compose -f docker-compose.local.yml up --build
+# 사용법: docker-compose -f docker-compose.local.yml --env-file .env.local up --build
+# 참고: 쉘 환경 변수가 .env.local 파일의 값을 오버라이드할 수 있으므로 --env-file 옵션을 명시하는 것이 좋습니다
 
 services:
   spring-app:
@@ -77,6 +78,7 @@ services:
 
     networks:
       - app-network
+      - my-network  # MySQL 컨테이너와 통신을 위해 추가
 
     # Health Check
     healthcheck:
@@ -116,3 +118,6 @@ services:
 networks:
   app-network:
     driver: bridge
+  my-network:
+    external: true  # 외부에서 생성된 네트워크 사용
+    name: open-api-batch-server_my-network
