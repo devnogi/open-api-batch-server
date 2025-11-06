@@ -6,6 +6,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -103,10 +106,24 @@ class AuctionHistoryQueryDslRepository {
             }
         }
 
-        // 거래 일자 조건
-        if (c.date_auction_buy() != null && !c.date_auction_buy().isBlank()) {
-            // 날짜 파싱 및 조건 추가 로직
-            // TODO: 날짜 범위 검색 구현
+        // 거래 일자 조건 (String 'yyyy-MM-dd' → Instant 변환)
+        if (c.dateAuctionBuyRequest() != null) {
+            DateAuctionBuyRequest date = c.dateAuctionBuyRequest();
+            if (date.dateAuctionBuyFrom() != null && !date.dateAuctionBuyFrom().isBlank()) {
+                Instant fromInstant =
+                        LocalDate.parse(date.dateAuctionBuyFrom())
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant();
+                builder.and(ah.dateAuctionBuy.goe(fromInstant));
+            }
+            if (date.dateAuctionBuyTo() != null && !date.dateAuctionBuyTo().isBlank()) {
+                Instant toInstant =
+                        LocalDate.parse(date.dateAuctionBuyTo())
+                                .plusDays(1) // 다음 날 00:00:00으로 설정하여 해당 날짜 전체 포함
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant();
+                builder.and(ah.dateAuctionBuy.lt(toInstant));
+            }
         }
 
         return builder;
