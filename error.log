@@ -1,0 +1,83 @@
+15:30:05,173 |-INFO in ch.qos.logback.classic.LoggerContext[default] - This is logback-classic version 1.5.18
+15:30:05,184 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Here is a list of configurators discovered as a service, by rank:
+15:30:05,184 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b -   org.springframework.boot.logging.logback.RootLogLevelConfigurator
+15:30:05,184 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - They will be invoked in order until ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY is returned.
+15:30:05,184 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Constructed configurator of type class org.springframework.boot.logging.logback.RootLogLevelConfigurator
+15:30:05,270 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - org.springframework.boot.logging.logback.RootLogLevelConfigurator.configure() call lasted 1 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+15:30:05,270 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Trying to configure with ch.qos.logback.classic.joran.SerializedModelConfigurator
+15:30:05,275 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Constructed configurator of type class ch.qos.logback.classic.joran.SerializedModelConfigurator
+15:30:05,286 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.scmo]
+15:30:05,364 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback.scmo]
+15:30:05,364 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - ch.qos.logback.classic.joran.SerializedModelConfigurator.configure() call lasted 89 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+15:30:05,364 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Trying to configure with ch.qos.logback.classic.util.DefaultJoranConfigurator
+15:30:05,366 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Constructed configurator of type class ch.qos.logback.classic.util.DefaultJoranConfigurator
+15:30:05,368 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.xml]
+15:30:05,369 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback.xml]
+15:30:05,369 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - ch.qos.logback.classic.util.DefaultJoranConfigurator.configure() call lasted 3 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+15:30:05,370 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Trying to configure with ch.qos.logback.classic.BasicConfigurator
+15:30:05,375 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - Constructed configurator of type class ch.qos.logback.classic.BasicConfigurator
+15:30:05,375 |-INFO in ch.qos.logback.classic.BasicConfigurator@76f7d241 - Setting up default configuration.
+15:30:05,770 |-INFO in ch.qos.logback.core.ConsoleAppender[console] - BEWARE: Writing to the console can be very slow. Avoid logging to the
+15:30:05,770 |-INFO in ch.qos.logback.core.ConsoleAppender[console] - console in production environments, especially in high volume systems.
+15:30:05,770 |-INFO in ch.qos.logback.core.ConsoleAppender[console] - See also https://logback.qos.ch/codes.html#slowConsole
+15:30:05,772 |-INFO in ch.qos.logback.classic.util.ContextInitializer@2783717b - ch.qos.logback.classic.BasicConfigurator.configure() call lasted 397 milliseconds. ExecutionStatus=NEUTRAL
+15:30:10,275 |-INFO in ConfigurationWatchList(mainURL=jar:nested:/app.jar/!BOOT-INF/classes/!/logback/logback-display.xml, fileWatchList={}, urlWatchList=[}) - URL [jar:nested:/app.jar/!BOOT-INF/classes/!/logback/logback-display.xml] is not of type file
+15:30:10,582 |-WARN in org.springframework.boot.logging.logback.SpringProfileIfNestedWithinSecondPhaseElementSanityChecker@3829ac1 - <springProfile> elements cannot be nested within an <appender>, <logger> or <root> element
+15:30:10,582 |-WARN in org.springframework.boot.logging.logback.SpringProfileIfNestedWithinSecondPhaseElementSanityChecker@3829ac1 - Element <root> at line 5 contains a nested <springProfile> element at line 6
+15:30:10,582 |-WARN in org.springframework.boot.logging.logback.SpringProfileIfNestedWithinSecondPhaseElementSanityChecker@3829ac1 - Element <root> at line 5 contains a nested <springProfile> element at line 9
+15:30:10,582 |-WARN in org.springframework.boot.logging.logback.SpringProfileIfNestedWithinSecondPhaseElementSanityChecker@3829ac1 - Element <root> at line 5 contains a nested <springProfile> element at line 14
+15:30:10,872 |-INFO in ch.qos.logback.core.joran.util.ConfigurationWatchListUtil@4baf352a - Adding [jar:nested:/app.jar/!BOOT-INF/classes/!/logback/logback-appender.xml] to configuration watch list.15:30:10,873 |-INFO in ConfigurationWatchList(mainURL=jar:nested:/app.jar/!BOOT-INF/classes/!/logback/logback-display.xml, fileWatchList={}, urlWatchList=[}) - Cannot watch [jar:nested:/app.jar/!BOOT-INF/classes/!/logback/logback-appender.xml] as its protocol is not one of file, http or https.
+15:30:10,883 |-INFO in ch.qos.logback.core.model.processor.ConversionRuleModelHandler - registering conversion word clr with class [org.springframework.boot.logging.logback.ColorConverter]
+15:30:10,884 |-INFO in ch.qos.logback.core.model.processor.ConversionRuleModelHandler - registering conversion word wEx with class [org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter]
+15:30:10,884 |-INFO in ch.qos.logback.core.model.processor.TimestampModelHandler - Using current interpretation time, i.e. now, as time reference.
+15:30:10,886 |-INFO in ch.qos.logback.core.model.processor.TimestampModelHandler - Adding property to the context with key="BY_DATE" and value="2025-10-20" to the LOCAL scope
+15:30:10,975 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "[%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Seoul}] [%5p] [%15.15thread] [%-40.40logger{39}] - %m%n" substituted for "[%d{yyyy-MM-dd HH:mm:ss.SSS, ${logback.timezone:-Asia/Seoul}}] [%5p] [%15.15thread] [%-40.40logger{39}] - %m%n"
+15:30:10,977 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [CONSOLE]
+15:30:10,978 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.ConsoleAppender]
+15:30:11,089 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "[%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Seoul}] [%5p] [%15.15thread] [%-40.40logger{39}] - %m%n" substituted for "${CONSOLE_LOG_PATTERN}"
+15:30:11,091 |-WARN in ch.qos.logback.core.model.processor.ImplicitModelHandler - Ignoring unknown property [charset] in [ch.qos.logback.classic.PatternLayout]
+15:30:11,174 |-INFO in ch.qos.logback.classic.pattern.DateConverter@15eebbff - Setting zoneId to "Asia/Seoul"
+15:30:11,175 |-WARN in ch.qos.logback.core.ConsoleAppender[CONSOLE] - This appender no longer admits a layout as a sub-component, set an encoder instead.
+15:30:11,175 |-WARN in ch.qos.logback.core.ConsoleAppender[CONSOLE] - To ensure compatibility, wrapping your layout in LayoutWrappingEncoder.
+15:30:11,175 |-WARN in ch.qos.logback.core.ConsoleAppender[CONSOLE] - See also https://logback.qos.ch/codes.html#layoutInsteadOfEncoder for details
+15:30:11,175 |-INFO in ch.qos.logback.core.ConsoleAppender[CONSOLE] - BEWARE: Writing to the console can be very slow. Avoid logging to the
+15:30:11,175 |-INFO in ch.qos.logback.core.ConsoleAppender[CONSOLE] - console in production environments, especially in high volume systems.
+15:30:11,175 |-INFO in ch.qos.logback.core.ConsoleAppender[CONSOLE] - See also https://logback.qos.ch/codes.html#slowConsole
+15:30:11,175 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [FILE]
+15:30:11,176 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.rolling.RollingFileAppender]
+15:30:11,181 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "./logs/2025-10-20_log_data.log" substituted for "${LOG_FILE_PATH}/${BY_DATE}_${LOG_FILE_NAME}.log"
+15:30:11,182 |-INFO in ch.qos.logback.core.model.processor.ImplicitModelHandler - Assuming default type [ch.qos.logback.classic.encoder.PatternLayoutEncoder] for [encoder] property
+15:30:11,182 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "[%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Seoul}] [%5p] [%15.15thread] [%-40.40logger{39}] - %m%n" substituted for "${CONSOLE_LOG_PATTERN}"
+15:30:11,183 |-INFO in ch.qos.logback.classic.pattern.DateConverter@22d6f11 - Setting zoneId to "Asia/Seoul"
+15:30:11,263 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "./logs/archive/%d{yyyy-MM-dd, Asia/Seoul}_%i.log" substituted for "${ARCHIVE_FILE_PATH}/%d{yyyy-MM-dd, ${logback.timezone:-Asia/Seoul}}_%i.log"
+15:30:11,271 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@815336475 - setting totalSizeCap to 50 MB
+15:30:11,276 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@815336475 - Archive files will be limited to [50 MB] each.
+15:30:11,276 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@815336475 - No compression will be used
+15:30:11,282 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@815336475 - Will use the pattern ./logs/archive/%d{yyyy-MM-dd, Asia/Seoul}_%i.log for the active file
+15:30:11,486 |-INFO in ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy@2453f95d - The date pattern is 'yyyy-MM-dd' from file name pattern './logs/archive/%d{yyyy-MM-dd, Asia/Seoul}_%i.log'.
+15:30:11,486 |-INFO in ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy@2453f95d - Roll-over at midnight.
+15:30:11,573 |-INFO in ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy@2453f95d - Setting initial period to 2025-10-20T15:30:11.572Z
+15:30:11,582 |-INFO in ch.qos.logback.core.rolling.RollingFileAppender[FILE] - Active log file name: ./logs/2025-10-20_log_data.log
+15:30:11,583 |-INFO in ch.qos.logback.core.rolling.RollingFileAppender[FILE] - File property is set to [./logs/2025-10-20_log_data.log]
+15:30:11,586 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [ERROR]
+15:30:11,586 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.rolling.RollingFileAppender]
+15:30:11,667 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "./logs/2025-10-20_log_data_error.log" substituted for "${LOG_FILE_PATH}/${BY_DATE}_${ERROR_LOG_FILE_NAME}.log"
+15:30:11,668 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "[%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Seoul}] [%5p] [%15.15thread] [%-40.40logger{39}] - %m%n" substituted for "${CONSOLE_LOG_PATTERN}"
+15:30:11,668 |-INFO in ch.qos.logback.classic.pattern.DateConverter@44828f6b - Setting zoneId to "Asia/Seoul"
+15:30:11,668 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@1bb1fde8 - value "./logs/archive/%d{yyyy-MM-dd, Asia/Seoul}_error_%i.log" substituted for "${ARCHIVE_FILE_PATH}/%d{yyyy-MM-dd, ${logback.timezone:-Asia/Seoul}}_error_%i.log"
+15:30:11,670 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@767436045 - setting totalSizeCap to 50 MB
+15:30:11,670 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@767436045 - Archive files will be limited to [50 MB] each.
+15:30:11,670 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@767436045 - No compression will be used
+15:30:11,670 |-INFO in c.q.l.core.rolling.SizeAndTimeBasedRollingPolicy@767436045 - Will use the pattern ./logs/archive/%d{yyyy-MM-dd, Asia/Seoul}_error_%i.log for the active file
+15:30:11,671 |-INFO in ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy@553f1d75 - The date pattern is 'yyyy-MM-dd' from file name pattern './logs/archive/%d{yyyy-MM-dd, Asia/Seoul}_error_%i.log'.
+15:30:11,671 |-INFO in ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy@553f1d75 - Roll-over at midnight.
+15:30:11,672 |-INFO in ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy@553f1d75 - Setting initial period to 2025-10-20T15:30:11.672Z
+15:30:11,673 |-INFO in ch.qos.logback.core.rolling.RollingFileAppender[ERROR] - Active log file name: ./logs/2025-10-20_log_data_error.log
+15:30:11,673 |-INFO in ch.qos.logback.core.rolling.RollingFileAppender[ERROR] - File property is set to [./logs/2025-10-20_log_data_error.log]
+15:30:11,674 |-INFO in ch.qos.logback.classic.model.processor.RootLoggerModelHandler - Setting level of ROOT logger to INFO
+15:30:11,675 |-INFO in ch.qos.logback.classic.jul.LevelChangePropagator@6e1d8f9e - Propagating INFO level on Logger[ROOT] onto the JUL framework
+15:30:11,677 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [CONSOLE] to Logger[ROOT]
+15:30:11,677 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [FILE] to Logger[ROOT]
+15:30:11,677 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [ERROR] to Logger[ROOT]
+15:30:11,677 |-INFO in ch.qos.logback.core.model.processor.DefaultProcessor@3e34ace1 - End of configuration.
+15:30:11,679 |-INFO in org.springframework.boot.logging.logback.SpringBootJoranConfigurator@62fe6067 - Registering current configuration as safe fallback point
