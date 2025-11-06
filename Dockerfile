@@ -4,7 +4,8 @@
 # Stage 3: Runtime Stage - 최종 런타임 이미지
 
 # Stage 1: Build Stage
-FROM gradle:8.5-jdk21-alpine AS builder
+# alpine 제거하여 ARM64(Apple Silicon)와 AMD64(Intel/AMD) 모두 지원
+FROM gradle:8.5-jdk21 AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -59,6 +60,10 @@ COPY --from=extractor --chown=spring:spring /app/dependencies/ ./
 COPY --from=extractor --chown=spring:spring /app/spring-boot-loader/ ./
 COPY --from=extractor --chown=spring:spring /app/snapshot-dependencies/ ./
 COPY --from=extractor --chown=spring:spring /app/application/ ./
+
+# 로그 디렉토리 생성 및 권한 설정 (Named volume 마운트 전에 실행됨)
+RUN mkdir -p /app/logs /app/logs/archive && \
+    chown -R spring:spring /app/logs
 
 # 사용자 전환
 USER spring:spring
