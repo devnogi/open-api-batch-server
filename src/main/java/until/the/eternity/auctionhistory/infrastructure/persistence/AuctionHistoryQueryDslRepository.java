@@ -1,6 +1,8 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
@@ -9,16 +11,21 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.entity.QAuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.enums.SearchStandard;
-import until.the.eternity.auctionhistory.interfaces.rest.dto.request.*;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.DateAuctionBuyRequest;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
 import until.the.eternity.auctionitemoption.domain.entity.QAuctionItemOption;
 
 @Component
@@ -61,13 +68,17 @@ class AuctionHistoryQueryDslRepository {
             }
         }
 
-        // 3단계: 모든 옵션과 함께 조회 (LEFT JOIN - 조건 없음!)
+        // 3단계: 정렬 조건 빌드
+        List<OrderSpecifier<?>> orderSpecifiers = buildOrderSpecifiers(pageable, ah);
+
+        // 4단계: 모든 옵션과 함께 조회 (LEFT JOIN - 조건 없음!)
         List<AuctionHistory> content =
                 queryFactory
                         .selectFrom(ah)
                         .leftJoin(ah.auctionItemOptions, aio)
                         .fetchJoin()
                         .where(historyBuilder)
+                        .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
                         .distinct() // 중복 제거
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
@@ -389,7 +400,7 @@ class AuctionHistoryQueryDslRepository {
             valueCondition = numValue.eq(value); // 기본값: 같음
         }
 
-        // 명시적으로 괄호를 추가하여 쿼리의 가독성을 높입니다
+        // 명시적 괄호 추가
         BooleanExpression combined = optionTypeCondition.and(valueCondition);
         return Expressions.booleanTemplate("({0})", combined);
     }
@@ -398,5 +409,35 @@ class AuctionHistoryQueryDslRepository {
     private NumberTemplate<Integer> castOptionValueToInt(QAuctionItemOption aio) {
         return Expressions.numberTemplate(
                 Integer.class, "COALESCE({0}, {1}, 0)", aio.optionValue2, aio.optionValue);
+    }
+
+    /** Pageable의 Sort를 QueryDSL OrderSpecifier로 변환 */
+    private List<OrderSpecifier<?>> buildOrderSpecifiers(Pageable pageable, QAuctionHistory ah) {
+        List<OrderSpecifier<?>> orders = new ArrayList<>();
+
+        if (pageable.getSort().isSorted()) {
+            for (Sort.Order order : pageable.getSort()) {
+                Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+                String property = order.getProperty();
+
+                // 필드명에 따라 QueryDSL 정렬 표현식 생성
+                OrderSpecifier<?> orderSpecifier =
+                        switch (property) {
+                            case "dateAuctionBuy" ->
+                                    new OrderSpecifier<>(direction, ah.dateAuctionBuy);
+                            case "auctionPricePerUnit" ->
+                                    new OrderSpecifier<>(direction, ah.auctionPricePerUnit);
+                            case "itemName" -> new OrderSpecifier<>(direction, ah.itemName);
+                            default -> new OrderSpecifier<>(Order.DESC, ah.dateAuctionBuy); // 기본값
+                        };
+
+                orders.add(orderSpecifier);
+            }
+        } else {
+            // 정렬 조건이 없으면 기본 정렬은 최신 거래일자순: dateAuctionBuy DESC
+            orders.add(new OrderSpecifier<>(Order.DESC, ah.dateAuctionBuy));
+        }
+
+        return orders;
     }
 }
