@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.entity.QAuctionHistory;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.enums.SearchStandard;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.*;
 import until.the.eternity.auctionitemoption.domain.entity.QAuctionItemOption;
 
@@ -119,7 +120,7 @@ class AuctionHistoryQueryDslRepository {
             if (date.dateAuctionBuyTo() != null && !date.dateAuctionBuyTo().isBlank()) {
                 Instant toInstant =
                         LocalDate.parse(date.dateAuctionBuyTo())
-                                .plusDays(1) // 다음 날 00:00:00으로 설정하여 해당 날짜 전체 포함
+                                .plusDays(1)
                                 .atStartOfDay(ZoneId.systemDefault())
                                 .toInstant();
                 builder.and(ah.dateAuctionBuy.lt(toInstant));
@@ -370,20 +371,22 @@ class AuctionHistoryQueryDslRepository {
         return new OptionConditionResult(builder, conditionCount);
     }
 
-    /** 옵션 조건 빌드 헬퍼 (option_type + 숫자 비교 + UP/DOWN) */
+    /** 옵션 조건 빌드 헬퍼 (option_type + 숫자 비교 + SearchStandard) */
     private BooleanExpression buildOptionCondition(
-            QAuctionItemOption aio, String optionType, Integer value, String standard) {
+            QAuctionItemOption aio, String optionType, Integer value, SearchStandard standard) {
         BooleanExpression optionTypeCondition = aio.optionType.eq(optionType);
 
         NumberTemplate<Integer> numValue = castOptionValueToInt(aio);
 
         BooleanExpression valueCondition;
-        if ("UP".equals(standard)) {
+        if (standard == null || standard.isEqual()) {
+            valueCondition = numValue.eq(value); // 같음
+        } else if (standard.isUp()) {
             valueCondition = numValue.goe(value); // 이상 (>=)
-        } else if ("DOWN".equals(standard)) {
+        } else if (standard.isDown()) {
             valueCondition = numValue.loe(value); // 이하 (<=)
         } else {
-            valueCondition = numValue.eq(value); // 같음
+            valueCondition = numValue.eq(value); // 기본값: 같음
         }
 
         // 명시적으로 괄호를 추가하여 쿼리의 가독성을 높입니다
