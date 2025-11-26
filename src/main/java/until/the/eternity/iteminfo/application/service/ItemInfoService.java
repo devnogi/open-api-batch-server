@@ -2,12 +2,15 @@ package until.the.eternity.iteminfo.application.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
+import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,5 +36,16 @@ public class ItemInfoService {
     public List<ItemInfoResponse> findBySubCategory(String subCategory) {
         List<ItemInfo> itemInfos = itemInfoRepository.findBySubCategory(subCategory);
         return ItemInfoResponse.from(itemInfos);
+    }
+
+    public Page<ItemInfoResponse> findAllDetail(Pageable pageable) {
+        Page<ItemInfo> itemInfoPage = itemInfoRepository.findAllWithPagination(pageable);
+        return itemInfoPage.map(ItemInfoResponse::from);
+    }
+
+    public List<ItemInfoSummaryResponse> findAllSummary(
+            org.springframework.data.domain.Sort.Direction direction) {
+        List<ItemInfo> itemInfos = itemInfoRepository.findAllSortedByName(direction);
+        return ItemInfoSummaryResponse.from(itemInfos);
     }
 }
