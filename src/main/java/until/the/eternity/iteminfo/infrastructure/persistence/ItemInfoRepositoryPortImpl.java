@@ -39,4 +39,14 @@ public class ItemInfoRepositoryPortImpl implements ItemInfoRepositoryPort {
         Sort sort = Sort.by(direction, "id.name");
         return jpaRepository.findAll(sort);
     }
+
+    @Override
+    public boolean existsById(until.the.eternity.iteminfo.domain.entity.ItemInfoId id) {
+        return jpaRepository.existsById(id);
+    }
+
+    @Override
+    public void saveAll(List<ItemInfo> itemInfos) {
+        jpaRepository.saveAll(itemInfos);
+    }
 }

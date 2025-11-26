@@ -29,4 +29,6 @@ public interface AuctionHistoryRepositoryPort {
     void saveAll(List<AuctionHistory> newEntities);
 
     Optional<Instant> findLatestDateAuctionBuyBySubCategory(ItemCategory itemCategory);
+
+    List<Object[]> findDistinctItemInfo();
 }

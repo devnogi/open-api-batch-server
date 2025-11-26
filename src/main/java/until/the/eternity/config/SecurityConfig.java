@@ -39,7 +39,7 @@ public class SecurityConfig {
                                                 "/swagger-ui/**", "/v3/api-docs/**", "/docs/**")
                                         .permitAll()
                                         // API 엔드포인트는 공개
-                                        .requestMatchers("/api/**")
+                                        .requestMatchers("/api/**", "/auction-history/**")
                                         .permitAll()
                                         // 나머지 요청은 인증 필요
                                         .anyRequest()

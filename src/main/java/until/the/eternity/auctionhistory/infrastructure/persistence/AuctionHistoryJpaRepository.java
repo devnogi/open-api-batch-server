@@ -36,4 +36,11 @@ public interface AuctionHistoryJpaRepository
 
     @EntityGraph(attributePaths = "itemOptions")
     Optional<AuctionHistory> findWithItemOptionsByAuctionBuyId(String id);
+
+    @Query(
+            """
+           select distinct a.itemName, a.itemTopCategory, a.itemSubCategory
+             from AuctionHistory a
+           """)
+    List<Object[]> findDistinctItemInfo();
 }

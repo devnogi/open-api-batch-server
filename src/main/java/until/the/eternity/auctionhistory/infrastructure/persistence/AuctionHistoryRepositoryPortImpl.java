@@ -83,4 +83,9 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
         return jpaRepository.findLatestDateAuctionBuyBySubCategory(
                 itemCategory.getTopCategory(), itemCategory.getSubCategory());
     }
+
+    @Override
+    public List<Object[]> findDistinctItemInfo() {
+        return jpaRepository.findDistinctItemInfo();
+    }
 }

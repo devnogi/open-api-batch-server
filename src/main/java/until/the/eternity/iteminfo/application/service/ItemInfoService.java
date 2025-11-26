@@ -1,23 +1,30 @@
 package until.the.eternity.iteminfo.application.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
+import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
+import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSyncResponse;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemInfoService {
 
     private final ItemInfoRepositoryPort itemInfoRepository;
+    private final AuctionHistoryRepositoryPort auctionHistoryRepository;
 
     public List<ItemCategoryResponse> findItemCategories() {
         return ItemCategoryResponse.from();
@@ -47,5 +54,58 @@ public class ItemInfoService {
             org.springframework.data.domain.Sort.Direction direction) {
         List<ItemInfo> itemInfos = itemInfoRepository.findAllSortedByName(direction);
         return ItemInfoSummaryResponse.from(itemInfos);
+    }
+
+    @Transactional
+    public ItemInfoSyncResponse syncItemInfoFromAuctionHistory() {
+        log.info("Starting to sync ItemInfo from AuctionHistory");
+
+        // 1. AuctionHistory에서 distinct한 아이템 정보 조회
+        List<Object[]> distinctItems = auctionHistoryRepository.findDistinctItemInfo();
+        log.info("Found {} distinct items in AuctionHistory", distinctItems.size());
+
+        // 2. 중복되지 않은 아이템만 필터링하여 저장
+        List<ItemInfo> newItemInfos = new ArrayList<>();
+        List<String> syncedItemNames = new ArrayList<>();
+
+        for (Object[] item : distinctItems) {
+            String itemName = (String) item[0];
+            String topCategory = (String) item[1];
+            String subCategory = (String) item[2];
+
+            ItemInfoId itemInfoId = new ItemInfoId(itemName, subCategory, topCategory);
+
+            // 이미 존재하는 아이템인지 확인
+            if (!itemInfoRepository.existsById(itemInfoId)) {
+                ItemInfo itemInfo =
+                        ItemInfo.builder()
+                                .id(itemInfoId)
+                                .description(null)
+                                .inventoryWidth(null)
+                                .inventoryHeight(null)
+                                .inventoryMaxBundleCount(null)
+                                .history(null)
+                                .acquisitionMethod(null)
+                                .storeSalesPrice(null)
+                                .weaponType(null)
+                                .repair(null)
+                                .maxAlterationCount(null)
+                                .build();
+
+                newItemInfos.add(itemInfo);
+                syncedItemNames.add(itemName);
+                log.debug("Adding new item to sync: {}", itemName);
+            }
+        }
+
+        // 3. 새로운 아이템 정보 저장
+        if (!newItemInfos.isEmpty()) {
+            itemInfoRepository.saveAll(newItemInfos);
+            log.info("Successfully synced {} new items to ItemInfo", newItemInfos.size());
+        } else {
+            log.info("No new items to sync");
+        }
+
+        return ItemInfoSyncResponse.of(syncedItemNames);
     }
 }
