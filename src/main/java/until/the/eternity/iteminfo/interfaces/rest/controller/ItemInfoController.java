@@ -18,6 +18,7 @@ import until.the.eternity.common.enums.SortDirection;
 import until.the.eternity.common.response.ApiResponse;
 import until.the.eternity.iteminfo.application.service.ItemInfoService;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoPageRequestDto;
+import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
@@ -44,43 +45,35 @@ public class ItemInfoController {
         return itemInfoService.findAll();
     }
 
-    @Operation(summary = "상위 카테고리로 검색", description = "상위 카테고리 이름으로 아이템 정보를 검색합니다.")
-    @GetMapping("/search/top-category")
-    public List<ItemInfoResponse> searchItemInfosByTopCategory(
-            @Parameter(description = "검색할 상위 카테고리", required = true, example = "무기") @RequestParam
-                    String topCategory) {
-        return itemInfoService.findByTopCategory(topCategory);
-    }
-
-    @Operation(summary = "하위 카테고리로 검색", description = "하위 카테고리 이름으로 아이템 정보를 검색합니다.")
-    @GetMapping("/search/sub-category")
-    public List<ItemInfoResponse> searchItemInfosBySubCategory(
-            @Parameter(description = "검색할 하위 카테고리", required = true, example = "한손검") @RequestParam
-                    String subCategory) {
-        return itemInfoService.findBySubCategory(subCategory);
-    }
-
     @Operation(
             summary = "아이템 상세 정보 페이지네이션 조회",
-            description = "모든 아이템 정보를 페이지네이션과 함께 조회합니다. name 컬럼 기준으로 정렬됩니다.")
+            description =
+                    "아이템 정보를 페이지네이션과 함께 조회합니다. "
+                            + "topCategory는 필수 파라미터이며, name, subCategory로 추가 필터링 가능합니다. "
+                            + "name 컬럼 기준으로 정렬됩니다.")
     @GetMapping("/detail")
     public ResponseEntity<ApiResponse<Page<ItemInfoResponse>>> getItemInfosDetail(
-            @Valid @ModelAttribute ItemInfoPageRequestDto pageRequest) {
+            @Valid @ModelAttribute ItemInfoPageRequestDto pageRequest,
+            @Valid @ModelAttribute ItemInfoSearchRequest searchRequest) {
         Page<ItemInfoResponse> itemInfoPage =
-                itemInfoService.findAllDetail(pageRequest.toPageable());
+                itemInfoService.findAllDetail(searchRequest, pageRequest.toPageable());
         return ResponseEntity.ok(ApiResponse.success(itemInfoPage));
     }
 
     @Operation(
             summary = "아이템 요약 정보 조회",
-            description = "모든 아이템의 이름, 상위 카테고리, 하위 카테고리만 조회합니다. name 컬럼 기준으로 정렬됩니다.")
+            description =
+                    "아이템의 이름, 상위 카테고리, 하위 카테고리만 조회합니다. "
+                            + "topCategory는 필수 파라미터이며, name, subCategory로 추가 필터링 가능합니다. "
+                            + "name 컬럼 기준으로 정렬됩니다.")
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<List<ItemInfoSummaryResponse>>> getItemInfosSummary(
             @Parameter(description = "정렬 방향 (ASC, DESC)", example = "ASC")
                     @RequestParam(defaultValue = "ASC")
-                    SortDirection direction) {
+                    SortDirection direction,
+            @Valid @ModelAttribute ItemInfoSearchRequest searchRequest) {
         List<ItemInfoSummaryResponse> summaryList =
-                itemInfoService.findAllSummary(direction.toSpringDirection());
+                itemInfoService.findAllSummary(searchRequest, direction.toSpringDirection());
         return ResponseEntity.ok(ApiResponse.success(summaryList));
     }
 

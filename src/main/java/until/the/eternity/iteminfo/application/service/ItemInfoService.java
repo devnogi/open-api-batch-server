@@ -9,9 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
+import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
+import until.the.eternity.iteminfo.domain.exception.ItemInfoExceptionCode;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
+import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
@@ -45,15 +48,32 @@ public class ItemInfoService {
         return ItemInfoResponse.from(itemInfos);
     }
 
-    public Page<ItemInfoResponse> findAllDetail(Pageable pageable) {
-        Page<ItemInfo> itemInfoPage = itemInfoRepository.findAllWithPagination(pageable);
+    public Page<ItemInfoResponse> findAllDetail(
+            ItemInfoSearchRequest searchRequest, Pageable pageable) {
+        validateTopCategory(searchRequest);
+        Page<ItemInfo> itemInfoPage =
+                itemInfoRepository.searchWithPagination(searchRequest, pageable);
         return itemInfoPage.map(ItemInfoResponse::from);
     }
 
     public List<ItemInfoSummaryResponse> findAllSummary(
+            ItemInfoSearchRequest searchRequest,
             org.springframework.data.domain.Sort.Direction direction) {
-        List<ItemInfo> itemInfos = itemInfoRepository.findAllSortedByName(direction);
+        validateTopCategory(searchRequest);
+        // direction을 Pageable로 변환
+        Pageable pageable =
+                org.springframework.data.domain.PageRequest.of(
+                        0,
+                        Integer.MAX_VALUE,
+                        org.springframework.data.domain.Sort.by(direction, "id.name"));
+        List<ItemInfo> itemInfos = itemInfoRepository.search(searchRequest, pageable);
         return ItemInfoSummaryResponse.from(itemInfos);
+    }
+
+    private void validateTopCategory(ItemInfoSearchRequest searchRequest) {
+        if (searchRequest.topCategory() == null || searchRequest.topCategory().isBlank()) {
+            throw new CustomException(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED);
+        }
     }
 
     @Transactional

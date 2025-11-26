@@ -8,11 +8,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
+import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 
 @Repository
 @RequiredArgsConstructor
 public class ItemInfoRepositoryPortImpl implements ItemInfoRepositoryPort {
     private final ItemInfoJpaRepository jpaRepository;
+    private final ItemInfoQueryDslRepository queryDslRepository;
 
     @Override
     public List<ItemInfo> findAll() {
@@ -48,5 +50,16 @@ public class ItemInfoRepositoryPortImpl implements ItemInfoRepositoryPort {
     @Override
     public void saveAll(List<ItemInfo> itemInfos) {
         jpaRepository.saveAll(itemInfos);
+    }
+
+    @Override
+    public Page<ItemInfo> searchWithPagination(
+            ItemInfoSearchRequest searchRequest, Pageable pageable) {
+        return queryDslRepository.searchWithPagination(searchRequest, pageable);
+    }
+
+    @Override
+    public List<ItemInfo> search(ItemInfoSearchRequest searchRequest, Pageable pageable) {
+        return queryDslRepository.search(searchRequest, pageable);
     }
 }
