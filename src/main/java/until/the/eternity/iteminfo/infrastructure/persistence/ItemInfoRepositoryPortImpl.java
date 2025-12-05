@@ -48,6 +48,11 @@ public class ItemInfoRepositoryPortImpl implements ItemInfoRepositoryPort {
     }
 
     @Override
+    public List<until.the.eternity.iteminfo.domain.entity.ItemInfoId> findAllIds() {
+        return jpaRepository.findAllIds();
+    }
+
+    @Override
     public void saveAll(List<ItemInfo> itemInfos) {
         jpaRepository.saveAll(itemInfos);
     }

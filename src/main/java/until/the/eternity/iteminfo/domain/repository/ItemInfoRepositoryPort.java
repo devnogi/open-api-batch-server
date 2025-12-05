@@ -20,6 +20,8 @@ public interface ItemInfoRepositoryPort {
 
     boolean existsById(ItemInfoId id);
 
+    List<ItemInfoId> findAllIds();
+
     void saveAll(List<ItemInfo> itemInfos);
 
     Page<ItemInfo> searchWithPagination(ItemInfoSearchRequest searchRequest, Pageable pageable);

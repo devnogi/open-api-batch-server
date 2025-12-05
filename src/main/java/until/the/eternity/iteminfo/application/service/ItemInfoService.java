@@ -1,7 +1,9 @@
 package until.the.eternity.iteminfo.application.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -84,7 +86,11 @@ public class ItemInfoService {
         List<Object[]> distinctItems = auctionHistoryRepository.findDistinctItemInfo();
         log.info("Found {} distinct items in AuctionHistory", distinctItems.size());
 
-        // 2. 중복되지 않은 아이템만 필터링하여 저장
+        // 2. 기존 ItemInfoId를 한 번의 쿼리로 조회 (N+1 쿼리 문제 해결)
+        Set<ItemInfoId> existingIds = new HashSet<>(itemInfoRepository.findAllIds());
+        log.info("Found {} existing items in ItemInfo", existingIds.size());
+
+        // 3. 중복되지 않은 아이템만 필터링하여 저장
         List<ItemInfo> newItemInfos = new ArrayList<>();
         List<String> syncedItemNames = new ArrayList<>();
 
@@ -95,8 +101,8 @@ public class ItemInfoService {
 
             ItemInfoId itemInfoId = new ItemInfoId(itemName, subCategory, topCategory);
 
-            // 이미 존재하는 아이템인지 확인
-            if (!itemInfoRepository.existsById(itemInfoId)) {
+            // 메모리에서 O(1) 시간 복잡도로 존재 여부 확인
+            if (!existingIds.contains(itemInfoId)) {
                 ItemInfo itemInfo =
                         ItemInfo.builder()
                                 .id(itemInfoId)
@@ -118,7 +124,7 @@ public class ItemInfoService {
             }
         }
 
-        // 3. 새로운 아이템 정보 저장
+        // 4. 새로운 아이템 정보 저장
         if (!newItemInfos.isEmpty()) {
             itemInfoRepository.saveAll(newItemInfos);
             log.info("Successfully synced {} new items to ItemInfo", newItemInfos.size());
