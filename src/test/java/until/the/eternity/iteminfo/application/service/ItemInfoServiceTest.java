@@ -287,6 +287,106 @@ class ItemInfoServiceTest {
         verify(itemInfoRepository, never()).saveAll(anyList());
     }
 
+    @Test
+    @DisplayName("상위 카테고리로 조회 시 결과가 없으면 빈 목록을 반환한다")
+    void findByTopCategory_should_return_empty_list_when_no_results() {
+        // given
+        String topCategory = "존재하지않는카테고리";
+        when(itemInfoRepository.findByTopCategory(topCategory)).thenReturn(List.of());
+
+        // when
+        List<ItemInfoResponse> result = itemInfoService.findByTopCategory(topCategory);
+
+        // then
+        assertThat(result).isEmpty();
+        verify(itemInfoRepository).findByTopCategory(topCategory);
+    }
+
+    @Test
+    @DisplayName("하위 카테고리로 조회 시 결과가 없으면 빈 목록을 반환한다")
+    void findBySubCategory_should_return_empty_list_when_no_results() {
+        // given
+        String subCategory = "존재하지않는카테고리";
+        when(itemInfoRepository.findBySubCategory(subCategory)).thenReturn(List.of());
+
+        // when
+        List<ItemInfoResponse> result = itemInfoService.findBySubCategory(subCategory);
+
+        // then
+        assertThat(result).isEmpty();
+        verify(itemInfoRepository).findBySubCategory(subCategory);
+    }
+
+    @Test
+    @DisplayName("요약 정보 조회 시 topCategory가 빈 문자열이면 예외가 발생한다")
+    void findAllSummary_should_throw_exception_when_topCategory_is_blank() {
+        // given
+        ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
+
+        // when & then
+        assertThatThrownBy(() -> itemInfoService.findAllSummary(searchRequest, Sort.Direction.ASC))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED.getMessage());
+    }
+
+    @Test
+    @DisplayName("요약 정보 조회 시 결과가 없으면 빈 목록을 반환한다")
+    void findAllSummary_should_return_empty_list_when_no_results() {
+        // given
+        ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "무기");
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class)))
+                .thenReturn(List.of());
+
+        // when
+        List<ItemInfoSummaryResponse> result =
+                itemInfoService.findAllSummary(searchRequest, Sort.Direction.ASC);
+
+        // then
+        assertThat(result).isEmpty();
+        verify(itemInfoRepository).search(eq(searchRequest), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("요약 정보 조회 시 내림차순 정렬이 적용된다")
+    void findAllSummary_should_apply_descending_sort() {
+        // given
+        ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "무기");
+        ItemInfo item1 = createItemInfo("A아이템", "한손검", "무기");
+        ItemInfo item2 = createItemInfo("Z아이템", "한손검", "무기");
+
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class)))
+                .thenReturn(List.of(item2, item1));
+
+        // when
+        List<ItemInfoSummaryResponse> result =
+                itemInfoService.findAllSummary(searchRequest, Sort.Direction.DESC);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting("name").containsExactly("Z아이템", "A아이템");
+        verify(itemInfoRepository).search(eq(searchRequest), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("상세 정보 조회 시 결과가 없으면 빈 페이지를 반환한다")
+    void findAllDetail_should_return_empty_page_when_no_results() {
+        // given
+        ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "무기");
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable))
+                .thenReturn(emptyPage);
+
+        // when
+        Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
+
+        // then
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isZero();
+        verify(itemInfoRepository).searchWithPagination(searchRequest, pageable);
+    }
+
     private ItemInfo createItemInfo(String name, String subCategory, String topCategory) {
         ItemInfo itemInfo = mock(ItemInfo.class);
 
