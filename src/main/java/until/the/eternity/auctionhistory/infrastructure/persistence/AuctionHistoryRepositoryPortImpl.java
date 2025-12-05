@@ -28,33 +28,8 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     private int batchSize;
 
     @Override
-    public List<AuctionHistory> findAllByAuctionBuyIds(List<String> auctionBuyIds) {
-        return jpaRepository.findAllByAuctionBuyIdIn(auctionBuyIds);
-    }
-
-    @Override
     public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
         return queryDslRepository.search(condition, pageable);
-    }
-
-    @Override
-    public Optional<AuctionHistory> findByIdWithOptions(String id) {
-        return jpaRepository.findWithItemOptionsByAuctionBuyId(id);
-    }
-
-    @Override
-    public boolean existsByAuctionBuyIds(List<String> ids) {
-        return jpaRepository.existsByAuctionBuyIdIn(ids);
-    }
-
-    @Override
-    public List<String> findExistingIds(List<String> ids) {
-        return jpaRepository.findExistingIds(ids);
-    }
-
-    @Override
-    public boolean existsByAuctionBuyIdIn(List<String> ids) {
-        return jpaRepository.existsByAuctionBuyIdIn(ids);
     }
 
     @Override
