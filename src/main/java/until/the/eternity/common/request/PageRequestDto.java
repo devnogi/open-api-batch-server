@@ -18,7 +18,6 @@ public record PageRequestDto(
                         example = "dateAuctionBuy")
                 SortField sortBy,
         @Schema(description = "정렬 방향 (ASC, DESC)", example = "DESC") SortDirection direction) {
-
     private static final int DEFAULT_PAGE = 1;
     private static final int DEFAULT_SIZE = 20;
     private static final SortField DEFAULT_SORT_BY = SortField.DATE_AUCTION_BUY;
