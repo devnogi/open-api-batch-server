@@ -95,28 +95,16 @@ public class ItemInfoService {
         List<String> syncedItemNames = new ArrayList<>();
 
         for (Object[] item : distinctItems) {
+            // Query returns: itemName, itemTopCategory, itemSubCategory
             String itemName = (String) item[0];
-            String topCategory = (String) item[1];
-            String subCategory = (String) item[2];
+            String itemTopCategory = (String) item[1];
+            String itemSubCategory = (String) item[2];
 
-            ItemInfoId itemInfoId = new ItemInfoId(itemName, subCategory, topCategory);
+            ItemInfoId itemInfoId = new ItemInfoId(itemName, itemSubCategory, itemTopCategory);
 
             // 메모리에서 O(1) 시간 복잡도로 존재 여부 확인
             if (!existingIds.contains(itemInfoId)) {
-                ItemInfo itemInfo =
-                        ItemInfo.builder()
-                                .id(itemInfoId)
-                                .description(null)
-                                .inventoryWidth(null)
-                                .inventoryHeight(null)
-                                .inventoryMaxBundleCount(null)
-                                .history(null)
-                                .acquisitionMethod(null)
-                                .storeSalesPrice(null)
-                                .weaponType(null)
-                                .repair(null)
-                                .maxAlterationCount(null)
-                                .build();
+                ItemInfo itemInfo = ItemInfo.builder().id(itemInfoId).build();
 
                 newItemInfos.add(itemInfo);
                 syncedItemNames.add(itemName);
