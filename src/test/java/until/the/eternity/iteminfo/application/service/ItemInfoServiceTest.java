@@ -235,10 +235,8 @@ class ItemInfoServiceTest {
                 .thenReturn(List.of(item1, item2, item3));
 
         // 나뭇가지만 이미 존재
-        when(itemInfoRepository.existsById(new ItemInfoId("나뭇가지", "한손검", "무기"))).thenReturn(true);
-        when(itemInfoRepository.existsById(new ItemInfoId("숏소드", "한손검", "무기"))).thenReturn(false);
-        when(itemInfoRepository.existsById(new ItemInfoId("염색 앰플", "염색 앰플", "소모품")))
-                .thenReturn(false);
+        ItemInfoId existingId = new ItemInfoId("나뭇가지", "한손검", "무기");
+        when(itemInfoRepository.findAllIds()).thenReturn(List.of(existingId));
 
         // when
         ItemInfoSyncResponse result = itemInfoService.syncItemInfoFromAuctionHistory();
@@ -259,7 +257,10 @@ class ItemInfoServiceTest {
         distinctItems.add(item1);
 
         when(auctionHistoryRepository.findDistinctItemInfo()).thenReturn(distinctItems);
-        when(itemInfoRepository.existsById(any(ItemInfoId.class))).thenReturn(true);
+
+        // 모든 아이템이 이미 존재
+        ItemInfoId existingId = new ItemInfoId("나뭇가지", "한손검", "무기");
+        when(itemInfoRepository.findAllIds()).thenReturn(List.of(existingId));
 
         // when
         ItemInfoSyncResponse result = itemInfoService.syncItemInfoFromAuctionHistory();
@@ -275,6 +276,7 @@ class ItemInfoServiceTest {
     void syncItemInfoFromAuctionHistory_should_return_empty_when_no_data_in_auction_history() {
         // given
         when(auctionHistoryRepository.findDistinctItemInfo()).thenReturn(new ArrayList<>());
+        when(itemInfoRepository.findAllIds()).thenReturn(new ArrayList<>());
 
         // when
         ItemInfoSyncResponse result = itemInfoService.syncItemInfoFromAuctionHistory();
