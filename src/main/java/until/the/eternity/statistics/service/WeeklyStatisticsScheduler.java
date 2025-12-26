@@ -13,7 +13,7 @@ public class WeeklyStatisticsScheduler {
     private final WeeklyStatisticsService weeklyStatisticsService;
 
     /** 매주 월요일 새벽 주간 통계 계산 및 저장 (전주 데이터 집계) 기본 cron: 매주 월요일 새벽 4시 (변경 가능) */
-    @Scheduled(cron = "${statistics.weekly.cron:0 0 4 * * MON}", zone = "Asia/Seoul")
+    @Scheduled(cron = "${statistics.weekly.cron:5 0 4 * * MON}", zone = "Asia/Seoul")
     public void scheduleWeeklyStatistics() {
         log.info("[Weekly Statistics Scheduler] Starting scheduled task...");
         long start = System.currentTimeMillis();

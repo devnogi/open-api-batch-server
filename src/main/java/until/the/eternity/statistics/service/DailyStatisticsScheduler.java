@@ -13,7 +13,7 @@ public class DailyStatisticsScheduler {
     private final DailyStatisticsService dailyStatisticsService;
 
     /** 매일 새벽 일간 통계 계산 및 저장 기본 cron: 매일 새벽 3시 (변경 가능) */
-    @Scheduled(cron = "${statistics.daily.cron:0 0 3 * * *}", zone = "Asia/Seoul")
+    @Scheduled(cron = "${statistics.daily.cron:5 0 3 * * *}", zone = "Asia/Seoul")
     public void scheduleDailyStatistics() {
         log.info("[Daily Statistics Scheduler] Starting scheduled task...");
         long start = System.currentTimeMillis();

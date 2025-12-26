@@ -26,7 +26,7 @@ public class AuctionHistoryScheduler {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
-    @Scheduled(cron = "${openapi.auction-history.cron}", zone = "Asia/Seoul")
+    @Scheduled(cron = "${openapi.auction-history.cron:0 0 * * * *}", zone = "Asia/Seoul")
     public void fetchAndSaveAuctionHistoryAll() {
         // ItemCategory를 topCategory별로 그룹화
         Map<String, List<ItemCategory>> categoriesByTopCategory =
