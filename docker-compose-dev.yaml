@@ -10,7 +10,8 @@ services:
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
-      - .env
+      - .env:
+
     labels:
       # Autoheal: unhealthy 상태 시 자동 재시작 활성화
       autoheal: "true"
@@ -38,7 +39,6 @@ services:
       NEXON_OPEN_API_KEY: ${NEXON_OPEN_API_KEY}
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON}"
-      AUCTION_HISTORY_MIN_PRICE_CRON: "${AUCTION_HISTORY_MIN_PRICE_CRON}"
 
       # === Docker Configuration ===
       DOCKER_USERNAME: ${DOCKER_USERNAME}
