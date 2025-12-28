@@ -37,7 +37,7 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                         CURRENT_TIMESTAMP AS updated_at
                     FROM auction_history ah
                     WHERE DATE(ah.date_auction_buy) = DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR))
-                    GROUP BY ah.item_name
+                    GROUP BY ah.item_name, DATE(date_auction_buy)
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),
