@@ -19,8 +19,8 @@ DROP TABLE IF EXISTS item_daily_min_price;
 CREATE TABLE item_daily_statistics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 식별자',
     item_name VARCHAR(255) NOT NULL COMMENT '아이템 이름',
-    top_category VARCHAR(255) NOT NULL COMMENT '탑 카테고리',
-    sub_categpry VARCHAR(255) NOT NULL COMMENT '서브 카테고리',
+    item_top_category VARCHAR(255) NOT NULL COMMENT '탑 카테고리',
+    item_sub_category VARCHAR(255) NOT NULL COMMENT '서브 카테고리',
     date_auction_buy DATE NOT NULL COMMENT '거래 일자',
     min_price BIGINT NOT NULL COMMENT '최저 단가',
     max_price BIGINT NOT NULL COMMENT '최고 단가',
@@ -73,8 +73,8 @@ CREATE TABLE top_category_daily_statistics (
 CREATE TABLE item_weekly_statistics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '고유 식별자',
     item_name VARCHAR(255) NOT NULL COMMENT '아이템 이름',
-    top_category VARCHAR(255) NOT NULL COMMENT '상위 카테고리',
-    sub_categpry VARCHAR(255) NOT NULL COMMENT '하위 카테고리',
+    item_top_category VARCHAR(255) NOT NULL COMMENT '상위 카테고리',
+    item_sub_category VARCHAR(255) NOT NULL COMMENT '하위 카테고리',
     year INT NOT NULL COMMENT '연도',
     week_number INT NOT NULL COMMENT '주차 번호',
     week_start_date DATE NOT NULL COMMENT '주 시작일 (월요일)',
