@@ -16,6 +16,8 @@ public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeekly
                     """
                     INSERT INTO item_weekly_statistics (
                         item_name,
+                        item_top_category,
+                        item_sub_category,
                         year,
                         week_number,
                         week_start_date,
@@ -29,6 +31,8 @@ public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeekly
                     )
                     SELECT
                         ids.item_name,
+                        item_top_category,
+                        item_sub_category,
                         YEAR(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)) AS year,
                         WEEK(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY), 1) AS week_number,
                         DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY) AS week_start_date,
@@ -42,7 +46,7 @@ public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeekly
                     FROM item_daily_statistics ids
                     WHERE ids.date_auction_buy >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
                       AND ids.date_auction_buy < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-                    GROUP BY ids.item_name
+                    GROUP BY ids.item_name, item_top_category, item_sub_category
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),

@@ -16,6 +16,8 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                     """
                     INSERT INTO item_daily_statistics (
                         item_name,
+                        item_top_category,
+                        item_sub_category,
                         date_auction_buy,
                         min_price,
                         max_price,
@@ -27,6 +29,8 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                     )
                     SELECT
                         ah.item_name,
+                        item_top_category,
+                        item_sub_category,
                         DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR)) AS date_auction_buy,
                         MIN(ah.auction_price_per_unit) AS min_price,
                         MAX(ah.auction_price_per_unit) AS max_price,
@@ -37,7 +41,7 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                         CURRENT_TIMESTAMP AS updated_at
                     FROM auction_history ah
                     WHERE DATE(ah.date_auction_buy) = DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR))
-                    GROUP BY ah.item_name, DATE(date_auction_buy)
+                    GROUP BY ah.item_name, ah.item_top_category, ah.item_sub_category, DATE(date_auction_buy)
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),
