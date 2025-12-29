@@ -64,9 +64,6 @@ spy.log
 # - .env.prod: Production server configuration template
 # NOTE: These template files should ONLY contain placeholder values, never real secrets!
 
-### Spring Boot ###
-application.yml
-
 ### node ###
 node_modules/
 package-lock.json
