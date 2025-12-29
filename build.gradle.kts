@@ -47,9 +47,6 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
 
-    // Docker-Compose
-    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:${property("jwtTokenVersion")}")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:${property("jwtTokenVersion")}")
