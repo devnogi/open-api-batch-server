@@ -9,6 +9,7 @@
 
 -- 기존 item_daily_min_price 테이블 삭제
 DROP TABLE IF EXISTS item_daily_min_price;
+DROP TABLE IF EXISTS item_weekly_min_price_history;
 
 -- =====================================================
 -- Daily Statistics Tables
@@ -31,7 +32,7 @@ CREATE TABLE item_daily_statistics (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UNIQUE KEY uk_item_daily_statistics_item_name_date (item_name, date_auction_buy),
     INDEX idx_item_daily_statistics_item_name_date (item_name, date_auction_buy)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='아이템별 일간 통계';
+) COMMENT='아이템별 일간 통계';
 
 -- 서브카테고리별 일간 통계
 CREATE TABLE subcategory_daily_statistics (
@@ -47,7 +48,7 @@ CREATE TABLE subcategory_daily_statistics (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UNIQUE KEY uk_subcategory_daily_statistics_category_date (item_sub_category, date_auction_buy),
     INDEX idx_subcategory_daily_statistics_category_date (item_sub_category, date_auction_buy)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='서브카테고리별 일간 통계';
+) COMMENT='서브카테고리별 일간 통계';
 
 -- 탑카테고리별 일간 통계
 CREATE TABLE top_category_daily_statistics (
@@ -63,7 +64,7 @@ CREATE TABLE top_category_daily_statistics (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UNIQUE KEY uk_top_category_daily_statistics_category_date (item_top_category, date_auction_buy),
     INDEX idx_top_category_daily_statistics_category_date (item_top_category, date_auction_buy)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='탑카테고리별 일간 통계';
+) COMMENT='탑카테고리별 일간 통계';
 
 -- =====================================================
 -- Weekly Statistics Tables
@@ -87,7 +88,7 @@ CREATE TABLE item_weekly_statistics (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UNIQUE KEY uk_item_weekly_statistics_item_name_year_week (item_name, year, week_number),
     INDEX idx_item_weekly_statistics_item_name_year_week (item_name, year, week_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='아이템별 주간 통계';
+) COMMENT='아이템별 주간 통계';
 
 -- 서브카테고리별 주간 통계
 CREATE TABLE subcategory_weekly_statistics (
@@ -105,7 +106,7 @@ CREATE TABLE subcategory_weekly_statistics (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UNIQUE KEY uk_subcategory_weekly_statistics_category_year_week (item_sub_category, year, week_number),
     INDEX idx_subcategory_weekly_statistics_category_year_week (item_sub_category, year, week_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='서브카테고리별 주간 통계';
+) COMMENT='서브카테고리별 주간 통계';
 
 -- 탑카테고리별 주간 통계
 CREATE TABLE top_category_weekly_statistics (
@@ -123,4 +124,4 @@ CREATE TABLE top_category_weekly_statistics (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UNIQUE KEY uk_top_category_weekly_statistics_category_year_week (item_top_category, year, week_number),
     INDEX idx_top_category_weekly_statistics_category_year_week (item_top_category, year, week_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='탑카테고리별 주간 통계';
+) COMMENT='탑카테고리별 주간 통계';
