@@ -31,7 +31,7 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                         ah.item_name,
                         item_top_category,
                         item_sub_category,
-                        DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR)) AS date_auction_buy,
+                        DATE(NOW()) AS date_auction_buy,
                         MIN(ah.auction_price_per_unit) AS min_price,
                         MAX(ah.auction_price_per_unit) AS max_price,
                         AVG(ah.auction_price_per_unit) AS avg_price,
@@ -40,7 +40,7 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                         CURRENT_TIMESTAMP AS created_at,
                         CURRENT_TIMESTAMP AS updated_at
                     FROM auction_history ah
-                    WHERE DATE(ah.date_auction_buy) = DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR))
+                    WHERE DATE(ah.date_auction_buy) = DATE(NOW())
                     GROUP BY ah.item_name, ah.item_top_category, ah.item_sub_category, DATE(date_auction_buy)
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),

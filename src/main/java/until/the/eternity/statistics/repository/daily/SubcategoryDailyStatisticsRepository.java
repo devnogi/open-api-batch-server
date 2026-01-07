@@ -39,7 +39,7 @@ public interface SubcategoryDailyStatisticsRepository
                     FROM item_daily_statistics ids
                     INNER JOIN auction_history ah ON ids.item_name = ah.item_name
                         AND DATE(ah.date_auction_buy) = ids.date_auction_buy
-                    WHERE ids.date_auction_buy = DATE(DATE_SUB(NOW(), INTERVAL 9 HOUR))
+                    WHERE ids.date_auction_buy = DATE(NOW())
                     GROUP BY ah.item_sub_category, ids.date_auction_buy
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
