@@ -2,8 +2,9 @@ package until.the.eternity.statistics.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import until.the.eternity.auctionhistory.domain.event.AuctionHistorySavedEvent;
 
 @Slf4j
 @Component
@@ -12,20 +13,26 @@ public class DailyStatisticsScheduler {
 
     private final DailyStatisticsService dailyStatisticsService;
 
-    /** 매일 새벽 일간 통계 계산 및 저장 기본 cron: 매일 새벽 3시 (변경 가능) */
-    @Scheduled(cron = "${statistics.daily.cron:0 5 * * * *}", zone = "Asia/Seoul")
-    public void scheduleDailyStatistics() {
-        log.info("[Daily Statistics Scheduler] Starting scheduled task...");
+    /**
+     * AuctionHistory 저장 완료 이벤트 수신 시 당일 통계 업데이트
+     * AuctionHistoryScheduler가 실행될 때마다 자동으로 호출됨
+     */
+    @EventListener
+    public void onAuctionHistorySaved(AuctionHistorySavedEvent event) {
+        log.info(
+                "[Daily Statistics Event Listener] Received AuctionHistorySavedEvent - {} records saved at {}",
+                event.getSavedCount(),
+                event.getEventTime());
         long start = System.currentTimeMillis();
 
         try {
-            dailyStatisticsService.calculateAndSaveDailyStatistics();
+            dailyStatisticsService.calculateAndSaveCurrentDayStatistics();
             log.info(
-                    "[Daily Statistics Scheduler] Scheduled task completed successfully in {} ms",
+                    "[Daily Statistics Event Listener] Current day statistics updated successfully in {} ms",
                     System.currentTimeMillis() - start);
         } catch (Exception e) {
             log.error(
-                    "[Daily Statistics Scheduler] Error occurred during scheduled task: {}",
+                    "[Daily Statistics Event Listener] Error occurred while updating current day statistics: {}",
                     e.getMessage(),
                     e);
             throw e;

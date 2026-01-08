@@ -8,7 +8,10 @@ import until.the.eternity.statistics.domain.entity.daily.ItemDailyStatistics;
 
 public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailyStatistics, Long> {
 
-    /** 전날 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 upsert */
+    /**
+     * 당일 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 upsert
+     * AuctionHistoryScheduler가 실행될 때마다 당일 통계만 업데이트
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query(
@@ -29,9 +32,9 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                     )
                     SELECT
                         ah.item_name,
-                        item_top_category,
-                        item_sub_category,
-                        DATE(NOW()) AS date_auction_buy,
+                        ah.item_top_category,
+                        ah.item_sub_category,
+                        DATE(ah.date_auction_buy) AS date_auction_buy,
                         MIN(ah.auction_price_per_unit) AS min_price,
                         MAX(ah.auction_price_per_unit) AS max_price,
                         AVG(ah.auction_price_per_unit) AS avg_price,
@@ -41,7 +44,7 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                         CURRENT_TIMESTAMP AS updated_at
                     FROM auction_history ah
                     WHERE DATE(ah.date_auction_buy) = DATE(NOW())
-                    GROUP BY ah.item_name, ah.item_top_category, ah.item_sub_category, DATE(date_auction_buy)
+                    GROUP BY ah.item_name, ah.item_top_category, ah.item_sub_category, DATE(ah.date_auction_buy)
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),
@@ -51,5 +54,53 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
                         updated_at = CURRENT_TIMESTAMP;
                     """,
             nativeQuery = true)
-    void upsertDailyStatistics();
+    void upsertCurrentDayStatistics();
+
+    /**
+     * 전날 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 최종 확정
+     * 매일 새벽에 한 번 실행되어 전날 23시대 거래 내역까지 포함한 통계를 완성
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query(
+            value =
+                    """
+                    INSERT INTO item_daily_statistics (
+                        item_name,
+                        item_top_category,
+                        item_sub_category,
+                        date_auction_buy,
+                        min_price,
+                        max_price,
+                        avg_price,
+                        total_volume,
+                        total_quantity,
+                        created_at,
+                        updated_at
+                    )
+                    SELECT
+                        ah.item_name,
+                        ah.item_top_category,
+                        ah.item_sub_category,
+                        DATE(ah.date_auction_buy) AS date_auction_buy,
+                        MIN(ah.auction_price_per_unit) AS min_price,
+                        MAX(ah.auction_price_per_unit) AS max_price,
+                        AVG(ah.auction_price_per_unit) AS avg_price,
+                        SUM(ah.auction_price_per_unit * ah.item_count) AS total_volume,
+                        SUM(ah.item_count) AS total_quantity,
+                        CURRENT_TIMESTAMP AS created_at,
+                        CURRENT_TIMESTAMP AS updated_at
+                    FROM auction_history ah
+                    WHERE DATE(ah.date_auction_buy) = DATE(NOW()) - INTERVAL 1 DAY
+                    GROUP BY ah.item_name, ah.item_top_category, ah.item_sub_category, DATE(ah.date_auction_buy)
+                    ON DUPLICATE KEY UPDATE
+                        min_price = VALUES(min_price),
+                        max_price = VALUES(max_price),
+                        avg_price = VALUES(avg_price),
+                        total_volume = VALUES(total_volume),
+                        total_quantity = VALUES(total_quantity),
+                        updated_at = CURRENT_TIMESTAMP;
+                    """,
+            nativeQuery = true)
+    void upsertPreviousDayStatistics();
 }

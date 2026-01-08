@@ -9,7 +9,10 @@ import until.the.eternity.statistics.domain.entity.daily.SubcategoryDailyStatist
 public interface SubcategoryDailyStatisticsRepository
         extends JpaRepository<SubcategoryDailyStatistics, Long> {
 
-    /** 전날의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert */
+    /**
+     * 당일의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert
+     * item_daily_statistics 테이블만 사용하여 효율적으로 집계
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query(
@@ -27,7 +30,7 @@ public interface SubcategoryDailyStatisticsRepository
                         updated_at
                     )
                     SELECT
-                        ah.item_sub_category,
+                        ids.item_sub_category,
                         ids.date_auction_buy,
                         MIN(ids.min_price) AS min_price,
                         MAX(ids.max_price) AS max_price,
@@ -37,10 +40,8 @@ public interface SubcategoryDailyStatisticsRepository
                         CURRENT_TIMESTAMP AS created_at,
                         CURRENT_TIMESTAMP AS updated_at
                     FROM item_daily_statistics ids
-                    INNER JOIN auction_history ah ON ids.item_name = ah.item_name
-                        AND DATE(ah.date_auction_buy) = ids.date_auction_buy
                     WHERE ids.date_auction_buy = DATE(NOW())
-                    GROUP BY ah.item_sub_category, ids.date_auction_buy
+                    GROUP BY ids.item_sub_category, ids.date_auction_buy
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),
@@ -50,5 +51,49 @@ public interface SubcategoryDailyStatisticsRepository
                         updated_at = CURRENT_TIMESTAMP;
                     """,
             nativeQuery = true)
-    void upsertDailyStatistics();
+    void upsertCurrentDayStatistics();
+
+    /**
+     * 전날의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 최종 확정
+     * item_daily_statistics 테이블만 사용하여 효율적으로 집계
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query(
+            value =
+                    """
+                    INSERT INTO subcategory_daily_statistics (
+                        item_sub_category,
+                        date_auction_buy,
+                        min_price,
+                        max_price,
+                        avg_price,
+                        total_volume,
+                        total_quantity,
+                        created_at,
+                        updated_at
+                    )
+                    SELECT
+                        ids.item_sub_category,
+                        ids.date_auction_buy,
+                        MIN(ids.min_price) AS min_price,
+                        MAX(ids.max_price) AS max_price,
+                        AVG(ids.avg_price) AS avg_price,
+                        SUM(ids.total_volume) AS total_volume,
+                        SUM(ids.total_quantity) AS total_quantity,
+                        CURRENT_TIMESTAMP AS created_at,
+                        CURRENT_TIMESTAMP AS updated_at
+                    FROM item_daily_statistics ids
+                    WHERE ids.date_auction_buy = DATE(NOW()) - INTERVAL 1 DAY
+                    GROUP BY ids.item_sub_category, ids.date_auction_buy
+                    ON DUPLICATE KEY UPDATE
+                        min_price = VALUES(min_price),
+                        max_price = VALUES(max_price),
+                        avg_price = VALUES(avg_price),
+                        total_volume = VALUES(total_volume),
+                        total_quantity = VALUES(total_quantity),
+                        updated_at = CURRENT_TIMESTAMP;
+                    """,
+            nativeQuery = true)
+    void upsertPreviousDayStatistics();
 }

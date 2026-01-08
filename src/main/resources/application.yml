@@ -89,3 +89,10 @@ openapi:
     cron: ${AUCTION_HISTORY_CRON}
   min-price:
     cron: ${AUCTION_HISTORY_MIN_PRICE_CRON}
+
+statistics:
+  previous-day:
+    # 전날 통계 최종 확정 스케줄러
+    # AuctionHistoryScheduler 실행 이후 전날 23시대 거래까지 포함한 통계를 확정
+    # 기본값: 매일 00:10 (AuctionHistory가 00:05에 실행되므로 그 이후)
+    cron: ${STATISTICS_PREVIOUS_DAY_CRON:0 10 0 * * *}
