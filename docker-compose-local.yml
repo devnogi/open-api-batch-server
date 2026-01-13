@@ -13,7 +13,7 @@ services:
     image: open-api-batch-server:local
     container_name: spring-app-local
     ports:
-      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
+      - "${SERVER_PORT:-8092}:${SERVER_PORT:-8092}"
     env_file:
       - .env.local  # 로컬 환경 변수 파일
     labels:
@@ -23,15 +23,15 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
-      SERVER_PORT: ${SERVER_PORT:-8080}
+      SERVER_PORT: ${SERVER_PORT:-8092}
 
       # === Database Configuration ===
       # Docker 네트워크 내부 연결 설정 (고정값)
       DB_IP: mysql  # Docker 서비스 이름
-      DB_PORT: 3306  # Docker 네트워크 내부 포트
-      DB_SCHEMA: ${DB_SCHEMA:-devnogi}
-      DB_USER: root  # MySQL 컨테이너의 root 사용자
-      DB_PASSWORD: ${DB_ROOT_PASSWORD:-password}
+      DB_PORT: ${DB_PORT:-3318}  # Docker 네트워크 내부 포트
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}  # 애플리케이션 전용 사용자 (local_oab)
+      DB_PASSWORD: ${DB_PASSWORD}
 
       # === Security Configuration ===
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-secret-key-change-in-production}
@@ -42,7 +42,7 @@ services:
       NEXON_OPEN_API_KEY: ${NEXON_OPEN_API_KEY}
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS:-1000}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON:-0 0 * * * *}"
-      AUCTION_HISTORY_MIN_PRICE_CRON: "${AUCTION_HISTORY_MIN_PRICE_CRON:-0 30 * * * *}"
+      STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
 
       # === JVM Configuration (로컬 개발용 - 메모리 사용량 감소) ===
       JAVA_OPTS: >-
@@ -88,7 +88,7 @@ services:
 
     # Health Check
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT:-8080}/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT:-8092}/actuator/health"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: ${HEALTHCHECK_TIMEOUT:-10s}
       retries: ${HEALTHCHECK_RETRIES:-3}
@@ -108,12 +108,15 @@ services:
     env_file:
       - .env.local  # 환경 변수 파일 로드
     ports:
-      - "${MYSQL_EXTERNAL_PORT:-3306}:3306"  # 외부 접속용 포트 (호스트에서 접근 시)
+      - "${MYSQL_EXTERNAL_PORT:-3318}:${DB_PORT:-3318}"  # 외부 접속용 포트 (호스트에서 접근 시)
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-password}
-      MYSQL_DATABASE: ${DB_SCHEMA:-devnogi}
-      # MYSQL_USER는 root를 지정할 수 없으므로 제거
-      # root 사용자는 MYSQL_ROOT_PASSWORD로 자동 생성됨
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_SCHEMA}
+      # 애플리케이션 전용 사용자 생성 (보안 best practice)
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      # 참고: MYSQL_USER는 자동으로 MYSQL_DATABASE에 대한 모든 권한을 받습니다
+      # root 사용자는 MYSQL_ROOT_PASSWORD로 별도 생성됨
       LANG: C.UTF_8
       TZ: Asia/Seoul
     volumes:
@@ -128,6 +131,7 @@ services:
       retries: 5
       start_period: 30s
     command:
+      - --port=${DB_PORT:-3318}
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_0900_ai_ci
       - --skip-character-set-client-handshake
@@ -165,4 +169,3 @@ networks:
   app-network:
     driver: bridge
   my-network:
-    driver: bridge

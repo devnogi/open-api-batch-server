@@ -24,7 +24,7 @@ public record PageRequestDto(
     private static final SortDirection DEFAULT_DIRECTION = SortDirection.DESC;
 
     public Pageable toPageable() {
-        int resolvedPage = this.page != null ? this.page - 1 : DEFAULT_PAGE;
+        int resolvedPage = this.page != null ? this.page - 1 : DEFAULT_PAGE - 1;
         int resolvedSize = this.size != null ? this.size : DEFAULT_SIZE;
         SortField resolvedSortBy = this.sortBy != null ? this.sortBy : DEFAULT_SORT_BY;
         SortDirection resolvedDirection =

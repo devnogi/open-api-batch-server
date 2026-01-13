@@ -1,6 +1,7 @@
 package until.the.eternity.auctionhistory.domain.mapper;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.mapstruct.*;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
@@ -14,7 +15,7 @@ public interface OpenApiAuctionHistoryMapper {
     @Mapping(
             source = "dateAuctionBuy",
             target = "dateAuctionBuy",
-            qualifiedByName = "stringToInstant")
+            qualifiedByName = "utcToKst")
     @Mapping(source = "openApiAuctionItemOptionResponse", target = "auctionItemOptions")
     @Mapping(
             target = "itemTopCategory",
@@ -25,8 +26,9 @@ public interface OpenApiAuctionHistoryMapper {
     List<AuctionHistory> toEntityList(
             List<OpenApiAuctionHistoryResponse> dtoList, @Context ItemCategory itemCategory);
 
-    @Named("stringToInstant")
-    default Instant stringToInstant(String value) {
-        return Instant.parse(value);
+    @Named("utcToKst")
+    default Instant utcToKst(Instant utcTime) {
+        // API에서 받은 UTC 시간에 9시간을 더하여 KST로 변환
+        return utcTime != null ? utcTime.plus(9, ChronoUnit.HOURS) : null;
     }
 }
