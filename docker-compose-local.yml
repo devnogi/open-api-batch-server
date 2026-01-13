@@ -42,6 +42,7 @@ services:
       NEXON_OPEN_API_KEY: ${NEXON_OPEN_API_KEY}
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS:-1000}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON:-0 0 * * * *}"
+      STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
 
       # === JVM Configuration (로컬 개발용 - 메모리 사용량 감소) ===
       JAVA_OPTS: >-
