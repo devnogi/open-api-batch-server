@@ -20,24 +20,19 @@ public class TopCategoryDailyStatisticsService {
     private final TopCategoryDailyStatisticsRepository repository;
     private final TopCategoryDailyStatisticsMapper mapper;
 
-    /** 탑카테고리별 일간 통계 전체 조회 (페이징) */
+    /** 탑카테고리별 일간 통계 조회 (topCategory, 날짜 범위) */
     @Transactional(readOnly = true)
-    public PageResponseDto<TopCategoryDailyStatisticsResponse> findAll(Pageable pageable) {
-        Page<TopCategoryDailyStatistics> page = repository.findAll(pageable);
-        Page<TopCategoryDailyStatisticsResponse> dtoPage = page.map(mapper::toDto);
-        return PageResponseDto.of(dtoPage);
-    }
+    public java.util.List<TopCategoryDailyStatisticsResponse> search(
+            String topCategory, java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        // 날짜 범위 검증 (최대 30일)
+        until.the.eternity.statistics.util.DateRangeValidator.validateDailyDateRange(
+                startDate, endDate);
 
-    /** 탑카테고리별 일간 통계 ID로 단건 조회 */
-    @Transactional(readOnly = true)
-    public TopCategoryDailyStatisticsResponse findById(Long id) {
-        TopCategoryDailyStatistics entity =
-                repository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "TopCategoryDailyStatistics not found: " + id));
-        return mapper.toDto(entity);
+        // 조회
+        java.util.List<TopCategoryDailyStatistics> results =
+                repository.findByTopCategoryAndDateRange(topCategory, startDate, endDate);
+
+        // DTO 변환
+        return results.stream().map(mapper::toDto).collect(java.util.stream.Collectors.toList());
     }
 }

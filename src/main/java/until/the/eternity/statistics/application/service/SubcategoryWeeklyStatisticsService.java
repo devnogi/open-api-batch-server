@@ -20,24 +20,22 @@ public class SubcategoryWeeklyStatisticsService {
     private final SubcategoryWeeklyStatisticsRepository repository;
     private final SubcategoryWeeklyStatisticsMapper mapper;
 
-    /** 서브카테고리별 주간 통계 전체 조회 (페이징) */
+    /** 서브카테고리별 주간 통계 조회 (subCategory, 날짜 범위) */
     @Transactional(readOnly = true)
-    public PageResponseDto<SubcategoryWeeklyStatisticsResponse> findAll(Pageable pageable) {
-        Page<SubcategoryWeeklyStatistics> page = repository.findAll(pageable);
-        Page<SubcategoryWeeklyStatisticsResponse> dtoPage = page.map(mapper::toDto);
-        return PageResponseDto.of(dtoPage);
-    }
+    public java.util.List<SubcategoryWeeklyStatisticsResponse> search(
+            String topCategory, // topCategory는 파라미터로 받지만 조회에는 사용하지 않음 (DB 구조상)
+            String subCategory,
+            java.time.LocalDate startDate,
+            java.time.LocalDate endDate) {
+        // 날짜 범위 검증 (최대 4개월)
+        until.the.eternity.statistics.util.DateRangeValidator.validateWeeklyDateRange(
+                startDate, endDate);
 
-    /** 서브카테고리별 주간 통계 ID로 단건 조회 */
-    @Transactional(readOnly = true)
-    public SubcategoryWeeklyStatisticsResponse findById(Long id) {
-        SubcategoryWeeklyStatistics entity =
-                repository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "SubcategoryWeeklyStatistics not found: " + id));
-        return mapper.toDto(entity);
+        // 조회
+        java.util.List<SubcategoryWeeklyStatistics> results =
+                repository.findBySubcategoryAndDateRange(subCategory, startDate, endDate);
+
+        // DTO 변환
+        return results.stream().map(mapper::toDto).collect(java.util.stream.Collectors.toList());
     }
 }

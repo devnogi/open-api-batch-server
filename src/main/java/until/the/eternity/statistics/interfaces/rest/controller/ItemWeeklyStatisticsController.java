@@ -22,21 +22,20 @@ public class ItemWeeklyStatisticsController {
 
     @GetMapping
     @Operation(
-            summary = "아이템별 주간 통계 목록 조회",
-            description =
-                    "아이템별 주간 거래 통계 목록을 페이징하여 조회합니다. 최저가, 최고가, 평균가, 거래 총량, 거래 수량, 연도, 주차 정보를 포함합니다.")
-    public ResponseEntity<PageResponseDto<ItemWeeklyStatisticsResponse>> getItemWeeklyStatistics(
-            @ParameterObject @ModelAttribute PageRequestDto pageDto) {
-        PageResponseDto<ItemWeeklyStatisticsResponse> result =
-                service.findAll(pageDto.toPageable());
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "아이템별 주간 통계 단건 조회", description = "ID를 통해 특정 아이템의 주간 거래 통계를 조회합니다.")
-    public ResponseEntity<ItemWeeklyStatisticsResponse> getItemWeeklyStatisticsById(
-            @Parameter(description = "통계 ID", example = "1") @PathVariable Long id) {
-        ItemWeeklyStatisticsResponse result = service.findById(id);
-        return ResponseEntity.ok(result);
+            summary = "아이템별 주간 통계 조회",
+            description = "아이템 이름, 서브 카테고리, 탑 카테고리로 주간 통계를 조회합니다. 최대 4개월까지 조회 가능합니다.")
+    public ResponseEntity<java.util.List<ItemWeeklyStatisticsResponse>> searchItemWeeklyStatistics(
+            @ParameterObject @ModelAttribute
+                    @jakarta.validation.Valid
+                    until.the.eternity.statistics.interfaces.rest.dto.request.ItemWeeklyStatisticsSearchRequest
+                            request) {
+        java.util.List<ItemWeeklyStatisticsResponse> results =
+                service.search(
+                        request.itemName(),
+                        request.subCategory(),
+                        request.topCategory(),
+                        request.startDate(),
+                        request.endDate());
+        return ResponseEntity.ok(results);
     }
 }

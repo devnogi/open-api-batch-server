@@ -36,6 +36,14 @@ public class ItemWeeklyStatistics {
     @Schema(description = "아이템 이름", example = "켈틱 로열 나이트 소드")
     private String itemName;
 
+    @Column(name = "item_top_category", nullable = false, length = 255)
+    @Schema(description = "아이템 탑 카테고리", example = "무기")
+    private String itemTopCategory;
+
+    @Column(name = "item_sub_category", nullable = false, length = 255)
+    @Schema(description = "아이템 서브 카테고리", example = "한손검")
+    private String itemSubCategory;
+
     @Column(name = "year", nullable = false)
     @Schema(description = "연도", example = "2025")
     private Integer year;

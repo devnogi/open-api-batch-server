@@ -20,24 +20,22 @@ public class SubcategoryDailyStatisticsService {
     private final SubcategoryDailyStatisticsRepository repository;
     private final SubcategoryDailyStatisticsMapper mapper;
 
-    /** 서브카테고리별 일간 통계 전체 조회 (페이징) */
+    /** 서브카테고리별 일간 통계 조회 (subCategory, 날짜 범위) */
     @Transactional(readOnly = true)
-    public PageResponseDto<SubcategoryDailyStatisticsResponse> findAll(Pageable pageable) {
-        Page<SubcategoryDailyStatistics> page = repository.findAll(pageable);
-        Page<SubcategoryDailyStatisticsResponse> dtoPage = page.map(mapper::toDto);
-        return PageResponseDto.of(dtoPage);
-    }
+    public java.util.List<SubcategoryDailyStatisticsResponse> search(
+            String topCategory, // topCategory는 파라미터로 받지만 조회에는 사용하지 않음 (DB 구조상)
+            String subCategory,
+            java.time.LocalDate startDate,
+            java.time.LocalDate endDate) {
+        // 날짜 범위 검증 (최대 30일)
+        until.the.eternity.statistics.util.DateRangeValidator.validateDailyDateRange(
+                startDate, endDate);
 
-    /** 서브카테고리별 일간 통계 ID로 단건 조회 */
-    @Transactional(readOnly = true)
-    public SubcategoryDailyStatisticsResponse findById(Long id) {
-        SubcategoryDailyStatistics entity =
-                repository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "SubcategoryDailyStatistics not found: " + id));
-        return mapper.toDto(entity);
+        // 조회
+        java.util.List<SubcategoryDailyStatistics> results =
+                repository.findBySubcategoryAndDateRange(subCategory, startDate, endDate);
+
+        // DTO 변환
+        return results.stream().map(mapper::toDto).collect(java.util.stream.Collectors.toList());
     }
 }
