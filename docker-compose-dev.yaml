@@ -10,7 +10,7 @@ services:
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
-      - .env:
+      - .env
 
     labels:
       # Autoheal: unhealthy 상태 시 자동 재시작 활성화
