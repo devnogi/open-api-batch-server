@@ -34,8 +34,8 @@ public class ItemWeeklyStatisticsController {
                         request.itemName(),
                         request.subCategory(),
                         request.topCategory(),
-                        request.startDate(),
-                        request.endDate());
+                        request.getStartDateWithDefault(),
+                        request.getEndDateWithDefault());
         return ResponseEntity.ok(results);
     }
 }

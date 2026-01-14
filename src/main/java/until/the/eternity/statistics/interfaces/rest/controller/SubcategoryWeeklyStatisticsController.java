@@ -34,8 +34,8 @@ public class SubcategoryWeeklyStatisticsController {
                 service.search(
                         request.topCategory(),
                         request.subCategory(),
-                        request.startDate(),
-                        request.endDate());
+                        request.getStartDateWithDefault(),
+                        request.getEndDateWithDefault());
         return ResponseEntity.ok(results);
     }
 }

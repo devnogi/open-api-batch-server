@@ -31,7 +31,7 @@ public class TopCategoryDailyStatisticsController {
                             until.the.eternity.statistics.interfaces.rest.dto.request.TopCategoryDailyStatisticsSearchRequest
                                     request) {
         java.util.List<TopCategoryDailyStatisticsResponse> results =
-                service.search(request.topCategory(), request.startDate(), request.endDate());
+                service.search(request.topCategory(), request.getStartDateWithDefault(), request.getEndDateWithDefault());
         return ResponseEntity.ok(results);
     }
 }

@@ -31,7 +31,7 @@ public class TopCategoryWeeklyStatisticsController {
                             until.the.eternity.statistics.interfaces.rest.dto.request.TopCategoryWeeklyStatisticsSearchRequest
                                     request) {
         java.util.List<TopCategoryWeeklyStatisticsResponse> results =
-                service.search(request.topCategory(), request.startDate(), request.endDate());
+                service.search(request.topCategory(), request.getStartDateWithDefault(), request.getEndDateWithDefault());
         return ResponseEntity.ok(results);
     }
 }
