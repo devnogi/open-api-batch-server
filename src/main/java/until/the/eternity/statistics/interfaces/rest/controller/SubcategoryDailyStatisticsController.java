@@ -22,21 +22,20 @@ public class SubcategoryDailyStatisticsController {
 
     @GetMapping
     @Operation(
-            summary = "서브카테고리별 일간 통계 목록 조회",
-            description =
-                    "서브카테고리별 일간 거래 통계 목록을 페이징하여 조회합니다. 최저가, 최고가, 평균가, 거래 총량, 거래 수량 정보를 포함합니다.")
-    public ResponseEntity<PageResponseDto<SubcategoryDailyStatisticsResponse>>
-            getSubcategoryDailyStatistics(@ParameterObject @ModelAttribute PageRequestDto pageDto) {
-        PageResponseDto<SubcategoryDailyStatisticsResponse> result =
-                service.findAll(pageDto.toPageable());
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "서브카테고리별 일간 통계 단건 조회", description = "ID를 통해 특정 서브카테고리의 일간 거래 통계를 조회합니다.")
-    public ResponseEntity<SubcategoryDailyStatisticsResponse> getSubcategoryDailyStatisticsById(
-            @Parameter(description = "통계 ID", example = "1") @PathVariable Long id) {
-        SubcategoryDailyStatisticsResponse result = service.findById(id);
-        return ResponseEntity.ok(result);
+            summary = "서브카테고리별 일간 통계 조회",
+            description = "탑 카테고리와 서브 카테고리로 일간 통계를 조회합니다. 최대 30일까지 조회 가능합니다.")
+    public ResponseEntity<java.util.List<SubcategoryDailyStatisticsResponse>>
+            searchSubcategoryDailyStatistics(
+                    @ParameterObject @ModelAttribute
+                            @jakarta.validation.Valid
+                            until.the.eternity.statistics.interfaces.rest.dto.request.SubcategoryDailyStatisticsSearchRequest
+                                    request) {
+        java.util.List<SubcategoryDailyStatisticsResponse> results =
+                service.search(
+                        request.topCategory(),
+                        request.subCategory(),
+                        request.getStartDateWithDefault(),
+                        request.getEndDateWithDefault());
+        return ResponseEntity.ok(results);
     }
 }

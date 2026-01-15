@@ -20,24 +20,19 @@ public class TopCategoryWeeklyStatisticsService {
     private final TopCategoryWeeklyStatisticsRepository repository;
     private final TopCategoryWeeklyStatisticsMapper mapper;
 
-    /** 탑카테고리별 주간 통계 전체 조회 (페이징) */
+    /** 탑카테고리별 주간 통계 조회 (topCategory, 날짜 범위) */
     @Transactional(readOnly = true)
-    public PageResponseDto<TopCategoryWeeklyStatisticsResponse> findAll(Pageable pageable) {
-        Page<TopCategoryWeeklyStatistics> page = repository.findAll(pageable);
-        Page<TopCategoryWeeklyStatisticsResponse> dtoPage = page.map(mapper::toDto);
-        return PageResponseDto.of(dtoPage);
-    }
+    public java.util.List<TopCategoryWeeklyStatisticsResponse> search(
+            String topCategory, java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        // 날짜 범위 검증 (최대 4개월)
+        until.the.eternity.statistics.util.DateRangeValidator.validateWeeklyDateRange(
+                startDate, endDate);
 
-    /** 탑카테고리별 주간 통계 ID로 단건 조회 */
-    @Transactional(readOnly = true)
-    public TopCategoryWeeklyStatisticsResponse findById(Long id) {
-        TopCategoryWeeklyStatistics entity =
-                repository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "TopCategoryWeeklyStatistics not found: " + id));
-        return mapper.toDto(entity);
+        // 조회
+        java.util.List<TopCategoryWeeklyStatistics> results =
+                repository.findByTopCategoryAndDateRange(topCategory, startDate, endDate);
+
+        // DTO 변환
+        return results.stream().map(mapper::toDto).collect(java.util.stream.Collectors.toList());
     }
 }

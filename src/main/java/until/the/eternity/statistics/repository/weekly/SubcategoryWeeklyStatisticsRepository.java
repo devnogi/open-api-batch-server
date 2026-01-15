@@ -1,13 +1,33 @@
 package until.the.eternity.statistics.repository.weekly;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.weekly.SubcategoryWeeklyStatistics;
+import until.the.eternity.statistics.util.WeekConverter;
 
 public interface SubcategoryWeeklyStatisticsRepository
         extends JpaRepository<SubcategoryWeeklyStatistics, Long> {
+
+    /**
+     * 서브카테고리별 주간 통계 조회
+     *
+     * @param subCategory 서브 카테고리
+     * @param startDate 시작 날짜
+     * @param endDate 종료 날짜
+     * @return 해당 조건의 주간 통계 리스트
+     */
+    @Query(
+            "SELECT s FROM SubcategoryWeeklyStatistics s WHERE s.itemSubCategory = :subCategory "
+                    + "AND s.weekStartDate BETWEEN :startDate AND :endDate "
+                    + "ORDER BY s.year ASC, s.weekNumber ASC")
+    List<SubcategoryWeeklyStatistics> findBySubcategoryAndDateRange(
+            @Param("subCategory") String subCategory,
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate);
 
     /** 전주의 ItemWeeklyStatistics 데이터를 기반으로 서브카테고리별 주간 통계를 집계하여 upsert */
     @Modifying(clearAutomatically = true, flushAutomatically = true)

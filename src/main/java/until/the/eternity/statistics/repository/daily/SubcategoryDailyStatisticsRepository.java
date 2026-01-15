@@ -1,13 +1,33 @@
 package until.the.eternity.statistics.repository.daily;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.daily.SubcategoryDailyStatistics;
 
 public interface SubcategoryDailyStatisticsRepository
         extends JpaRepository<SubcategoryDailyStatistics, Long> {
+
+    /**
+     * 서브카테고리별 일간 통계 조회
+     *
+     * @param subCategory 서브 카테고리
+     * @param startDate 시작 일자
+     * @param endDate 종료 일자
+     * @return 해당 조건의 일간 통계 리스트
+     */
+    @Query(
+            "SELECT s FROM SubcategoryDailyStatistics s WHERE s.itemSubCategory = :subCategory "
+                    + "AND s.dateAuctionBuy BETWEEN :startDate AND :endDate "
+                    + "ORDER BY s.dateAuctionBuy ASC")
+    List<SubcategoryDailyStatistics> findBySubcategoryAndDateRange(
+            @Param("subCategory") String subCategory,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     /**
      * 당일의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert
