@@ -113,7 +113,7 @@ jobs:
             cd /home/${{ secrets.PROD_SERVER_USER }}/app
 
             # Write .env.prod content to .env
-            echo "${{ secrets.ENV_FILE_PROD }}" > .env
+            echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
 
             # Pull latest production image
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
