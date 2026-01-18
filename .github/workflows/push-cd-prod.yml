@@ -85,6 +85,12 @@ jobs:
       # ========================================
       - name: Setup SSH key and config
         run: |
+          set -x
+
+          echo "HOST=${{ secrets.PROD_SERVER_HOST }}"
+          echo "USER=${{ secrets.PROD_SERVER_USER }}"
+          echo "PORT=${{ secrets.PROD_SERVER_PORT }}"
+          
           mkdir -p ~/.ssh
           echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/my-key.pem
           chmod 400 ~/.ssh/my-key.pem
