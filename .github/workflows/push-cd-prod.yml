@@ -105,7 +105,7 @@ jobs:
 
       - name: Copy docker-compose-prod.yml to server
         run: |
-          scp -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose-prod.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
+          scp -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose-prod.yml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
 
       - name: Deploy to Production Server
         run: |
