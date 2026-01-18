@@ -103,9 +103,9 @@ jobs:
         run: |
           ssh -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /home/${{ secrets.PROD_SERVER_USER }}/app/logs"
 
-      - name: Copy docker-compose-dev.yaml to server
+      - name: Copy docker-compose-prod.yml to server
         run: |
-          scp -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
+          scp -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose-prod.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
 
       - name: Deploy to Production Server
         run: |
