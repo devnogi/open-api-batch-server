@@ -1,11 +1,7 @@
-version: "3.8"
-
 services:
   spring-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-latest}
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-prod}
+    pull_policy: always
     container_name: spring-app
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
@@ -84,6 +80,7 @@ services:
 
     networks:
       - app-network
+      - devnogi-network  # MySQL, Redis 등 인프라 컨테이너와 통신
     # Health Check: 컨테이너 상태 감지 (autoheal과 연동)
     # wget 사용 (Alpine Linux에 기본 설치되어 있음)
     healthcheck:
@@ -135,3 +132,6 @@ volumes:
 networks:
   app-network:
     driver: bridge
+  devnogi-network:
+    external: true
+    name: infra_devnogi-network  # 기존 인프라 네트워크 (MySQL, Redis)
