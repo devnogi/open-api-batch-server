@@ -115,6 +115,9 @@ jobs:
             # Write .env.prod content to .env
             echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
 
+            # Docker Hub 로그인
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
             # Pull latest production image
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
 
