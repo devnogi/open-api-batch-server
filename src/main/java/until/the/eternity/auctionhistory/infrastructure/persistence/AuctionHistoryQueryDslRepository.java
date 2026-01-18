@@ -8,11 +8,6 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +22,12 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.request.DateAuction
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
 import until.the.eternity.auctionitemoption.domain.entity.QAuctionItemOption;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -71,17 +72,32 @@ class AuctionHistoryQueryDslRepository {
         // 3단계: 정렬 조건 빌드
         List<OrderSpecifier<?>> orderSpecifiers = buildOrderSpecifiers(pageable, ah);
 
-        // 4단계: 모든 옵션과 함께 조회 (LEFT JOIN - 조건 없음!)
+        // 4단계: Deferred Join (Late Row Lookup) 패턴 적용
+        // 4-1단계: ID만 먼저 조회 (인덱스 활용)
+        List<String> ids =
+                queryFactory
+                        .select(ah.auctionBuyId)
+                        .from(ah)
+                        .where(historyBuilder)
+                        .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .fetch();
+
+        // 결과가 없으면 빈 페이지 반환
+        if (ids.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, 0L);
+        }
+
+        // 4-2단계: ID로 상세 조회 (LEFT JOIN으로 옵션 포함)
         List<AuctionHistory> content =
                 queryFactory
                         .selectFrom(ah)
                         .leftJoin(ah.auctionItemOptions, aio)
                         .fetchJoin()
-                        .where(historyBuilder)
+                        .where(ah.auctionBuyId.in(ids))
                         .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
-                        .distinct() // 중복 제거
-                        .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize())
+                        .distinct()
                         .fetch();
 
         // Count 쿼리 (JOIN 없이 실행)

@@ -2,11 +2,8 @@ package until.the.eternity.statistics.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.statistics.domain.entity.daily.TopCategoryDailyStatistics;
 import until.the.eternity.statistics.domain.mapper.TopCategoryDailyStatisticsMapper;
 import until.the.eternity.statistics.interfaces.rest.dto.response.TopCategoryDailyStatisticsResponse;
