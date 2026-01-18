@@ -119,10 +119,10 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
 
             # Stop and remove existing containers
-            docker compose down
+            docker compose -f docker-compose-prod.yml down
 
             # Start new containers
-            docker compose up -d
+            docker compose -f docker-compose-prod.yml up -d
 
             echo "✅ Production deployment complete"
           EOF
@@ -132,7 +132,7 @@ jobs:
       # ========================================
       - name: Comprehensive Health Check
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+          ssh -i ~/.ssh/my-key.pem -p ${{ secrets.PROD_SERVER_PORT }} ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
             echo "=== Starting Production Health Check ==="
 
             # 1. Check if container is running
@@ -171,7 +171,7 @@ jobs:
             # 3. Check Spring Boot actuator health endpoint
             echo "Checking actuator health endpoint..."
             for i in {1..30}; do
-              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.PROD_SERVER_PORT || 8080 }}/actuator/health || echo "")
+              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.PROD_APP_PORT || 8080 }}/actuator/health || echo "")
 
               if echo "$HEALTH_RESPONSE" | grep -q '"status":"UP"'; then
                 echo "✅ Application health check passed"
@@ -192,7 +192,7 @@ jobs:
 
             # 4. Smoke test: Check if API responds
             echo "Running smoke test..."
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.PROD_SERVER_PORT || 8080 }}/actuator/health)
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.PROD_APP_PORT || 8080 }}/actuator/health)
             if [ "$HTTP_CODE" == "200" ]; then
               echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
             else
@@ -208,7 +208,7 @@ jobs:
         if: success()
         run: |
           echo "✅ Production deployment successful!"
-          echo "🔗 Production Server: http://${{ secrets.PROD_SERVER_HOST }}:${{ secrets.PROD_SERVER_PORT || 8080 }}"
+          echo "🔗 Production Server: http://${{ secrets.PROD_SERVER_HOST }}:${{ secrets.PROD_APP_PORT || 8080 }}"
           echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod"
           echo "📦 Commit: ${{ github.sha }}"
           echo "⚠️  Please verify the production deployment manually"
