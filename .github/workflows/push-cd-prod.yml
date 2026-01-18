@@ -86,18 +86,18 @@ jobs:
       - name: Setup SSH key and config
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/my-key.pem
           chmod 400 ~/.ssh/my-key.pem
           ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
           echo -e "Host *\n  ServerAliveInterval 60\n  ServerAliveCountMax 3" >> ~/.ssh/config
 
       - name: Create app directory on server
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /home/${{ secrets.PROD_SERVER_USER }}/app/logs"
+          ssh -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /home/${{ secrets.PROD_SERVER_USER }}/app/logs"
 
       - name: Copy docker-compose-dev.yaml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
+          scp -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
 
       - name: Deploy to Production Server
         run: |
