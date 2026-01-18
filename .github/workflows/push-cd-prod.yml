@@ -101,7 +101,7 @@ jobs:
 
       - name: Deploy to Production Server
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+          ssh -i ~/.ssh/my-key.pem -p ${{ secrets.PROD_SERVER_PORT }} ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
             cd /home/${{ secrets.PROD_SERVER_USER }}/app
 
             # Write .env.prod content to .env
