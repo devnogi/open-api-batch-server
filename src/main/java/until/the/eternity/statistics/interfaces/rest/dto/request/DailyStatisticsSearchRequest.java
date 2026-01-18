@@ -1,8 +1,9 @@
 package until.the.eternity.statistics.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @Schema(description = "일간 통계 검색 요청")
 public record DailyStatisticsSearchRequest(

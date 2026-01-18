@@ -1,13 +1,14 @@
 package until.the.eternity.auctionitemoption.domain.entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionitem.domain.entity.AuctionItem;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "auction_item_option")

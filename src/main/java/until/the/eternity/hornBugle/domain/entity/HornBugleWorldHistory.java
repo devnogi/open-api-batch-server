@@ -1,8 +1,9 @@
 package until.the.eternity.hornBugle.domain.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "horn_bugle_world_history")

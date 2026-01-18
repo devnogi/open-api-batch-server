@@ -71,7 +71,7 @@ springdoc:
 decorator:
   datasource:
     p6spy:
-      enable-logging: false
+      enable-logging: true
 
 logging:
   config: classpath:logback/logback-display.xml

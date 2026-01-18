@@ -3,8 +3,9 @@ package until.the.eternity.common.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Arrays;
 import org.springframework.data.domain.Sort;
+
+import java.util.Arrays;
 
 /** 정렬 방향 (오름차순/내림차순) */
 @Schema(description = "정렬 방향", enumAsRef = true)
