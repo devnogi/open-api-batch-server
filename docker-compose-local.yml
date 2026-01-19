@@ -11,7 +11,7 @@ services:
       dockerfile: Dockerfile
     # 로컬 이미지 이름 (Docker Hub에 push하지 않음)
     image: open-api-batch-server:local
-    container_name: spring-app-local
+    container_name: devnogi-batch-app-local
     ports:
       - "${SERVER_PORT:-8092}:${SERVER_PORT:-8092}"
     env_file:
@@ -142,7 +142,7 @@ services:
   # Autoheal: unhealthy 컨테이너 자동 재시작
   autoheal:
     image: willfarrell/autoheal:latest
-    container_name: autoheal-local
+    container_name: devnogi-batch-autoheal-local
     restart: unless-stopped
     environment:
       AUTOHEAL_INTERVAL: ${AUTOHEAL_INTERVAL:-30}

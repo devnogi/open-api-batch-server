@@ -1,16 +1,16 @@
 version: "3.8"
 
 services:
-  spring-app:
+  devnogi-batch-dev:
     build:
       context: .
       dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-latest}
-    container_name: spring-app
+    container_name: devnogi-batch-app-dev
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
-      - .env
+      - .env.dev
 
     labels:
       # Autoheal: unhealthy 상태 시 자동 재시작 활성화
@@ -104,7 +104,7 @@ services:
   # - healthcheck와 독립적으로 동작 (healthcheck가 unhealthy 판정하면 autoheal이 재시작)
   autoheal:
     image: willfarrell/autoheal:latest
-    container_name: autoheal
+    container_name: devnogi-batch-autoheal-dev
     restart: unless-stopped
     environment:
       # AUTOHEAL_INTERVAL: 체크 주기 (초 단위)

@@ -100,8 +100,8 @@ jobs:
           ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /home/${{ secrets.SERVER_USER }}/app
 
-            # Write .env.dev content to .env
-            echo "${{ secrets.ENV_FILE_DEV }}" > .env
+            # Write .env.dev content to .env.dev
+            echo "${{ secrets.ENV_FILE_DEV }}" > .env.dev
 
             # Pull latest dev image
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
