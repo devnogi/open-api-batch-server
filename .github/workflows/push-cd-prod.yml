@@ -204,7 +204,7 @@ jobs:
             fi
 
             echo "=== Health Check Complete ==="
-            docker ps --filter "name=spring-app"
+            docker ps --filter "name=devnogi-batch-app-prod"
           EOF
 
       - name: Display deployment info
