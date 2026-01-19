@@ -125,7 +125,7 @@ jobs:
             docker compose -f docker-compose-prod.yml down
 
             # Start new containers
-            docker compose -f docker-compose-prod.yml up -d
+            docker compose -f docker-compose-prod.yml --env-file .env.prod up -d
 
             echo "✅ Production deployment complete"
           EOF
@@ -225,4 +225,4 @@ jobs:
           echo "❌ Deployment failed! Consider manual rollback if needed."
           echo "To rollback, SSH to server and run:"
           echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod-<previous-sha>"
-          echo "  docker compose down && docker compose up -d"
+          echo "  docker compose -f docker-compose-prod.yml down && docker compose -f docker-compose-prod.yml --env-file .env.prod up -d"

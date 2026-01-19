@@ -93,7 +93,7 @@ jobs:
 
       - name: Copy docker-compose-dev.yml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose-dev.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
+          scp -i ~/.ssh/my-key.pem docker-compose-dev.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
 
       - name: Deploy to Dev Server
         run: |
@@ -107,10 +107,10 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
 
             # Stop and remove existing containers
-            docker compose down
+            docker compose -f docker-compose-dev.yml down
 
             # Start new containers
-            docker compose up -d
+            docker compose -f docker-compose-dev.yml --env-file .env.dev up -d
 
             echo "✅ Dev deployment complete"
           EOF
