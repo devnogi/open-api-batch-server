@@ -139,11 +139,11 @@ jobs:
             echo "=== Starting Production Health Check ==="
 
             # 1. Check if container is running
-            CONTAINER_ID=$(docker ps -q --filter "name=spring-app")
+            CONTAINER_ID=$(docker ps -q --filter "name=devnogi-batch-app-prod")
             if [ -z "$CONTAINER_ID" ]; then
               echo "❌ Container not running"
               docker ps -a
-              docker logs spring-app --tail 50
+              docker logs devnogi-batch-app-prod --tail 50
               exit 1
             fi
             echo "✅ Container is running (ID: $CONTAINER_ID)"
@@ -151,7 +151,7 @@ jobs:
             # 2. Wait for Docker health check
             echo "Waiting for container to become healthy..."
             for i in {1..36}; do
-              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' spring-app 2>/dev/null || echo "no-healthcheck")
+              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' devnogi-batch-app-prod 2>/dev/null || echo "no-healthcheck")
 
               if [ "$HEALTH_STATUS" == "healthy" ]; then
                 echo "✅ Container is healthy"
@@ -166,7 +166,7 @@ jobs:
 
               if [ $i -eq 36 ]; then
                 echo "❌ Container failed to become healthy after 6 minutes"
-                docker logs spring-app --tail 100
+                docker logs devnogi-batch-app-prod --tail 100
                 exit 1
               fi
             done
@@ -188,7 +188,7 @@ jobs:
               if [ $i -eq 30 ]; then
                 echo "❌ Application health check failed after 5 minutes"
                 echo "Last response: $HEALTH_RESPONSE"
-                docker logs spring-app --tail 100
+                docker logs devnogi-batch-app-prod --tail 100
                 exit 1
               fi
             done
