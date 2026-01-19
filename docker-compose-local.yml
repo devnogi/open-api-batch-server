@@ -1,8 +1,11 @@
 version: "3.8"
 
-# 로컬 개발 환경용 Docker Compose 설정
-# 사용법: docker-compose -f docker-compose-local.yml --env-file .env.local up --build
+# =============================================================================
+# 로컬 개발 환경용 Docker Compose 설정 (Profile: local)
+# =============================================================================
+# 사용법: docker-compose -f docker-compose-local.yml --env-file .env.local up -d --build
 # 참고: 쉘 환경 변수가 .env.local 파일의 값을 오버라이드할 수 있으므로 --env-file 옵션을 명시하는 것이 좋습니다
+# =============================================================================
 
 services:
   spring-app:
@@ -15,12 +18,12 @@ services:
     ports:
       - "${SERVER_PORT:-8092}:${SERVER_PORT:-8092}"
     env_file:
-      - .env.local  # 로컬 환경 변수 파일
+      - .env.local  # 로컬 환경 변수 파일 (DB, JWT, API 키 등 민감 정보)
     labels:
       autoheal: "true"
     environment:
       # === Application Configuration ===
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_PROFILES_ACTIVE: local
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       SERVER_PORT: ${SERVER_PORT:-8092}
@@ -44,21 +47,22 @@ services:
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON:-0 0 * * * *}"
       STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
 
-      # === JVM Configuration (로컬 개발용 - 메모리 사용량 감소) ===
+      # === JVM Configuration (Local - 경량 개발용) ===
+      # Heap: 256m~512m, Non-Heap: 256m, Total: ~768m
       JAVA_OPTS: >-
-        -Xms${JAVA_OPTS_XMS:-256m}
-        -Xmx${JAVA_OPTS_XMX:-512m}
-        -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE:-128m}
-        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-64m}
-        -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE:-64m}
-        -Xss${JAVA_OPTS_XSS:-512k}
+        -Xms256m
+        -Xmx512m
+        -XX:MaxMetaspaceSize=128m
+        -XX:ReservedCodeCacheSize=64m
+        -XX:MaxDirectMemorySize=64m
+        -Xss512k
         -XX:+UseG1GC
-        -XX:MaxGCPauseMillis=${JAVA_OPTS_MAX_GC_PAUSE_MILLIS:-200}
-        -XX:G1HeapRegionSize=${JAVA_OPTS_G1_HEAP_REGION_SIZE:-1m}
-        -XX:InitiatingHeapOccupancyPercent=${JAVA_OPTS_INITIATING_HEAP_OCCUPANCY_PERCENT:-45}
+        -XX:MaxGCPauseMillis=200
+        -XX:G1HeapRegionSize=1m
+        -XX:InitiatingHeapOccupancyPercent=45
         -XX:+TieredCompilation
-        -XX:TieredStopAtLevel=${JAVA_OPTS_TIERED_STOP_AT_LEVEL:-1}
-        -XX:CICompilerCount=${JAVA_OPTS_CI_COMPILER_COUNT:-2}
+        -XX:TieredStopAtLevel=1
+        -XX:CICompilerCount=2
         -XX:+UseCompressedOops
         -XX:+UseCompressedClassPointers
         -Djava.security.egd=file:/dev/./urandom
@@ -67,15 +71,15 @@ services:
       - app-logs:/app/logs  # Named volume 사용 (권한 문제 해결)
       # 로컬 개발 시 설정 파일 마운트 (선택사항)
       # - ./config:/app/config:ro
-    restart: on-failure:${RESTART_POLICY_MAX_RETRIES:-3}
+    restart: on-failure:3
 
-    # 로컬 개발용 리소스 제한 (더 적은 리소스)
+    # === Docker Resource Limits (Local - 경량) ===
     deploy:
       resources:
         limits:
-          memory: ${DOCKER_MEMORY_LIMIT:-1g}
+          memory: 1g
         reservations:
-          memory: ${DOCKER_MEMORY_RESERVATION:-512m}
+          memory: 512m
 
     networks:
       - app-network
@@ -86,19 +90,20 @@ services:
       mysql:
         condition: service_healthy
 
-    # Health Check
+    # === Health Check (Local - 표준) ===
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT:-8092}/actuator/health"]
-      interval: ${HEALTHCHECK_INTERVAL:-30s}
-      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
-      retries: ${HEALTHCHECK_RETRIES:-3}
-      start_period: ${HEALTHCHECK_START_PERIOD:-90s}  # MySQL 초기화 시간 고려하여 증가
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s  # MySQL 초기화 시간 고려
 
+    # === Logging (Local - 최소) ===
     logging:
       driver: "json-file"
       options:
-        max-size: ${LOGGING_MAX_SIZE:-10m}
-        max-file: "${LOGGING_MAX_FILE:-3}"
+        max-size: "10m"
+        max-file: "3"
 
   # MySQL Database
   mysql:
@@ -139,15 +144,16 @@ services:
       - --default-time-zone=+09:00  # MySQL 레벨 타임존 설정
       - --explicit_defaults_for_timestamp=1  # TIMESTAMP 기본값 명시 허용
 
-  # Autoheal: unhealthy 컨테이너 자동 재시작
+  # === Autoheal (Local - 표준) ===
+  # unhealthy 컨테이너 자동 재시작 서비스
   autoheal:
     image: willfarrell/autoheal:latest
     container_name: devnogi-batch-autoheal-local
     restart: unless-stopped
     environment:
-      AUTOHEAL_INTERVAL: ${AUTOHEAL_INTERVAL:-30}
-      AUTOHEAL_START_PERIOD: ${AUTOHEAL_START_PERIOD:-0}
-      AUTOHEAL_DEFAULT_STOP_TIMEOUT: ${AUTOHEAL_DEFAULT_STOP_TIMEOUT:-10}
+      AUTOHEAL_INTERVAL: 30        # 체크 주기 (초)
+      AUTOHEAL_START_PERIOD: 0     # 시작 유예 시간 (healthcheck start_period를 따름)
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: 10  # graceful shutdown 대기 시간 (초)
       DOCKER_SOCK: /var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -156,9 +162,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${AUTOHEAL_MEMORY_LIMIT:-50m}
+          memory: 50m
         reservations:
-          memory: ${AUTOHEAL_MEMORY_RESERVATION:-20m}
+          memory: 20m
 
 volumes:
   mysql_data:
