@@ -101,16 +101,16 @@ jobs:
 
       - name: Create app directory on server
         run: |
-          ssh -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /home/${{ secrets.PROD_SERVER_USER }}/app/logs"
+          ssh -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /opt/devnogi-batch/logs"
 
       - name: Copy docker-compose-prod.yml to server
         run: |
-          scp -P ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose-prod.yml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
+          scp -P ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose-prod.yml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/opt/devnogi-batch/
 
       - name: Deploy to Production Server
         run: |
           ssh -i ~/.ssh/my-key.pem -p ${{ secrets.PROD_SERVER_PORT }} ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
-            cd /home/${{ secrets.PROD_SERVER_USER }}/app
+            cd /opt/devnogi-batch
 
             # Write .env.prod content to .env
             echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
