@@ -53,19 +53,19 @@ services:
       # === JVM Configuration (Dev - 중간 리소스) ===
       # Heap: 256m~512m, Non-Heap: ~262m, Total: ~774m
       JAVA_OPTS: >-
-        -Xms256m
-        -Xmx512m
-        -XX:MaxMetaspaceSize=150m
-        -XX:ReservedCodeCacheSize=48m
-        -XX:MaxDirectMemorySize=64m
-        -Xss512k
+        -Xms${JAVA_OPTS_XMS:-256m}
+        -Xmx${JAVA_OPTS_XMX:-512m}
+        -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE:-150m}
+        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-48m}
+        -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE:-64m}
+        -Xss${JAVA_OPTS_XSS:-512k}
         -XX:+UseG1GC
-        -XX:MaxGCPauseMillis=200
-        -XX:G1HeapRegionSize=2m
-        -XX:InitiatingHeapOccupancyPercent=45
+        -XX:MaxGCPauseMillis=${JAVA_OPTS_MAX_GC_PAUSE_MILLIS:-200}
+        -XX:G1HeapRegionSize=${JAVA_OPTS_G1_HEAP_REGION_SIZE:-2m}
+        -XX:InitiatingHeapOccupancyPercent=${JAVA_OPTS_INITIATING_HEAP_OCCUPANCY_PERCENT:-45}
         -XX:+TieredCompilation
-        -XX:TieredStopAtLevel=2
-        -XX:CICompilerCount=2
+        -XX:TieredStopAtLevel=${JAVA_OPTS_TIERED_STOP_AT_LEVEL:-2}
+        -XX:CICompilerCount=${JAVA_OPTS_CI_COMPILER_COUNT:-2}
         -XX:+UseCompressedOops
         -XX:+UseCompressedClassPointers
         -Djava.security.egd=file:/dev/./urandom
