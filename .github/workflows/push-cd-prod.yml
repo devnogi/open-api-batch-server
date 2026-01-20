@@ -2,10 +2,7 @@ name: CI/CD for Production Server
 
 on:
   push:
-    branches: [ main, dev ] # Only main branch, 테스트 이후에 dev 지울 것
-  pull_request:
-    branches: [ dev, main ] # 테스트 이후에 지울 것
-    types: [ opened, synchronize, reopened ]
+    branches: [ main, dev ] # Only main branch, 서비스 시작 이후 dev 지울 것
 
 permissions:
   contents: read
