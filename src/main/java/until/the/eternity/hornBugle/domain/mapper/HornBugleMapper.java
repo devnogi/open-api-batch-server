@@ -1,7 +1,6 @@
 package until.the.eternity.hornBugle.domain.mapper;
 
 import java.time.Instant;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
@@ -14,11 +13,9 @@ public interface HornBugleMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "serverName", expression = "java(server.getServerName())")
-    @Mapping(target = "dateRegister", expression = "java(registerTime)")
+    @Mapping(target = "dateRegister", source = "registerTime")
     HornBugleWorldHistory toEntity(
-            OpenApiHornBugleHistoryResponse dto,
-            @Context HornBugleServer server,
-            @Context Instant registerTime);
+            OpenApiHornBugleHistoryResponse dto, HornBugleServer server, Instant registerTime);
 
     HornBugleHistoryResponse toResponse(HornBugleWorldHistory entity);
 }

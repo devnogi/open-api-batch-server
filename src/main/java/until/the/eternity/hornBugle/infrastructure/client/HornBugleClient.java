@@ -32,7 +32,7 @@ public class HornBugleClient {
                         uriBuilder ->
                                 uriBuilder
                                         .path("/horn-bugle-world/history")
-                                        .queryParam("server_name", server.getEncodedServerName())
+                                        .queryParam("server_name", server.getServerName())
                                         .build())
                 .retrieve()
                 .bodyToMono(OpenApiHornBugleHistoryListResponse.class)
