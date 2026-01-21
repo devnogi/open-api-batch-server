@@ -23,7 +23,7 @@ public class HornBugleClient {
      */
     public Mono<OpenApiHornBugleHistoryListResponse> fetchHornBugleHistory(HornBugleServer server) {
         log.info(
-                "[SCHEDULE] [HornBugle] Calling Nexon Open API Horn Bugle History API for server='{}'",
+                "[HornBugle] Calling Nexon Open API Horn Bugle History API for server='{}'",
                 server.getServerName());
 
         return openApiWebClient
@@ -36,13 +36,22 @@ public class HornBugleClient {
                                         .build())
                 .retrieve()
                 .bodyToMono(OpenApiHornBugleHistoryListResponse.class)
+                .doOnNext(
+                        response ->
+                                log.debug(
+                                        "[HornBugle] [{}] API response received: {} records",
+                                        server.getServerName(),
+                                        response.hornBugleWorldHistory() != null
+                                                ? response.hornBugleWorldHistory().size()
+                                                : 0))
                 .onErrorResume(
                         throwable -> {
-                            log.warn(
-                                    "[SCHEDULE] [HornBugle] Failed to fetch Nexon Open API Horn Bugle History API for server='{}': error='{}', message='{}'",
+                            log.error(
+                                    "[HornBugle] Failed to fetch Nexon Open API Horn Bugle History API for server='{}': error='{}', message='{}'",
                                     server.getServerName(),
-                                    throwable.toString(),
-                                    throwable.getMessage());
+                                    throwable.getClass().getSimpleName(),
+                                    throwable.getMessage(),
+                                    throwable);
                             return Mono.empty();
                         });
     }
