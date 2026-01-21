@@ -27,10 +27,7 @@ public class ItemDailyStatisticsController {
             summary = "아이템별 일간 통계 조회",
             description = "아이템 이름, 서브 카테고리, 탑 카테고리로 일간 통계를 조회합니다. 최대 30일까지 조회 가능합니다.")
     public ResponseEntity<java.util.List<ItemDailyStatisticsResponse>> searchItemDailyStatistics(
-            @ParameterObject @ModelAttribute
-                    @Valid
-                    ItemDailyStatisticsSearchRequest
-                            request) {
+            @ParameterObject @ModelAttribute @Valid ItemDailyStatisticsSearchRequest request) {
         java.util.List<ItemDailyStatisticsResponse> results =
                 service.search(
                         request.itemName(),

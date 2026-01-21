@@ -13,10 +13,7 @@ public class DailyStatisticsScheduler {
 
     private final DailyStatisticsService dailyStatisticsService;
 
-    /**
-     * AuctionHistory 저장 완료 이벤트 수신 시 당일 통계 업데이트
-     * AuctionHistoryScheduler가 실행될 때마다 자동으로 호출됨
-     */
+    /** AuctionHistory 저장 완료 이벤트 수신 시 당일 통계 업데이트 AuctionHistoryScheduler가 실행될 때마다 자동으로 호출됨 */
     @EventListener
     public void onAuctionHistorySaved(AuctionHistorySavedEvent event) {
         log.info(

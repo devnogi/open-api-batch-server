@@ -26,9 +26,9 @@ public class SubcategoryDailyStatisticsController {
             description = "탑 카테고리와 서브 카테고리로 일간 통계를 조회합니다. 최대 30일까지 조회 가능합니다.")
     public ResponseEntity<java.util.List<SubcategoryDailyStatisticsResponse>>
             searchSubcategoryDailyStatistics(
-                    @ParameterObject @ModelAttribute
-                            @jakarta.validation.Valid
-                            until.the.eternity.statistics.interfaces.rest.dto.request.SubcategoryDailyStatisticsSearchRequest
+                    @ParameterObject @ModelAttribute @jakarta.validation.Valid
+                            until.the.eternity.statistics.interfaces.rest.dto.request
+                                            .SubcategoryDailyStatisticsSearchRequest
                                     request) {
         java.util.List<SubcategoryDailyStatisticsResponse> results =
                 service.search(

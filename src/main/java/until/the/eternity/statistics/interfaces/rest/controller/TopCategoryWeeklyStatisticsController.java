@@ -26,12 +26,15 @@ public class TopCategoryWeeklyStatisticsController {
             description = "탑 카테고리로 주간 통계를 조회합니다. 최대 4개월까지 조회 가능합니다.")
     public ResponseEntity<java.util.List<TopCategoryWeeklyStatisticsResponse>>
             searchTopCategoryWeeklyStatistics(
-                    @ParameterObject @ModelAttribute
-                            @jakarta.validation.Valid
-                            until.the.eternity.statistics.interfaces.rest.dto.request.TopCategoryWeeklyStatisticsSearchRequest
+                    @ParameterObject @ModelAttribute @jakarta.validation.Valid
+                            until.the.eternity.statistics.interfaces.rest.dto.request
+                                            .TopCategoryWeeklyStatisticsSearchRequest
                                     request) {
         java.util.List<TopCategoryWeeklyStatisticsResponse> results =
-                service.search(request.topCategory(), request.getStartDateWithDefault(), request.getEndDateWithDefault());
+                service.search(
+                        request.topCategory(),
+                        request.getStartDateWithDefault(),
+                        request.getEndDateWithDefault());
         return ResponseEntity.ok(results);
     }
 }

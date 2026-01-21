@@ -13,9 +13,8 @@ public class PreviousDayStatisticsScheduler {
     private final DailyStatisticsService dailyStatisticsService;
 
     /**
-     * 매일 새벽 전날 통계 최종 확정
-     * 기본 cron: 매일 새벽 0시 10분 (AuctionHistoryScheduler 0시 5분 실행 이후)
-     * 전날 23시대 거래 내역까지 모두 포함된 최종 통계를 저장
+     * 매일 새벽 전날 통계 최종 확정 기본 cron: 매일 새벽 0시 10분 (AuctionHistoryScheduler 0시 5분 실행 이후) 전날 23시대 거래 내역까지
+     * 모두 포함된 최종 통계를 저장
      */
     @Scheduled(cron = "${statistics.previous-day.cron:0 10 0 * * *}", zone = "Asia/Seoul")
     public void schedulePreviousDayStatistics() {

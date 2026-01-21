@@ -1,14 +1,13 @@
 package until.the.eternity.statistics.repository.daily;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.daily.SubcategoryDailyStatistics;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public interface SubcategoryDailyStatisticsRepository
         extends JpaRepository<SubcategoryDailyStatistics, Long> {
@@ -31,8 +30,8 @@ public interface SubcategoryDailyStatisticsRepository
             @Param("endDate") LocalDate endDate);
 
     /**
-     * 당일의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert
-     * item_daily_statistics 테이블만 사용하여 효율적으로 집계
+     * 당일의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert item_daily_statistics 테이블만 사용하여
+     * 효율적으로 집계
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
@@ -75,8 +74,7 @@ public interface SubcategoryDailyStatisticsRepository
     void upsertCurrentDayStatistics();
 
     /**
-     * 전날의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 최종 확정
-     * item_daily_statistics 테이블만 사용하여 효율적으로 집계
+     * 전날의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 최종 확정 item_daily_statistics 테이블만 사용하여 효율적으로 집계
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

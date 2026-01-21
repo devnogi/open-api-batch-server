@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.scheduler;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +15,6 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.event.AuctionHistorySavedEvent;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -113,7 +112,9 @@ public class AuctionHistoryScheduler {
                 totalSavedCount);
 
         // 통계 업데이트를 위한 이벤트 발행
-        log.debug("> [SCHEDULE] Publishing AuctionHistorySavedEvent with {} records", totalSavedCount);
+        log.debug(
+                "> [SCHEDULE] Publishing AuctionHistorySavedEvent with {} records",
+                totalSavedCount);
         eventPublisher.publishEvent(new AuctionHistorySavedEvent(totalSavedCount));
     }
 }

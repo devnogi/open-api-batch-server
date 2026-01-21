@@ -1,14 +1,13 @@
 package until.the.eternity.statistics.repository.daily;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.daily.ItemDailyStatistics;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailyStatistics, Long> {
 
@@ -35,8 +34,8 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
             @Param("endDate") LocalDate endDate);
 
     /**
-     * 당일 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 upsert
-     * AuctionHistoryScheduler가 실행될 때마다 당일 통계만 업데이트
+     * 당일 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 upsert AuctionHistoryScheduler가 실행될 때마다 당일 통계만
+     * 업데이트
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
@@ -83,8 +82,7 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
     void upsertCurrentDayStatistics();
 
     /**
-     * 전날 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 최종 확정
-     * 매일 새벽에 한 번 실행되어 전날 23시대 거래 내역까지 포함한 통계를 완성
+     * 전날 거래된 각 아이템의 통계를 item_daily_statistics 테이블에 최종 확정 매일 새벽에 한 번 실행되어 전날 23시대 거래 내역까지 포함한 통계를 완성
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

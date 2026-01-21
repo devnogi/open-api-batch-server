@@ -25,9 +25,9 @@ public class ItemWeeklyStatisticsController {
             summary = "아이템별 주간 통계 조회",
             description = "아이템 이름, 서브 카테고리, 탑 카테고리로 주간 통계를 조회합니다. 최대 4개월까지 조회 가능합니다.")
     public ResponseEntity<java.util.List<ItemWeeklyStatisticsResponse>> searchItemWeeklyStatistics(
-            @ParameterObject @ModelAttribute
-                    @jakarta.validation.Valid
-                    until.the.eternity.statistics.interfaces.rest.dto.request.ItemWeeklyStatisticsSearchRequest
+            @ParameterObject @ModelAttribute @jakarta.validation.Valid
+                    until.the.eternity.statistics.interfaces.rest.dto.request
+                                    .ItemWeeklyStatisticsSearchRequest
                             request) {
         java.util.List<ItemWeeklyStatisticsResponse> results =
                 service.search(
