@@ -2,7 +2,7 @@ name: CI/CD for Production Server
 
 on:
   push:
-    branches: [ main ]  # Only main branch
+    branches: [ main, dev ]  # Only main branch, 서비스 시작 후 dev 제거
 
 permissions:
   contents: read
@@ -83,35 +83,40 @@ jobs:
       - name: Setup SSH key and config
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/my-key.pem
           chmod 400 ~/.ssh/my-key.pem
-          ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} \
+          -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+
           echo -e "Host *\n  ServerAliveInterval 60\n  ServerAliveCountMax 3" >> ~/.ssh/config
 
       - name: Create app directory on server
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /home/${{ secrets.PROD_SERVER_USER }}/app/logs"
+          ssh -p ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} "mkdir -p /opt/devnogi-batch/logs"
 
-      - name: Copy docker-compose-dev.yaml to server
+      - name: Copy docker-compose-prod.yml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose.yaml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/home/${{ secrets.PROD_SERVER_USER }}/app/
+          scp -P ${{ secrets.PROD_SERVER_PORT }} -i ~/.ssh/my-key.pem docker-compose-prod.yml ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/opt/devnogi-batch/
 
       - name: Deploy to Production Server
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
-            cd /home/${{ secrets.PROD_SERVER_USER }}/app
+          ssh -i ~/.ssh/my-key.pem -p ${{ secrets.PROD_SERVER_PORT }} ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+            cd /opt/devnogi-batch
 
             # Write .env.prod content to .env
-            echo "${{ secrets.ENV_FILE_PROD }}" > .env
+            echo "${{ secrets.ENV_FILE_PROD }}" > .env.prod
+
+            # Docker Hub 로그인
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             # Pull latest production image
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
 
             # Stop and remove existing containers
-            docker compose down
+            docker compose -f docker-compose-prod.yml down
 
             # Start new containers
-            docker compose up -d
+            docker compose -f docker-compose-prod.yml --env-file .env.prod up -d
 
             echo "✅ Production deployment complete"
           EOF
@@ -121,15 +126,15 @@ jobs:
       # ========================================
       - name: Comprehensive Health Check
         run: |
-          ssh -i ~/.ssh/my-key.pem ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+          ssh -i ~/.ssh/my-key.pem -p ${{ secrets.PROD_SERVER_PORT }} ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
             echo "=== Starting Production Health Check ==="
 
             # 1. Check if container is running
-            CONTAINER_ID=$(docker ps -q --filter "name=spring-app")
+            CONTAINER_ID=$(docker ps -q --filter "name=devnogi-batch-app-prod")
             if [ -z "$CONTAINER_ID" ]; then
               echo "❌ Container not running"
               docker ps -a
-              docker logs spring-app --tail 50
+              docker logs devnogi-batch-app-prod --tail 50
               exit 1
             fi
             echo "✅ Container is running (ID: $CONTAINER_ID)"
@@ -137,7 +142,7 @@ jobs:
             # 2. Wait for Docker health check
             echo "Waiting for container to become healthy..."
             for i in {1..36}; do
-              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' spring-app 2>/dev/null || echo "no-healthcheck")
+              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' devnogi-batch-app-prod 2>/dev/null || echo "no-healthcheck")
 
               if [ "$HEALTH_STATUS" == "healthy" ]; then
                 echo "✅ Container is healthy"
@@ -152,7 +157,7 @@ jobs:
 
               if [ $i -eq 36 ]; then
                 echo "❌ Container failed to become healthy after 6 minutes"
-                docker logs spring-app --tail 100
+                docker logs devnogi-batch-app-prod --tail 100
                 exit 1
               fi
             done
@@ -160,7 +165,7 @@ jobs:
             # 3. Check Spring Boot actuator health endpoint
             echo "Checking actuator health endpoint..."
             for i in {1..30}; do
-              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.PROD_SERVER_PORT || 8080 }}/actuator/health || echo "")
+              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.PROD_APP_PORT || 8080 }}/actuator/health || echo "")
 
               if echo "$HEALTH_RESPONSE" | grep -q '"status":"UP"'; then
                 echo "✅ Application health check passed"
@@ -174,14 +179,14 @@ jobs:
               if [ $i -eq 30 ]; then
                 echo "❌ Application health check failed after 5 minutes"
                 echo "Last response: $HEALTH_RESPONSE"
-                docker logs spring-app --tail 100
+                docker logs devnogi-batch-app-prod --tail 100
                 exit 1
               fi
             done
 
             # 4. Smoke test: Check if API responds
             echo "Running smoke test..."
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.PROD_SERVER_PORT || 8080 }}/actuator/health)
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.PROD_APP_PORT || 8080 }}/actuator/health)
             if [ "$HTTP_CODE" == "200" ]; then
               echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
             else
@@ -190,14 +195,14 @@ jobs:
             fi
 
             echo "=== Health Check Complete ==="
-            docker ps --filter "name=spring-app"
+            docker ps --filter "name=devnogi-batch-app-prod"
           EOF
 
       - name: Display deployment info
         if: success()
         run: |
           echo "✅ Production deployment successful!"
-          echo "🔗 Production Server: http://${{ secrets.PROD_SERVER_HOST }}:${{ secrets.PROD_SERVER_PORT || 8080 }}"
+          echo "🔗 Production Server: http://${{ secrets.PROD_SERVER_HOST }}:${{ secrets.PROD_APP_PORT || 8080 }}"
           echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod"
           echo "📦 Commit: ${{ github.sha }}"
           echo "⚠️  Please verify the production deployment manually"
@@ -211,4 +216,4 @@ jobs:
           echo "❌ Deployment failed! Consider manual rollback if needed."
           echo "To rollback, SSH to server and run:"
           echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod-<previous-sha>"
-          echo "  docker compose down && docker compose up -d"
+          echo "  docker compose -f docker-compose-prod.yml down && docker compose -f docker-compose-prod.yml --env-file .env.prod up -d"

@@ -1,0 +1,130 @@
+# =============================================================================
+# 운영 서버 환경용 Docker Compose 설정 (Profile: prod)
+# =============================================================================
+# 사용법: docker-compose -f docker-compose-prod.yml --env-file .env.prod up -d
+# 고성능 리소스 할당 (Dev의 3배 메모리)
+# =============================================================================
+
+services:
+  spring-app:
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-prod}
+    pull_policy: always
+    container_name: devnogi-batch-app-prod
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    env_file:
+      - .env.prod  # 운영 환경 변수 파일 (DB, JWT, API 키 등 민감 정보)
+
+    labels:
+      autoheal: "true"
+    environment:
+      # === Application Configuration ===
+      SPRING_PROFILES_ACTIVE: prod
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      SERVER_PORT: ${SERVER_PORT}
+
+      # === Database Configuration ===
+      DB_IP: ${DB_IP}
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # === Security Configuration ===
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_TOKEN_VALIDITY: ${JWT_ACCESS_TOKEN_VALIDITY}
+      JWT_REFRESH_TOKEN_VALIDITY: ${JWT_REFRESH_TOKEN_VALIDITY}
+
+      # === External API Configuration ===
+      NEXON_OPEN_API_KEY: ${NEXON_OPEN_API_KEY}
+      AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS}
+      AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON}"
+      STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
+
+      # === Docker Configuration ===
+      DOCKER_USERNAME: ${DOCKER_USERNAME}
+      DOCKER_REPO: ${DOCKER_REPO}
+
+      # === JVM Configuration (Prod - 고성능, Dev의 3배) ===
+      # Heap: 768m~1536m, Non-Heap: ~786m, Total: ~2322m
+      JAVA_OPTS: >-
+        -Xms${JAVA_OPTS_XMS:-768m}
+        -Xmx${JAVA_OPTS_XMX:-1536m}
+        -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE:-450m}
+        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-144m}
+        -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE:-192m}
+        -Xss${JAVA_OPTS_XSS:-512k}
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=${JAVA_OPTS_MAX_GC_PAUSE_MILLIS:-100}
+        -XX:G1HeapRegionSize=${JAVA_OPTS_G1_HEAP_REGION_SIZE:-4m}
+        -XX:InitiatingHeapOccupancyPercent=${JAVA_OPTS_INITIATING_HEAP_OCCUPANCY_PERCENT:-35}
+        -XX:+TieredCompilation
+        -XX:TieredStopAtLevel=${JAVA_OPTS_TIERED_STOP_AT_LEVEL:-4}
+        -XX:CICompilerCount=${JAVA_OPTS_CI_COMPILER_COUNT:-4}
+        -XX:+UseCompressedOops
+        -XX:+UseCompressedClassPointers
+        -Djava.security.egd=file:/dev/./urandom
+        -Dspring.jmx.enabled=false
+    volumes:
+      - app-logs:/app/logs
+    restart: on-failure:5
+
+    # === Docker Resource Limits (Prod - 고성능, Dev의 3배) ===
+    deploy:
+      resources:
+        limits:
+          memory: 2250M
+        reservations:
+          memory: 1536M
+
+    networks:
+      - app-network
+      - devnogi-network  # MySQL, Redis 등 인프라 컨테이너와 통신
+
+    # === Health Check (Prod - 빈번한 체크, 빠른 복구) ===
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${SERVER_PORT}/actuator/health"]
+      interval: 15s      # 더 자주 체크 (운영 안정성)
+      timeout: 10s       # 더 짧은 타임아웃 (빠른 감지)
+      retries: 5         # 더 많은 재시도 (일시적 장애 허용)
+      start_period: 180s # 더 긴 시작 유예 (충분한 워밍업)
+
+    # === Logging (Prod - 대용량, 장기 보관) ===
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # === Autoheal (Prod - 빈번한 체크, 긴 graceful shutdown) ===
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: devnogi-batch-autoheal-prod
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_INTERVAL: 15        # 더 자주 체크 (초)
+      AUTOHEAL_START_PERIOD: 0     # 시작 유예 시간
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: 30  # 더 긴 graceful shutdown (초)
+      DOCKER_SOCK: /var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 75M
+        reservations:
+          memory: 30M
+
+volumes:
+  app-logs:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+  devnogi-network:
+    external: true
+    name: infra_devnogi-network  # 기존 인프라 네트워크 (MySQL, Redis)

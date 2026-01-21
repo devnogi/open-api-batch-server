@@ -82,7 +82,7 @@ jobs:
       - name: Setup SSH key and config
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my-key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/my-key.pem
           chmod 400 ~/.ssh/my-key.pem
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
           echo -e "Host *\n  ServerAliveInterval 60\n  ServerAliveCountMax 3" >> ~/.ssh/config
@@ -91,26 +91,29 @@ jobs:
         run: |
           ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /home/${{ secrets.SERVER_USER }}/app/logs"
 
-      - name: Copy docker-compose-dev.yaml to server
+      - name: Copy docker-compose-dev.yml to server
         run: |
-          scp -i ~/.ssh/my-key.pem docker-compose-dev.yaml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
+          scp -i ~/.ssh/my-key.pem docker-compose-dev.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
 
       - name: Deploy to Dev Server
         run: |
           ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /home/${{ secrets.SERVER_USER }}/app
 
-            # Write .env.dev content to .env
-            echo "${{ secrets.ENV_FILE_DEV }}" > .env
+            # Write .env.dev content to .env.dev
+            echo "${{ secrets.ENV_FILE_DEV }}" > .env.dev
+
+            # Docker Hub 로그인
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             # Pull latest dev image
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
 
             # Stop and remove existing containers
-            docker compose down
+            docker compose -f docker-compose-dev.yml down
 
             # Start new containers
-            docker compose up -d
+            docker compose -f docker-compose-dev.yml --env-file .env.dev up -d
 
             echo "✅ Dev deployment complete"
           EOF
@@ -124,11 +127,11 @@ jobs:
             echo "=== Starting Health Check ==="
 
             # 1. Check if container is running
-            CONTAINER_ID=$(docker ps -q --filter "name=spring-app")
+            CONTAINER_ID=$(docker ps -q --filter "name=devnogi-batch-app-dev")
             if [ -z "$CONTAINER_ID" ]; then
               echo "❌ Container not running"
               docker ps -a
-              docker logs spring-app --tail 50
+              docker logs devnogi-batch-app-dev --tail 50
               exit 1
             fi
             echo "✅ Container is running (ID: $CONTAINER_ID)"
@@ -136,7 +139,7 @@ jobs:
             # 2. Wait for Docker health check
             echo "Waiting for container to become healthy..."
             for i in {1..30}; do
-              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' spring-app 2>/dev/null || echo "no-healthcheck")
+              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' devnogi-batch-app-dev 2>/dev/null || echo "no-healthcheck")
 
               if [ "$HEALTH_STATUS" == "healthy" ]; then
                 echo "✅ Container is healthy"
@@ -151,7 +154,7 @@ jobs:
 
               if [ $i -eq 30 ]; then
                 echo "❌ Container failed to become healthy after 5 minutes"
-                docker logs spring-app --tail 100
+                docker logs devnogi-batch-app-dev --tail 100
                 exit 1
               fi
             done
@@ -173,13 +176,23 @@ jobs:
               if [ $i -eq 20 ]; then
                 echo "❌ Application health check failed after 3+ minutes"
                 echo "Last response: $HEALTH_RESPONSE"
-                docker logs spring-app --tail 100
+                docker logs devnogi-batch-app-dev --tail 100
                 exit 1
               fi
             done
 
+            # 4. Smoke test: Check if API responds
+            echo "Running smoke test..."
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.SERVER_PORT || 8080 }}/actuator/health)
+            if [ "$HTTP_CODE" == "200" ]; then
+              echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
+            else
+              echo "❌ Smoke test failed (HTTP $HTTP_CODE)"
+              exit 1
+            fi
+
             echo "=== Health Check Complete ==="
-            docker ps --filter "name=spring-app"
+            docker ps --filter "name=devnogi-batch-app-dev"
           EOF
 
       - name: Display deployment info
@@ -189,3 +202,14 @@ jobs:
           echo "🔗 Dev Server: http://${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PORT || 8080 }}"
           echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev"
           echo "📦 Commit: ${{ github.sha }}"
+
+      # ========================================
+      # Rollback on Failure
+      # ========================================
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed! Consider manual rollback if needed."
+          echo "To rollback, SSH to server and run:"
+          echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev-<previous-sha>"
+          echo "  docker compose -f docker-compose-dev.yml down && docker compose -f docker-compose-dev.yml --env-file .env.dev up -d"
