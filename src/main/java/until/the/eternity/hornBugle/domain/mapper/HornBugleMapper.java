@@ -14,6 +14,7 @@ public interface HornBugleMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "serverName", expression = "java(server.getServerName())")
     @Mapping(target = "dateRegister", source = "registerTime")
+    @Mapping(target = "dateSend", expression = "java(dto.dateSend().plusSeconds(32400))")
     HornBugleWorldHistory toEntity(
             OpenApiHornBugleHistoryResponse dto, HornBugleServer server, Instant registerTime);
 
