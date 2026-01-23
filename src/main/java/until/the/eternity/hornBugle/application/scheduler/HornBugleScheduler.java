@@ -1,5 +1,7 @@
 package until.the.eternity.hornBugle.application.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +12,6 @@ import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
 import until.the.eternity.hornBugle.infrastructure.client.HornBugleClient;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryListResponse;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component

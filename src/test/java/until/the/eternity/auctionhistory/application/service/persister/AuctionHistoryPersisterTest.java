@@ -1,5 +1,11 @@
 package until.the.eternity.auctionhistory.application.service.persister;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,13 +18,6 @@ import until.the.eternity.auctionhistory.domain.mapper.OpenApiAuctionHistoryMapp
 import until.the.eternity.auctionhistory.domain.service.AuctionHistoryDuplicateChecker;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryPersisterTest {
@@ -53,7 +52,7 @@ class AuctionHistoryPersisterTest {
     @DisplayName("새로운 경매 기록이 있을 때 필터링된 엔티티 리스트를 반환한다")
     void filterOutExisting_WhenNewRecordsExist_ShouldReturnFilteredEntities() {
         // given
-        when(duplicateChecker.filterExisting(dtoList)).thenReturn(filteredDtoList);
+        when(duplicateChecker.filterExisting(dtoList, category)).thenReturn(filteredDtoList);
         when(mapper.toEntityList(filteredDtoList, category)).thenReturn(entities);
 
         // when
@@ -62,7 +61,7 @@ class AuctionHistoryPersisterTest {
 
         // then
         assertThat(actualEntities).isEqualTo(entities);
-        verify(duplicateChecker).filterExisting(dtoList);
+        verify(duplicateChecker).filterExisting(dtoList, category);
         verify(mapper).toEntityList(filteredDtoList, category);
     }
 
@@ -70,7 +69,8 @@ class AuctionHistoryPersisterTest {
     @DisplayName("새로운 경매 기록이 없을 때 빈 리스트를 반환한다")
     void filterOutExisting_WhenNoNewRecords_ShouldReturnEmptyList() {
         // given
-        when(duplicateChecker.filterExisting(dtoList)).thenReturn(Collections.emptyList());
+        when(duplicateChecker.filterExisting(dtoList, category))
+                .thenReturn(Collections.emptyList());
         when(mapper.toEntityList(Collections.emptyList(), category))
                 .thenReturn(Collections.emptyList());
 
@@ -80,7 +80,7 @@ class AuctionHistoryPersisterTest {
 
         // then
         assertThat(actualEntities).isEmpty();
-        verify(duplicateChecker).filterExisting(dtoList);
+        verify(duplicateChecker).filterExisting(dtoList, category);
         verify(mapper).toEntityList(Collections.emptyList(), category);
     }
 
@@ -89,7 +89,8 @@ class AuctionHistoryPersisterTest {
     void filterOutExisting_WhenEmptyDtoList_ShouldReturnEmptyList() {
         // given
         List<OpenApiAuctionHistoryResponse> emptyList = Collections.emptyList();
-        when(duplicateChecker.filterExisting(emptyList)).thenReturn(Collections.emptyList());
+        when(duplicateChecker.filterExisting(emptyList, category))
+                .thenReturn(Collections.emptyList());
         when(mapper.toEntityList(Collections.emptyList(), category))
                 .thenReturn(Collections.emptyList());
 
@@ -99,7 +100,7 @@ class AuctionHistoryPersisterTest {
 
         // then
         assertThat(actualEntities).isEmpty();
-        verify(duplicateChecker).filterExisting(emptyList);
+        verify(duplicateChecker).filterExisting(emptyList, category);
         verify(mapper).toEntityList(Collections.emptyList(), category);
     }
 
@@ -111,7 +112,7 @@ class AuctionHistoryPersisterTest {
         List<OpenApiAuctionHistoryResponse> listWithNulls = Arrays.asList(dto1, null);
         List<OpenApiAuctionHistoryResponse> filteredList = List.of(dto1);
 
-        when(duplicateChecker.filterExisting(listWithNulls)).thenReturn(filteredList);
+        when(duplicateChecker.filterExisting(listWithNulls, category)).thenReturn(filteredList);
         when(mapper.toEntityList(filteredList, category)).thenReturn(entities);
 
         // when
@@ -120,7 +121,7 @@ class AuctionHistoryPersisterTest {
 
         // then
         assertThat(actualEntities).isEqualTo(entities);
-        verify(duplicateChecker).filterExisting(listWithNulls);
+        verify(duplicateChecker).filterExisting(listWithNulls, category);
         verify(mapper).toEntityList(filteredList, category);
     }
 
@@ -133,11 +134,10 @@ class AuctionHistoryPersisterTest {
         OpenApiAuctionHistoryResponse dto3 = mock(OpenApiAuctionHistoryResponse.class);
         List<OpenApiAuctionHistoryResponse> originalList = Arrays.asList(dto1, dto2, dto3);
 
-        // dto2는 중복이라 가정하고, dto1, dto3만 남김
         List<OpenApiAuctionHistoryResponse> nonDuplicateList = Arrays.asList(dto1, dto3);
         List<AuctionHistory> expectedEntities = List.of(mock(AuctionHistory.class));
 
-        when(duplicateChecker.filterExisting(originalList)).thenReturn(nonDuplicateList);
+        when(duplicateChecker.filterExisting(originalList, category)).thenReturn(nonDuplicateList);
         when(mapper.toEntityList(nonDuplicateList, category)).thenReturn(expectedEntities);
 
         // when
@@ -146,7 +146,7 @@ class AuctionHistoryPersisterTest {
 
         // then
         assertThat(actualEntities).isEqualTo(expectedEntities);
-        verify(duplicateChecker).filterExisting(originalList);
+        verify(duplicateChecker).filterExisting(originalList, category);
         verify(mapper).toEntityList(nonDuplicateList, category);
     }
 }

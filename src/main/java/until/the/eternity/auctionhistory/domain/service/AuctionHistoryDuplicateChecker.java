@@ -1,14 +1,16 @@
 package until.the.eternity.auctionhistory.domain.service;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
+import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort.LatestDateWithIds;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -18,27 +20,84 @@ public class AuctionHistoryDuplicateChecker {
     private final AuctionHistoryRepositoryPort repository;
 
     /**
-     * 주어진 DTO 컬렉션 안에 이미 저장된 auctionBuyId 가 있는지 추후 거대한 뿔피리 및 실시간 거래 정보 API를 활용하면 공통 component로 변경 고려
+     * 배치에서 첫 번째 중복 데이터의 인덱스를 반환합니다.
+     *
+     * <p>중복 판정 로직:
+     *
+     * <ul>
+     *   <li>date_auction_buy < latestDate → 중복 (과거 데이터)
+     *   <li>date_auction_buy == latestDate → auctionBuyId가 DB에 존재하면 중복
+     *   <li>date_auction_buy > latestDate → 신규 데이터
+     * </ul>
+     *
+     * @param batch 검사할 배치 데이터
+     * @param category 아이템 카테고리
+     * @return 첫 번째 중복 인덱스, 중복이 없으면 empty
      */
-    public boolean hasDuplicate(OpenApiAuctionHistoryResponse lastDto) {
-        Instant latestDate = getLatestAuctionDateOrMin(lastDto);
+    public OptionalInt checkDuplicateInBatch(
+            List<OpenApiAuctionHistoryResponse> batch, ItemCategory category) {
+        if (batch.isEmpty()) {
+            return OptionalInt.empty();
+        }
 
-        return lastDto.dateAuctionBuy().isAfter(latestDate);
+        var latestInfo = repository.findLatestDateWithIdsBySubCategory(category);
+
+        if (latestInfo.isEmpty()) {
+            return OptionalInt.empty();
+        }
+
+        LatestDateWithIds info = latestInfo.get();
+        Instant latestDate = info.latestDate();
+        Set<String> existingIds = info.existingIds();
+
+        for (int i = 0; i < batch.size(); i++) {
+            OpenApiAuctionHistoryResponse dto = batch.get(i);
+            if (isDuplicate(dto, latestDate, existingIds)) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
     }
 
+    /**
+     * DTO 리스트에서 이미 DB에 존재하는 데이터를 필터링합니다.
+     *
+     * @param dtos 필터링할 DTO 리스트
+     * @param category 아이템 카테고리
+     * @return 새로운 데이터만 포함된 리스트
+     */
     public List<OpenApiAuctionHistoryResponse> filterExisting(
-            List<OpenApiAuctionHistoryResponse> dtos) {
+            List<OpenApiAuctionHistoryResponse> dtos, ItemCategory category) {
         if (dtos.isEmpty()) {
             return dtos;
         }
-        Instant latestDate = getLatestAuctionDateOrMin(dtos.getFirst());
-        return dtos.stream().filter(dto -> dto.dateAuctionBuy().isAfter(latestDate)).toList();
+
+        var latestInfo = repository.findLatestDateWithIdsBySubCategory(category);
+
+        if (latestInfo.isEmpty()) {
+            return dtos;
+        }
+
+        LatestDateWithIds info = latestInfo.get();
+        Instant latestDate = info.latestDate();
+        Set<String> existingIds = info.existingIds();
+
+        return dtos.stream().filter(dto -> !isDuplicate(dto, latestDate, existingIds)).toList();
     }
 
-    private Instant getLatestAuctionDateOrMin(OpenApiAuctionHistoryResponse dto) {
-        return repository
-                .findLatestDateAuctionBuyBySubCategory(
-                        ItemCategory.findBySubCategory(dto.itemSubCategory()))
-                .orElse(Instant.MIN); // 기존에 카테고리가 없는 아이템이면 무조건 저장하기 위해서 Instant.MIN 반환
+    private boolean isDuplicate(
+            OpenApiAuctionHistoryResponse dto, Instant latestDate, Set<String> existingIds) {
+        Instant dtoDate = dto.dateAuctionBuy();
+
+        if (dtoDate.isBefore(latestDate)) {
+            return true;
+        }
+
+        if (dtoDate.equals(latestDate)) {
+            return existingIds.contains(dto.auctionBuyId());
+        }
+
+        return false;
     }
 }

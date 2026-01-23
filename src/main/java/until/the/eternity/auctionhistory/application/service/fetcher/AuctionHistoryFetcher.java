@@ -1,5 +1,8 @@
 package until.the.eternity.auctionhistory.application.service.fetcher;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.OptionalInt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,9 +11,6 @@ import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFe
 import until.the.eternity.auctionhistory.infrastructure.client.AuctionHistoryClient;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -47,14 +47,23 @@ public class AuctionHistoryFetcher implements AuctionHistoryFetcherPort {
             }
 
             var batch = response.auctionHistory();
-            result.addAll(batch);
 
-            if (duplicateChecker.hasDuplicate(batch.getLast())) {
+            OptionalInt duplicateIndex = duplicateChecker.checkDuplicateInBatch(batch, category);
+
+            if (duplicateIndex.isPresent()) {
+                int index = duplicateIndex.getAsInt();
+                if (index > 0) {
+                    result.addAll(batch.subList(0, index));
+                }
                 log.debug(
-                        "> [SCHEDULE] [{}] this fetched data has duplicate data, skip to next item subcategory",
-                        category.getSubCategory());
+                        "> [SCHEDULE] [{}] duplicate found at index {}, added {} items before duplicate",
+                        category.getSubCategory(),
+                        index,
+                        index);
                 break;
             }
+
+            result.addAll(batch);
 
             cursor = response.nextCursor();
 

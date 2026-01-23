@@ -1,13 +1,12 @@
 package until.the.eternity.hornBugle.domain.mapper;
 
+import java.time.Instant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
 import until.the.eternity.hornBugle.interfaces.rest.dto.response.HornBugleHistoryResponse;
-
-import java.time.Instant;
 
 @Mapper(componentModel = "spring")
 public interface HornBugleMapper {

@@ -1,6 +1,10 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -11,10 +15,6 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 
 /** AuctionHistoryRepository Interface 구현체 */
 @Repository
@@ -58,6 +58,19 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     public Optional<Instant> findLatestDateAuctionBuyBySubCategory(ItemCategory itemCategory) {
         return jpaRepository.findLatestDateAuctionBuyBySubCategory(
                 itemCategory.getTopCategory(), itemCategory.getSubCategory());
+    }
+
+    @Override
+    public Optional<LatestDateWithIds> findLatestDateWithIdsBySubCategory(
+            ItemCategory itemCategory) {
+        Optional<Instant> latestDate = findLatestDateAuctionBuyBySubCategory(itemCategory);
+        if (latestDate.isEmpty()) {
+            return Optional.empty();
+        }
+        List<String> ids =
+                jpaRepository.findAuctionBuyIdsByLatestDateAndSubCategory(
+                        itemCategory.getTopCategory(), itemCategory.getSubCategory());
+        return Optional.of(new LatestDateWithIds(latestDate.get(), new HashSet<>(ids)));
     }
 
     @Override
