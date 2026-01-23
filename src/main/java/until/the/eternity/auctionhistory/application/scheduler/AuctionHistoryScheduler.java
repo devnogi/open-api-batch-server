@@ -113,7 +113,9 @@ public class AuctionHistoryScheduler {
                 totalSavedCount);
 
         // 통계 업데이트를 위한 이벤트 발행
-        log.debug("> [SCHEDULE] Publishing AuctionHistorySavedEvent with {} records", totalSavedCount);
+        log.debug(
+                "> [SCHEDULE] Publishing AuctionHistorySavedEvent with {} records",
+                totalSavedCount);
         eventPublisher.publishEvent(new AuctionHistorySavedEvent(totalSavedCount));
     }
 }

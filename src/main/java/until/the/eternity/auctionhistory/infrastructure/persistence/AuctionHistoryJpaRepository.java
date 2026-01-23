@@ -44,4 +44,20 @@ public interface AuctionHistoryJpaRepository
              from AuctionHistory a
            """)
     List<Object[]> findDistinctItemInfo();
+
+    @Query(
+            """
+           select a.auctionBuyId
+             from AuctionHistory a
+            where a.itemTopCategory = :topCategory
+              and a.itemSubCategory = :subCategory
+              and a.dateAuctionBuy = (
+                  select max(a2.dateAuctionBuy)
+                    from AuctionHistory a2
+                   where a2.itemTopCategory = :topCategory
+                     and a2.itemSubCategory = :subCategory
+              )
+           """)
+    List<String> findAuctionBuyIdsByLatestDateAndSubCategory(
+            String topCategory, String subCategory);
 }

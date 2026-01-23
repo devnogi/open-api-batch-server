@@ -50,15 +50,15 @@ services:
       # === JVM Configuration (Local - 경량 개발용) ===
       # Heap: 256m~512m, Non-Heap: 256m, Total: ~768m
       JAVA_OPTS: >-
-        -Xms${JAVA_OPTS_XMS:-256m}
-        -Xmx${JAVA_OPTS_XMX:-512m}
-        -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE:-150m}
-        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-48m}
-        -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE:-64m}
-        -Xss${JAVA_OPTS_XSS:-512k}
+        -Xms${JAVA_OPTS_XMS:-512m}
+        -Xmx${JAVA_OPTS_XMX:-1024m}
+        -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE:-300m}
+        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-96m}
+        -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE:-128m}
+        -Xss${JAVA_OPTS_XSS:-1024k}
         -XX:+UseG1GC
-        -XX:MaxGCPauseMillis=${JAVA_OPTS_MAX_GC_PAUSE_MILLIS:-200}
-        -XX:G1HeapRegionSize=${JAVA_OPTS_G1_HEAP_REGION_SIZE:-2m}
+        -XX:MaxGCPauseMillis=${JAVA_OPTS_MAX_GC_PAUSE_MILLIS:-400}
+        -XX:G1HeapRegionSize=${JAVA_OPTS_G1_HEAP_REGION_SIZE:-4m}
         -XX:InitiatingHeapOccupancyPercent=${JAVA_OPTS_INITIATING_HEAP_OCCUPANCY_PERCENT:-45}
         -XX:+TieredCompilation
         -XX:TieredStopAtLevel=${JAVA_OPTS_TIERED_STOP_AT_LEVEL:-2}

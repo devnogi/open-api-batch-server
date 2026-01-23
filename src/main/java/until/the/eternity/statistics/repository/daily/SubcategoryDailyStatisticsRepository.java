@@ -31,8 +31,8 @@ public interface SubcategoryDailyStatisticsRepository
             @Param("endDate") LocalDate endDate);
 
     /**
-     * 당일의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert
-     * item_daily_statistics 테이블만 사용하여 효율적으로 집계
+     * 당일의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 집계하여 upsert item_daily_statistics 테이블만 사용하여
+     * 효율적으로 집계
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
@@ -75,8 +75,7 @@ public interface SubcategoryDailyStatisticsRepository
     void upsertCurrentDayStatistics();
 
     /**
-     * 전날의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 최종 확정
-     * item_daily_statistics 테이블만 사용하여 효율적으로 집계
+     * 전날의 ItemDailyStatistics 데이터를 기반으로 서브카테고리별 통계를 최종 확정 item_daily_statistics 테이블만 사용하여 효율적으로 집계
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

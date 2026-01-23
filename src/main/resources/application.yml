@@ -89,6 +89,10 @@ openapi:
     cron: ${AUCTION_HISTORY_CRON}
   min-price:
     cron: ${AUCTION_HISTORY_MIN_PRICE_CRON}
+  horn-bugle:
+    cron: ${HORN_BUGLE_CRON:0 */5 * * * *}
+    max-retries: ${HORN_BUGLE_MAX_RETRIES:3}
+    retry-delay-ms: ${HORN_BUGLE_RETRY_DELAY_MS:2000}
 
 statistics:
   previous-day:

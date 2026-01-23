@@ -6,6 +6,9 @@
         <springProfile name="default">
             <appender-ref ref="CONSOLE"/>
         </springProfile>
+        <springProfile name="local">
+            <appender-ref ref="CONSOLE"/>
+        </springProfile>
         <springProfile name="dev">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>

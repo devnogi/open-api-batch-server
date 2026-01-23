@@ -31,8 +31,8 @@ public interface TopCategoryDailyStatisticsRepository
             @Param("endDate") LocalDate endDate);
 
     /**
-     * 당일의 SubcategoryDailyStatistics 데이터를 기반으로 탑카테고리별 통계를 집계하여 upsert
-     * item_daily_statistics 테이블을 사용하여 top_category 정보를 가져옴
+     * 당일의 SubcategoryDailyStatistics 데이터를 기반으로 탑카테고리별 통계를 집계하여 upsert item_daily_statistics 테이블을
+     * 사용하여 top_category 정보를 가져옴
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
@@ -77,8 +77,8 @@ public interface TopCategoryDailyStatisticsRepository
     void upsertCurrentDayStatistics();
 
     /**
-     * 전날의 SubcategoryDailyStatistics 데이터를 기반으로 탑카테고리별 통계를 최종 확정
-     * item_daily_statistics 테이블을 사용하여 top_category 정보를 가져옴
+     * 전날의 SubcategoryDailyStatistics 데이터를 기반으로 탑카테고리별 통계를 최종 확정 item_daily_statistics 테이블을 사용하여
+     * top_category 정보를 가져옴
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

@@ -13,10 +13,7 @@ import java.util.List;
 public interface OpenApiAuctionHistoryMapper {
 
     @Named("toEntity(OpenApiAuctionHistoryResponse, ItemCategory)")
-    @Mapping(
-            source = "dateAuctionBuy",
-            target = "dateAuctionBuy",
-            qualifiedByName = "utcToKst")
+    @Mapping(source = "dateAuctionBuy", target = "dateAuctionBuy", qualifiedByName = "utcToKst")
     @Mapping(source = "openApiAuctionItemOptionResponse", target = "auctionItemOptions")
     @Mapping(
             target = "itemTopCategory",

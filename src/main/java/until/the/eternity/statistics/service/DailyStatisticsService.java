@@ -18,9 +18,8 @@ public class DailyStatisticsService {
     private final TopCategoryDailyStatisticsRepository topCategoryDailyStatisticsRepository;
 
     /**
-     * 당일의 경매 거래 내역을 기반으로 일간 통계를 업데이트
-     * AuctionHistoryScheduler가 실행될 때마다 호출되어 당일 통계만 갱신
-     * 순서: auction_history → ItemDaily → SubcategoryDaily → TopCategoryDaily
+     * 당일의 경매 거래 내역을 기반으로 일간 통계를 업데이트 AuctionHistoryScheduler가 실행될 때마다 호출되어 당일 통계만 갱신 순서:
+     * auction_history → ItemDaily → SubcategoryDaily → TopCategoryDaily
      */
     @Transactional
     public void calculateAndSaveCurrentDayStatistics() {
@@ -36,8 +35,7 @@ public class DailyStatisticsService {
                 System.currentTimeMillis() - start);
 
         // 2. ItemDailyStatistics → SubcategoryDailyStatistics (당일)
-        log.info(
-                "[Current Day Statistics] Step 2/3: Calculating subcategory daily statistics...");
+        log.info("[Current Day Statistics] Step 2/3: Calculating subcategory daily statistics...");
         long step2Start = System.currentTimeMillis();
         subcategoryDailyStatisticsRepository.upsertCurrentDayStatistics();
         log.info(
@@ -45,8 +43,7 @@ public class DailyStatisticsService {
                 System.currentTimeMillis() - step2Start);
 
         // 3. SubcategoryDailyStatistics → TopCategoryDailyStatistics (당일)
-        log.info(
-                "[Current Day Statistics] Step 3/3: Calculating top category daily statistics...");
+        log.info("[Current Day Statistics] Step 3/3: Calculating top category daily statistics...");
         long step3Start = System.currentTimeMillis();
         topCategoryDailyStatisticsRepository.upsertCurrentDayStatistics();
         log.info(
@@ -59,9 +56,8 @@ public class DailyStatisticsService {
     }
 
     /**
-     * 전날의 경매 거래 내역을 기반으로 일간 통계를 최종 확정
-     * 매일 새벽 한 번 실행되어 전날 23시대 거래까지 포함한 통계를 완성
-     * 순서: auction_history → ItemDaily → SubcategoryDaily → TopCategoryDaily
+     * 전날의 경매 거래 내역을 기반으로 일간 통계를 최종 확정 매일 새벽 한 번 실행되어 전날 23시대 거래까지 포함한 통계를 완성 순서: auction_history →
+     * ItemDaily → SubcategoryDaily → TopCategoryDaily
      */
     @Transactional
     public void calculateAndSavePreviousDayStatistics() {
@@ -77,8 +73,7 @@ public class DailyStatisticsService {
                 System.currentTimeMillis() - start);
 
         // 2. ItemDailyStatistics → SubcategoryDailyStatistics (전날)
-        log.info(
-                "[Previous Day Statistics] Step 2/3: Finalizing subcategory daily statistics...");
+        log.info("[Previous Day Statistics] Step 2/3: Finalizing subcategory daily statistics...");
         long step2Start = System.currentTimeMillis();
         subcategoryDailyStatisticsRepository.upsertPreviousDayStatistics();
         log.info(
@@ -86,8 +81,7 @@ public class DailyStatisticsService {
                 System.currentTimeMillis() - step2Start);
 
         // 3. SubcategoryDailyStatistics → TopCategoryDailyStatistics (전날)
-        log.info(
-                "[Previous Day Statistics] Step 3/3: Finalizing top category daily statistics...");
+        log.info("[Previous Day Statistics] Step 3/3: Finalizing top category daily statistics...");
         long step3Start = System.currentTimeMillis();
         topCategoryDailyStatisticsRepository.upsertPreviousDayStatistics();
         log.info(

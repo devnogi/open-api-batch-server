@@ -16,6 +16,7 @@ import until.the.eternity.common.enums.ItemCategory;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.OptionalInt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,20 +30,18 @@ class AuctionHistoryFetcherTest {
 
     @Mock AuctionHistoryDuplicateChecker duplicateChecker;
 
-    @InjectMocks AuctionHistoryFetcher fetcher; // 주입할 대상
+    @InjectMocks AuctionHistoryFetcher fetcher;
 
-    // 더미 데이터 생성 메소드
     private OpenApiAuctionHistoryResponse dummy(String id) {
         return new OpenApiAuctionHistoryResponse(
-                "페러시우스 타이탄 블레이드", // itemName
-                "신성한 페러시우스 타이탄 블레이드", // itemDisplayName
-                ItemCategory.SWORD.getSubCategory(), // itemSubCategory
-                1L, // itemCount
-                100L, // auctionPricePerUnit
-                Instant.now(), // dateAuctionBuy
-                id, // auctionBuyId
-                null // itemOption은 테스트 결과에 상관이 없으니 null 처리
-                );
+                "페러시우스 타이탄 블레이드",
+                "신성한 페러시우스 타이탄 블레이드",
+                ItemCategory.SWORD.getSubCategory(),
+                1L,
+                100L,
+                Instant.now(),
+                id,
+                null);
     }
 
     @Nested
@@ -52,30 +51,29 @@ class AuctionHistoryFetcherTest {
         @Test
         @DisplayName("모든 페이지를 수집하고 cursor가 null이면 종료한다")
         void fetchAllPages() {
-            // given ─ 첫 번째·두 번째 페이지
+            // given
             var page1 =
                     new OpenApiAuctionHistoryListResponse(
                             List.of(dummy("1"), dummy("2")), "cursor-1");
-            // 2번째 페이지가 끝이라 Nexon Open API가 null을 반환할 때
             var page2 = new OpenApiAuctionHistoryListResponse(List.of(dummy("3")), null);
 
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1"))
                     .thenReturn(Mono.just(page2));
-            // 기존 데이터와 마지막 페이지 (2페이지) 데이터의 중복이 없다고 가정
-            when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
+            when(duplicateChecker.checkDuplicateInBatch(any(), eq(ItemCategory.SWORD)))
+                    .thenReturn(OptionalInt.empty());
 
             // when
             var result = fetcher.fetch(ItemCategory.SWORD);
 
-            // then - 모든 데이터를 result에 포함
+            // then
             assertThat(result)
                     .hasSize(3)
                     .extracting(OpenApiAuctionHistoryResponse::auctionBuyId)
                     .containsExactly("1", "2", "3");
 
             verify(client, times(2)).fetchAuctionHistory(eq(ItemCategory.SWORD), any());
-            verify(duplicateChecker, times(2)).hasDuplicate(any());
+            verify(duplicateChecker, times(2)).checkDuplicateInBatch(any(), eq(ItemCategory.SWORD));
         }
     }
 
@@ -84,25 +82,75 @@ class AuctionHistoryFetcherTest {
     class EarlyBreakFlow {
 
         @Test
-        @DisplayName("duplicateChecker가 true를 반환하면 수집을 중단한다")
-        void stopOnDuplicate() {
-            // given - API 호출을 1번만 하고 중복으로 인해 중단
+        @DisplayName("첫 배치 첫 항목에서 중복이면 빈 리스트를 반환한다")
+        void stopOnDuplicateAtFirstItem() {
+            // given
             var page1 =
                     new OpenApiAuctionHistoryListResponse(
                             List.of(dummy("1"), dummy("2")), "cursor-1");
 
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            // when - 기존 데이터와 첫 페이지 데이터의 중복이 있다고 가정
-            when(duplicateChecker.hasDuplicate(page1.auctionHistory().getLast())).thenReturn(true);
+            when(duplicateChecker.checkDuplicateInBatch(page1.auctionHistory(), ItemCategory.SWORD))
+                    .thenReturn(OptionalInt.of(0));
 
+            // when
             var result = fetcher.fetch(ItemCategory.SWORD);
 
-            // then - 첫 페이지 데이터만 수집하고 종료
-            assertThat(result).hasSize(2);
-            assertThat(result.getFirst().auctionBuyId()).isEqualTo("1");
-
+            // then
+            assertThat(result).isEmpty();
             verify(client, times(1)).fetchAuctionHistory(ItemCategory.SWORD, "");
             verifyNoMoreInteractions(client);
+        }
+
+        @Test
+        @DisplayName("첫 배치 중간에서 중복이면 중복 전까지만 반환한다")
+        void stopOnDuplicateAtMiddle() {
+            // given
+            var batch = List.of(dummy("1"), dummy("2"), dummy("3"));
+            var page1 = new OpenApiAuctionHistoryListResponse(batch, "cursor-1");
+
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
+            when(duplicateChecker.checkDuplicateInBatch(batch, ItemCategory.SWORD))
+                    .thenReturn(OptionalInt.of(2));
+
+            // when
+            var result = fetcher.fetch(ItemCategory.SWORD);
+
+            // then
+            assertThat(result)
+                    .hasSize(2)
+                    .extracting(OpenApiAuctionHistoryResponse::auctionBuyId)
+                    .containsExactly("1", "2");
+            verify(client, times(1)).fetchAuctionHistory(ItemCategory.SWORD, "");
+            verifyNoMoreInteractions(client);
+        }
+
+        @Test
+        @DisplayName("두 번째 배치에서 중복이면 첫 배치 전체 + 중복 전까지만 반환한다")
+        void stopOnDuplicateAtSecondBatch() {
+            // given
+            var batch1 = List.of(dummy("1"), dummy("2"));
+            var batch2 = List.of(dummy("3"), dummy("4"), dummy("5"));
+            var page1 = new OpenApiAuctionHistoryListResponse(batch1, "cursor-1");
+            var page2 = new OpenApiAuctionHistoryListResponse(batch2, "cursor-2");
+
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
+            when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1"))
+                    .thenReturn(Mono.just(page2));
+            when(duplicateChecker.checkDuplicateInBatch(batch1, ItemCategory.SWORD))
+                    .thenReturn(OptionalInt.empty());
+            when(duplicateChecker.checkDuplicateInBatch(batch2, ItemCategory.SWORD))
+                    .thenReturn(OptionalInt.of(1));
+
+            // when
+            var result = fetcher.fetch(ItemCategory.SWORD);
+
+            // then
+            assertThat(result)
+                    .hasSize(3)
+                    .extracting(OpenApiAuctionHistoryResponse::auctionBuyId)
+                    .containsExactly("1", "2", "3");
+            verify(client, times(2)).fetchAuctionHistory(eq(ItemCategory.SWORD), any());
         }
 
         @Test
@@ -113,7 +161,7 @@ class AuctionHistoryFetcherTest {
             var result = fetcher.fetch(ItemCategory.SWORD);
 
             assertThat(result).isEmpty();
-            verify(duplicateChecker, never()).hasDuplicate(any());
+            verify(duplicateChecker, never()).checkDuplicateInBatch(any(), any());
         }
 
         @Test
@@ -126,16 +174,17 @@ class AuctionHistoryFetcherTest {
             var result = fetcher.fetch(ItemCategory.SWORD);
 
             assertThat(result).isEmpty();
-            verify(duplicateChecker, never()).hasDuplicate(any());
+            verify(duplicateChecker, never()).checkDuplicateInBatch(any(), any());
         }
 
         @Test
         @DisplayName("nextCursor가 빈 문자열이면 수집을 중단한다")
         void stopWhenNextCursorIsEmptyString() {
             // given
-            var page1 = new OpenApiAuctionHistoryListResponse(List.of(dummy("1")), ""); // 커서가 비어있음
+            var page1 = new OpenApiAuctionHistoryListResponse(List.of(dummy("1")), "");
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
+            when(duplicateChecker.checkDuplicateInBatch(any(), eq(ItemCategory.SWORD)))
+                    .thenReturn(OptionalInt.empty());
 
             // when
             var result = fetcher.fetch(ItemCategory.SWORD);
@@ -151,13 +200,13 @@ class AuctionHistoryFetcherTest {
         void stopWhenMiddlePageIsEmpty() {
             // given
             var page1 = new OpenApiAuctionHistoryListResponse(List.of(dummy("1")), "cursor-1");
-            var emptyPage =
-                    new OpenApiAuctionHistoryListResponse(List.of(), "cursor-2"); // 비어있는 페이지
+            var emptyPage = new OpenApiAuctionHistoryListResponse(List.of(), "cursor-2");
 
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
             when(client.fetchAuctionHistory(ItemCategory.SWORD, "cursor-1"))
                     .thenReturn(Mono.just(emptyPage));
-            when(duplicateChecker.hasDuplicate(any())).thenReturn(false);
+            when(duplicateChecker.checkDuplicateInBatch(any(), eq(ItemCategory.SWORD)))
+                    .thenReturn(OptionalInt.empty());
 
             // when
             var result = fetcher.fetch(ItemCategory.SWORD);
@@ -183,7 +232,7 @@ class AuctionHistoryFetcherTest {
             assertThat(result).isEmpty();
             verify(client, times(1)).fetchAuctionHistory(eq(ItemCategory.SWORD), any());
             verifyNoMoreInteractions(client);
-            verify(duplicateChecker, never()).hasDuplicate(any());
+            verify(duplicateChecker, never()).checkDuplicateInBatch(any(), any());
         }
     }
 }

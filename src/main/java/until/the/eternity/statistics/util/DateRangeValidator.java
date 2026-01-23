@@ -22,8 +22,7 @@ public class DateRangeValidator {
         if (daysBetween > DAILY_MAX_DAYS) {
             throw new IllegalArgumentException(
                     String.format(
-                            "일간 통계 조회는 최대 %d일까지만 가능합니다. 요청 기간: %d일",
-                            DAILY_MAX_DAYS, daysBetween));
+                            "일간 통계 조회는 최대 %d일까지만 가능합니다. 요청 기간: %d일", DAILY_MAX_DAYS, daysBetween));
         }
     }
 

@@ -24,7 +24,7 @@ public class AuctionHistoryPersister implements AuctionHistoryPersisterPort {
             List<OpenApiAuctionHistoryResponse> dtoList, ItemCategory category) {
 
         List<AuctionHistory> entities =
-                mapper.toEntityList(duplicateChecker.filterExisting(dtoList), category);
+                mapper.toEntityList(duplicateChecker.filterExisting(dtoList, category), category);
 
         entities.forEach(AuctionHistory::linkItemOptions);
 

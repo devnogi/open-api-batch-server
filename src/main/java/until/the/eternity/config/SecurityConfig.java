@@ -42,7 +42,10 @@ public class SecurityConfig {
                                         // TODO: API endpoint 정리 후 matcher 수정
                                         // TODO: 권한 관련 기능 개발 완료 후 hasRole 추가
                                         .requestMatchers(
-                                                "/api/**", "/auction-history/**", "/statistics/**")
+                                                "/api/**",
+                                                "/auction-history/**",
+                                                "/statistics/**",
+                                                "/horn-bugle/**")
                                         .permitAll()
                                         // 나머지 요청은 인증 필요
                                         .anyRequest()
