@@ -8,6 +8,11 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,13 +26,7 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHist
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.DateAuctionBuyRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
-import until.the.eternity.auctionitemoption.domain.entity.QAuctionItemOption;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
+import until.the.eternity.auctionitemoption.domain.entity.QAuctionHistoryItemOption;
 
 @Component
 @RequiredArgsConstructor
@@ -41,15 +40,15 @@ class AuctionHistoryQueryDslRepository {
     /** 경매 거래내역 검색 (옵션 조건 포함) */
     public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
         QAuctionHistory ah = QAuctionHistory.auctionHistory;
-        QAuctionItemOption aio = QAuctionItemOption.auctionItemOption;
+        QAuctionHistoryItemOption aio = QAuctionHistoryItemOption.auctionHistoryItemOption;
 
         // 1단계: 거래내역 조건 빌드
         BooleanBuilder historyBuilder = buildHistoryPredicate(condition, ah);
 
         // 2단계: 옵션 조건이 있으면 서브쿼리 추가
         if (condition.itemOptionSearchRequest() != null) {
-            // 서브쿼리용 별도 QAuctionItemOption 인스턴스
-            QAuctionItemOption subOption = new QAuctionItemOption("subOption");
+            // 서브쿼리용 별도 QAuctionHistoryItemOption 인스턴스
+            QAuctionHistoryItemOption subOption = new QAuctionHistoryItemOption("subOption");
             OptionConditionResult optionResult =
                     buildItemOptionConditions(condition.itemOptionSearchRequest(), subOption);
 
@@ -93,7 +92,7 @@ class AuctionHistoryQueryDslRepository {
         List<AuctionHistory> content =
                 queryFactory
                         .selectFrom(ah)
-                        .leftJoin(ah.auctionItemOptions, aio)
+                        .leftJoin(ah.auctionHistoryItemOptions, aio)
                         .fetchJoin()
                         .where(ah.auctionBuyId.in(ids))
                         .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
@@ -159,7 +158,7 @@ class AuctionHistoryQueryDslRepository {
 
     /** 옵션 검색 조건 빌드 (서브쿼리용) */
     private OptionConditionResult buildItemOptionConditions(
-            ItemOptionSearchRequest opt, QAuctionItemOption aio) {
+            ItemOptionSearchRequest opt, QAuctionHistoryItemOption aio) {
         BooleanBuilder builder = new BooleanBuilder();
         int conditionCount = 0;
         boolean ergConditionAdded = false; // 에르그 조건 추가 여부 (레벨/랭크 통합)
@@ -400,7 +399,10 @@ class AuctionHistoryQueryDslRepository {
 
     /** 옵션 조건 빌드 헬퍼 (option_type + 숫자 비교 + SearchStandard) */
     private BooleanExpression buildOptionCondition(
-            QAuctionItemOption aio, String optionType, Integer value, SearchStandard standard) {
+            QAuctionHistoryItemOption aio,
+            String optionType,
+            Integer value,
+            SearchStandard standard) {
         BooleanExpression optionTypeCondition = aio.optionType.eq(optionType);
 
         NumberTemplate<Integer> numValue = castOptionValueToInt(aio);
@@ -422,7 +424,7 @@ class AuctionHistoryQueryDslRepository {
     }
 
     /** option_value2 또는 option_value를 Integer로 변환하는 NumberTemplate */
-    private NumberTemplate<Integer> castOptionValueToInt(QAuctionItemOption aio) {
+    private NumberTemplate<Integer> castOptionValueToInt(QAuctionHistoryItemOption aio) {
         return Expressions.numberTemplate(
                 Integer.class, "COALESCE({0}, {1}, 0)", aio.optionValue2, aio.optionValue);
     }

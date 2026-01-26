@@ -1,22 +1,24 @@
 package until.the.eternity.auctionitemoption.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
-import until.the.eternity.auctionitem.domain.entity.AuctionItem;
 
-import java.util.UUID;
-
+/**
+ * 경매장 거래 내역(auction_history)에 연결된 아이템 옵션 정보. V15 마이그레이션에서 auction_item_option →
+ * auction_history_item_option으로 변경됨.
+ */
 @Entity
-@Table(name = "auction_item_option")
+@Table(name = "auction_history_item_option")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuctionItemOption {
+public class AuctionHistoryItemOption {
 
     @Id
     @Column(name = "id")
@@ -28,10 +30,6 @@ public class AuctionItemOption {
             referencedColumnName = "auction_buy_id",
             nullable = false)
     private AuctionHistory auctionHistory;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "auction_item_id", nullable = true)
-    private AuctionItem auctionItem;
 
     @Column(name = "option_type")
     private String optionType;
@@ -57,15 +55,16 @@ public class AuctionItemOption {
 
         // 이전 연관관계 정리
         if (this.auctionHistory != null) {
-            this.auctionHistory.getAuctionItemOptions().remove(this);
+            this.auctionHistory.getAuctionHistoryItemOptions().remove(this);
         }
 
         // 새 연관관계 설정
         this.auctionHistory = auctionHistory;
 
         // 반대 쪽 컬렉션 동기화
-        if (auctionHistory != null && !auctionHistory.getAuctionItemOptions().contains(this)) {
-            auctionHistory.getAuctionItemOptions().add(this);
+        if (auctionHistory != null
+                && !auctionHistory.getAuctionHistoryItemOptions().contains(this)) {
+            auctionHistory.getAuctionHistoryItemOptions().add(this);
         }
     }
 }

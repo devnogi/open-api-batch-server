@@ -1,7 +1,6 @@
 package until.the.eternity.auctionsearchoption.interfaces.rest.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.Map;
 
 @Schema(description = "검색 옵션 메타데이터 응답")

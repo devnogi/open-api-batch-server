@@ -1,11 +1,10 @@
 package until.the.eternity.auctionhistory.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import until.the.eternity.auctionitemoption.domain.entity.AuctionItemOption;
-
 import java.time.Instant;
 import java.util.List;
+import lombok.*;
+import until.the.eternity.auctionitemoption.domain.entity.AuctionHistoryItemOption;
 
 @Entity
 @Table(name = "auction_history")
@@ -36,7 +35,7 @@ public class AuctionHistory {
     private Instant dateAuctionBuy;
 
     @OneToMany(mappedBy = "auctionHistory", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AuctionItemOption> auctionItemOptions;
+    private List<AuctionHistoryItemOption> auctionHistoryItemOptions;
 
     @Column(name = "item_sub_category", nullable = false)
     private String itemSubCategory;
@@ -45,8 +44,8 @@ public class AuctionHistory {
     private String itemTopCategory;
 
     public AuctionHistory linkItemOptions() {
-        if (this.auctionItemOptions != null) {
-            for (AuctionItemOption o : this.auctionItemOptions) {
+        if (this.auctionHistoryItemOptions != null) {
+            for (AuctionHistoryItemOption o : this.auctionHistoryItemOptions) {
                 o.setAuctionHistory(this);
             }
         }

@@ -93,6 +93,11 @@ openapi:
     cron: ${HORN_BUGLE_CRON:0 */5 * * * *}
     max-retries: ${HORN_BUGLE_MAX_RETRIES:3}
     retry-delay-ms: ${HORN_BUGLE_RETRY_DELAY_MS:2000}
+  auction-realtime:
+    # 실시간 경매장 데이터 수집 스케줄러
+    # 10분 간격: 0, 10, 20, 30, 40, 50분
+    cron: ${AUCTION_REALTIME_CRON:0 0/10 * * * *}
+    delay-ms: ${AUCTION_REALTIME_DELAY_MS:500}
 
 statistics:
   previous-day:
