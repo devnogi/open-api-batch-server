@@ -3,10 +3,12 @@ package until.the.eternity.auctionrealtime.domain.mapper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
@@ -15,6 +17,8 @@ import until.the.eternity.common.enums.ItemCategory;
 /** OpenApiAuctionRealtimeResponse → AuctionRealtimeItem Entity 변환 Mapper. */
 @Mapper(componentModel = "spring", uses = OpenApiRealtimeItemOptionMapper.class)
 public interface OpenApiAuctionRealtimeMapper {
+
+    String UNKNOWN_ITEM_NAME = "(Unknown)";
 
     @Named("toEntity(OpenApiAuctionRealtimeResponse, ItemCategory)")
     @Mapping(
@@ -28,6 +32,15 @@ public interface OpenApiAuctionRealtimeMapper {
     @Mapping(target = "dateRegister", expression = "java(java.time.Instant.now())")
     AuctionRealtimeItem toEntity(
             OpenApiAuctionRealtimeResponse dto, @Context ItemCategory itemCategory);
+
+    @AfterMapping
+    default void afterMapping(
+            OpenApiAuctionRealtimeResponse dto, @MappingTarget AuctionRealtimeItem entity) {
+        // item_name이 "(Unknown)"인 경우 item_display_name으로 대체
+        if (UNKNOWN_ITEM_NAME.equals(entity.getItemName())) {
+            entity.setItemName(dto.itemDisplayName());
+        }
+    }
 
     @IterableMapping(qualifiedByName = "toEntity(OpenApiAuctionRealtimeResponse, ItemCategory)")
     List<AuctionRealtimeItem> toEntityList(

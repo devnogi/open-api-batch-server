@@ -67,4 +67,16 @@ public class AuctionHistoryItemOption {
             auctionHistory.getAuctionHistoryItemOptions().add(this);
         }
     }
+
+    public void setOptionValue(String optionValue) {
+        this.optionValue = optionValue;
+    }
+
+    public void setOptionValue2(String optionValue2) {
+        this.optionValue2 = optionValue2;
+    }
+
+    public void setOptionDesc(String optionDesc) {
+        this.optionDesc = optionDesc;
+    }
 }

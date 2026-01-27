@@ -11,6 +11,8 @@ import until.the.eternity.common.enums.ItemCategory;
 @Mapper(componentModel = "spring", uses = OpenApiItemOptionMapper.class)
 public interface OpenApiAuctionHistoryMapper {
 
+    String UNKNOWN_ITEM_NAME = "(Unknown)";
+
     @Named("toEntity(OpenApiAuctionHistoryResponse, ItemCategory)")
     @Mapping(source = "dateAuctionBuy", target = "dateAuctionBuy", qualifiedByName = "utcToKst")
     @Mapping(source = "openApiAuctionItemOptionResponse", target = "auctionHistoryItemOptions")
@@ -18,6 +20,15 @@ public interface OpenApiAuctionHistoryMapper {
             target = "itemTopCategory",
             expression = "java(ItemCategory.findTopCategory(dto.itemSubCategory()))")
     AuctionHistory toEntity(OpenApiAuctionHistoryResponse dto, @Context ItemCategory itemCategory);
+
+    @AfterMapping
+    default void afterMapping(
+            OpenApiAuctionHistoryResponse dto, @MappingTarget AuctionHistory entity) {
+        // item_name이 "(Unknown)"인 경우 item_display_name으로 대체
+        if (UNKNOWN_ITEM_NAME.equals(entity.getItemName())) {
+            entity.setItemName(dto.itemDisplayName());
+        }
+    }
 
     @IterableMapping(qualifiedByName = "toEntity(OpenApiAuctionHistoryResponse, ItemCategory)")
     List<AuctionHistory> toEntityList(
