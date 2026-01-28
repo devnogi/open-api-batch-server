@@ -153,7 +153,7 @@ public class HornBugleService {
         return PageResponseDto.of(responsePage);
     }
 
-    /** MySQL FULLTEXT 검색으로 keyword 검색을 수행한다. */
+    /** MySQL FULLTEXT 검색으로 keyword 검색을 수행한다. Native Query에서 ORDER BY를 지정하므로 Sort 없이 Pageable을 전달한다. */
     private PageResponseDto<HornBugleHistoryResponse> searchByDatabaseWithKeyword(
             String serverName, String keyword, HornBuglePageRequestDto pageRequest) {
 
@@ -162,9 +162,9 @@ public class HornBugleService {
         if (serverName != null && !serverName.isBlank()) {
             page =
                     repository.searchByKeywordAndServerName(
-                            keyword, serverName, pageRequest.toPageable());
+                            keyword, serverName, pageRequest.toPageableWithoutSort());
         } else {
-            page = repository.searchByKeyword(keyword, pageRequest.toPageable());
+            page = repository.searchByKeyword(keyword, pageRequest.toPageableWithoutSort());
         }
 
         Page<HornBugleHistoryResponse> responsePage = page.map(mapper::toResponse);

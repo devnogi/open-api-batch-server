@@ -105,17 +105,15 @@ public class HornBugleIndexService {
     public Page<HornBugleDocument> search(String keyword, String serverName, Pageable pageable) {
         try {
             // Multi-match query for keyword search
+            // Note: date_send is Date type, excluded from text search
+            // server_name is Keyword type, included for exact match
             Query multiMatchQuery =
                     Query.of(
                             q ->
                                     q.multiMatch(
                                             mm ->
                                                     mm.query(keyword)
-                                                            .fields(
-                                                                    "character_name",
-                                                                    "message",
-                                                                    "server_name",
-                                                                    "date_send")));
+                                                            .fields("character_name", "message")));
 
             // Build bool query
             BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder().must(multiMatchQuery);
