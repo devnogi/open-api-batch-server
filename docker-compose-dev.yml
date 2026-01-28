@@ -57,6 +57,7 @@ services:
         -Xmx${JAVA_OPTS_XMX:-512m}
         -XX:MaxMetaspaceSize=${JAVA_OPTS_MAX_METASPACE_SIZE:-150m}
         -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-48m}
+        -XX:ReservedCodeCacheSize=${JAVA_OPTS_RESERVED_CODE_CACHE_SIZE:-48m}
         -XX:MaxDirectMemorySize=${JAVA_OPTS_MAX_DIRECT_MEMORY_SIZE:-64m}
         -Xss${JAVA_OPTS_XSS:-512k}
         -XX:+UseG1GC
