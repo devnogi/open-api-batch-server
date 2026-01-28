@@ -45,7 +45,8 @@ public class SecurityConfig {
                                                 "/api/**",
                                                 "/auction-history/**",
                                                 "/statistics/**",
-                                                "/horn-bugle/**")
+                                                "/horn-bugle/**",
+                                                "/auction-realtime/**")
                                         .permitAll()
                                         // 나머지 요청은 인증 필요
                                         .anyRequest()

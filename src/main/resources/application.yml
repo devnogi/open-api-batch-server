@@ -112,7 +112,7 @@ statistics:
 
 elasticsearch:
   # Elasticsearch 기능 활성화 여부 (false면 ES 관련 기능 비활성화, DB 검색만 사용)
-  enabled: ${ELASTICSEARCH_ENABLED:false}
+  enabled: ${ELASTICSEARCH_ENABLED:true}
   index:
     # 서버 재기동 시 DB 데이터 일괄 색인 활성화 여부
-    enabled: ${ELASTICSEARCH_INDEX_ENABLED:false}
+    enabled: ${ELASTICSEARCH_INDEX_ENABLED:true}
