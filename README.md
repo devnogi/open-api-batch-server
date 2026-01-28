@@ -10,15 +10,21 @@
 
 ## 주요 기능
 
-### 경매장 데이터 수집
+### 경매장 거래 내역 수집
 - 매 1시간마다 마비노기 경매장 거래 내역을 Nexon Open API를 통해 수집
 - 약 70개의 아이템 카테고리에 대한 커서 기반 페이지네이션으로 데이터 수집
 - 카테고리별 요청 간 딜레이 설정으로 API Rate Limit 준수
+
+### 실시간 경매장 데이터 수집
+- 10분 간격으로 현재 판매 중인 아이템 정보 수집
+- 만료된 아이템 자동 삭제
+- 거래 내역과 분리된 별도 테이블로 관리
 
 ### 뿔피리 데이터 수집
 - 5분마다 거대한 외침의 뿔피리 내역 수집
 - 4개 서버 지원 (류트, 만돌린, 하프, 울프)
 - 지수 백오프 기반 재시도 로직 구현
+- **Elasticsearch 연동**: 한글 전문 검색 지원 (Ngram Parser)
 
 ### 통계 분석
 - **일간 통계**: 경매 데이터 수집 완료 시 자동 트리거 (이벤트 기반)
@@ -28,7 +34,7 @@
 ### 데이터 조회
 - 아이템별 최저가, 최고가, 평균가, 거래량 등 시세 조회
 - 서버별/전체 뿔피리 내역 조회
-- 아이템 옵션 필터링 (무기 공격력, 방어구 방어력 등)
+- 아이템 옵션 필터링 (무기 공격력, 방어구 방어력, 세공 옵션 등)
 
 <br>
 
@@ -39,9 +45,11 @@
 | **Backend** | Java 21, Spring Boot 3.5.0, Spring Data JPA, QueryDSL |
 | **HTTP Client** | Spring WebFlux (WebClient) |
 | **Database** | MySQL 8, Flyway |
+| **Search Engine** | Elasticsearch (한글 전문 검색) |
+| **Security** | Spring Security, JWT |
 | **Test** | JUnit5, Mockito, AssertJ, Testcontainers |
 | **Code Quality** | Spotless (Google Java Format AOSP), Jacoco |
-| **Documentation** | Swagger, Spring REST Docs |
+| **Documentation** | Swagger (Springdoc OpenAPI), Spring REST Docs |
 | **DevOps** | Docker Compose, GitHub Actions |
 | **Deployment** | Oracle Cloud |
 
@@ -52,7 +60,10 @@
 ```
 src/main/java/until/the/eternity/
 ├── auctionhistory/          # 경매장 거래 내역 수집 및 검색
-├── hornBugle/               # 뿔피리 내역 수집 및 검색
+├── auctionrealtime/         # 실시간 경매장 데이터 수집 (10분 간격)
+├── auctionitem/             # 경매장 아이템 엔티티
+├── auctionitemoption/       # 아이템 옵션 정보 (세공 옵션 포함)
+├── hornBugle/               # 뿔피리 내역 수집 및 검색 (Elasticsearch 연동)
 ├── statistics/              # 일간/주간 통계 집계
 ├── iteminfo/                # 아이템 메타데이터
 ├── itemoptioninfo/          # 아이템 옵션 정보
@@ -76,19 +87,45 @@ infrastructure/   # Repository 구현체, JPA
 
 ## API 엔드포인트
 
+### 경매장 거래 내역
 | Endpoint | Method | 설명 |
 |----------|--------|------|
 | `/auction-history/search` | GET | 경매 내역 검색 (필터 및 페이징) |
 | `/auction-history/{id}` | GET | 단일 거래 내역 조회 |
 | `/auction-history/batch` | POST | 배치 수동 실행 |
+
+### 실시간 경매장
+| Endpoint | Method | 설명 |
+|----------|--------|------|
+| `/auction-realtime/search` | GET | 현재 판매 중인 아이템 검색 |
+| `/auction-realtime/{id}` | GET | 단일 아이템 조회 |
+
+### 뿔피리
+| Endpoint | Method | 설명 |
+|----------|--------|------|
 | `/horn-bugle` | GET | 뿔피리 내역 검색 (서버별/전체) |
 | `/horn-bugle/batch` | POST | 뿔피리 배치 수동 실행 |
+
+### 통계
+| Endpoint | Method | 설명 |
+|----------|--------|------|
 | `/statistics/daily/items` | GET | 일간 아이템 통계 |
 | `/statistics/daily/subcategories` | GET | 일간 서브카테고리 통계 |
 | `/statistics/daily/top-categories` | GET | 일간 상위카테고리 통계 |
 | `/statistics/weekly/items` | GET | 주간 아이템 통계 |
+| `/statistics/weekly/subcategories` | GET | 주간 서브카테고리 통계 |
+| `/statistics/weekly/top-categories` | GET | 주간 상위카테고리 통계 |
+
+### 메타데이터
+| Endpoint | Method | 설명 |
+|----------|--------|------|
 | `/api/item-infos` | GET | 아이템 메타데이터 |
 | `/api/v1/item-option-infos` | GET | 아이템 옵션 정보 |
+| `/api/auction-search-options` | GET | 검색 옵션 메타데이터 |
+
+### 시스템
+| Endpoint | Method | 설명 |
+|----------|--------|------|
 | `/actuator/health` | GET | 헬스체크 |
 | `/swagger-ui/index.html` | - | API 문서 |
 
@@ -99,6 +136,7 @@ infrastructure/   # Repository 구현체, JPA
 | 스케줄러 | Cron 표현식 | 설명 |
 |----------|-------------|------|
 | 경매 내역 수집 | `0 0 * * * *` | 매 시 정각 |
+| 실시간 경매장 수집 | `0 0/10 * * * *` | 10분마다 |
 | 뿔피리 수집 | `0 */5 * * * *` | 5분마다 |
 | 전일 통계 확정 | `0 10 0 * * *` | 매일 00:10 |
 | 주간 통계 집계 | `5 0 4 * * MON` | 매주 월요일 04:00 |
@@ -126,6 +164,11 @@ JWT_REFRESH_TOKEN_VALIDITY=86400000
 
 # Nexon Open API
 NEXON_OPEN_API_KEY=your-api-key
+
+# Elasticsearch
+ELASTICSEARCH_URIS=http://localhost:9200
+ELASTICSEARCH_USERNAME=
+ELASTICSEARCH_PASSWORD=
 ```
 
 ### 선택 환경 변수
@@ -134,10 +177,18 @@ NEXON_OPEN_API_KEY=your-api-key
 AUCTION_HISTORY_CRON=0 0 * * * *
 AUCTION_HISTORY_DELAY_MS=1000
 
+# 실시간 경매장 배치
+AUCTION_REALTIME_CRON=0 0/10 * * * *
+AUCTION_REALTIME_DELAY_MS=500
+
 # 뿔피리 배치
 HORN_BUGLE_CRON=0 */5 * * * *
 HORN_BUGLE_MAX_RETRIES=3
 HORN_BUGLE_RETRY_DELAY_MS=2000
+
+# Elasticsearch 기능
+ELASTICSEARCH_ENABLED=true
+ELASTICSEARCH_INDEX_ENABLED=true
 
 # 통계
 STATISTICS_PREVIOUS_DAY_CRON=0 10 0 * * *
@@ -179,9 +230,9 @@ docker-compose -f docker-compose-local.yml down
 
 | 환경 | 파일 | 설명 |
 |------|------|------|
-| 로컬 개발 | `docker-compose-local.yml` | 로컬 빌드, 낮은 리소스 |
-| 개발 서버 | `docker-compose-dev.yml` | 개발 환경 배포 |
-| 운영 서버 | `docker-compose-prod.yml` | 운영 환경 배포 |
+| 로컬 개발 | `docker-compose-local.yml` | 로컬 빌드, MySQL, Elasticsearch 포함 |
+| 개발 서버 | `docker-compose-dev.yml` | 개발 환경 배포, Autoheal 컨테이너 포함 |
+| 운영 서버 | `docker-compose-prod.yml` | 운영 환경 배포, 높은 리소스 할당 |
 
 <br>
 
@@ -206,6 +257,30 @@ docker-compose -f docker-compose-local.yml down
 # 로컬 실행
 ./gradlew bootRun
 ```
+
+<br>
+
+## 데이터베이스 스키마
+
+Flyway를 통한 마이그레이션 관리 (17개 버전)
+
+### 주요 테이블
+| 테이블 | 설명 |
+|--------|------|
+| `auction_history` | 경매장 거래 내역 |
+| `auction_realtime_item` | 현재 판매 중인 아이템 |
+| `auction_history_item_option` | 거래 아이템 옵션 (세공 포함) |
+| `auction_realtime_item_option` | 실시간 아이템 옵션 |
+| `horn_bugle_world_history` | 뿔피리 내역 (FULLTEXT 인덱스) |
+| `item_daily_statistics` | 일간 아이템 통계 |
+| `item_weekly_statistics` | 주간 아이템 통계 |
+| `subcategory_daily_statistics` | 일간 서브카테고리 통계 |
+| `subcategory_weekly_statistics` | 주간 서브카테고리 통계 |
+| `top_category_daily_statistics` | 일간 상위카테고리 통계 |
+| `top_category_weekly_statistics` | 주간 상위카테고리 통계 |
+| `item_info` | 아이템 메타데이터 |
+| `item_option_value_info` | 아이템 옵션 정보 |
+| `metalware_info` | 금속류 정보 |
 
 <br>
 

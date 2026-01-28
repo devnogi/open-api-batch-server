@@ -17,6 +17,11 @@ services:
 
     labels:
       autoheal: "true"
+
+    depends_on:
+      devnogi-elastic-search:
+        condition: service_healthy
+
     environment:
       # === Application Configuration ===
       SPRING_PROFILES_ACTIVE: prod
@@ -41,6 +46,11 @@ services:
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON}"
       STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
+
+      # === Elasticsearch Configuration ===
+      ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
+      ELASTICSEARCH_INDEX_ENABLED: ${ELASTICSEARCH_INDEX_ENABLED:-true}
+      SPRING_ELASTICSEARCH_URIS: http://devnogi-elastic-search:9200
 
       # === Docker Configuration ===
       DOCKER_USERNAME: ${DOCKER_USERNAME}
@@ -97,6 +107,49 @@ services:
         max-size: "50m"
         max-file: "5"
 
+  # === Elasticsearch (Prod - 고성능, 최대 3GB) ===
+  devnogi-elastic-search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTICSEARCH_VERSION:-8.11.0}
+    container_name: devnogi-elastic-search
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms${ELASTICSEARCH_HEAP_SIZE:-1536m} -Xmx${ELASTICSEARCH_HEAP_SIZE:-1536m}"
+      - cluster.name=devnogi-es-cluster-prod
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+      - "${ELASTICSEARCH_TRANSPORT_PORT:-9300}:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+        reservations:
+          memory: 1536m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
   # === Autoheal (Prod - 빈번한 체크, 긴 graceful shutdown) ===
   autoheal:
     image: willfarrell/autoheal:latest
@@ -120,6 +173,8 @@ services:
 
 volumes:
   app-logs:
+    driver: local
+  elasticsearch_data:
     driver: local
 
 networks:

@@ -60,4 +60,15 @@ public class HornBugleRepositoryPortImpl implements HornBugleRepositoryPort {
             String serverName, Instant dateSend) {
         return jpaRepository.findByServerNameAndDateSend(serverName, dateSend);
     }
+
+    @Override
+    public Page<HornBugleWorldHistory> searchByKeyword(String keyword, Pageable pageable) {
+        return jpaRepository.searchByKeyword(keyword, pageable);
+    }
+
+    @Override
+    public Page<HornBugleWorldHistory> searchByKeywordAndServerName(
+            String keyword, String serverName, Pageable pageable) {
+        return jpaRepository.searchByKeywordAndServerName(keyword, serverName, pageable);
+    }
 }

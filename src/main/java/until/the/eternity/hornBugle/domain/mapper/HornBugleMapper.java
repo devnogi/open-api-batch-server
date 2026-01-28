@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
+import until.the.eternity.hornBugle.infrastructure.elasticsearch.HornBugleDocument;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
 import until.the.eternity.hornBugle.interfaces.rest.dto.response.HornBugleHistoryResponse;
 
@@ -20,4 +21,7 @@ public interface HornBugleMapper {
             OpenApiHornBugleHistoryResponse dto, HornBugleServer server, Instant registerTime);
 
     HornBugleHistoryResponse toResponse(HornBugleWorldHistory entity);
+
+    @Mapping(target = "id", expression = "java(Long.parseLong(document.getId()))")
+    HornBugleHistoryResponse toResponse(HornBugleDocument document);
 }

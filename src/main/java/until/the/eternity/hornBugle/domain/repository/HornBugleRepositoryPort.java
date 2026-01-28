@@ -19,4 +19,11 @@ public interface HornBugleRepositoryPort {
     Page<HornBugleWorldHistory> findAll(Pageable pageable);
 
     List<HornBugleWorldHistory> findByServerNameAndDateSend(String serverName, Instant dateSend);
+
+    /** FULLTEXT 인덱스를 사용한 키워드 검색 (전체 서버) */
+    Page<HornBugleWorldHistory> searchByKeyword(String keyword, Pageable pageable);
+
+    /** FULLTEXT 인덱스를 사용한 키워드 검색 (서버 필터 포함) */
+    Page<HornBugleWorldHistory> searchByKeywordAndServerName(
+            String keyword, String serverName, Pageable pageable);
 }
