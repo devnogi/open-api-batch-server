@@ -3,11 +3,31 @@ package until.the.eternity.auctionrealtime.domain.repository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
+import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
 import until.the.eternity.common.enums.ItemCategory;
 
 /** AuctionRealtimeItem Repository Port (Hexagonal Architecture). */
 public interface AuctionRealtimeItemRepositoryPort {
+
+    /**
+     * 실시간 경매장 아이템을 검색한다.
+     *
+     * @param condition 검색 조건
+     * @param pageable 페이지 정보
+     * @return 검색 결과
+     */
+    Page<AuctionRealtimeItem> search(AuctionRealtimeSearchRequest condition, Pageable pageable);
+
+    /**
+     * ID로 실시간 경매장 아이템을 조회한다.
+     *
+     * @param id 아이템 ID
+     * @return 아이템 (없으면 Optional.empty())
+     */
+    Optional<AuctionRealtimeItem> findById(Long id);
 
     /**
      * 해당 subcategory의 최신 date_auction_expire를 조회한다.

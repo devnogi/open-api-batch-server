@@ -47,6 +47,11 @@ services:
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON:-0 0 * * * *}"
       STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
 
+      # === Elasticsearch Configuration ===
+      ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
+      ELASTICSEARCH_INDEX_ENABLED: ${ELASTICSEARCH_INDEX_ENABLED:-true}
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+
       # === JVM Configuration (Local - 경량 개발용) ===
       # Heap: 256m~512m, Non-Heap: 256m, Total: ~768m
       JAVA_OPTS: >-
@@ -85,9 +90,11 @@ services:
       - app-network
       - my-network  # MySQL 컨테이너와 통신을 위해 추가
 
-    # MySQL이 준비될 때까지 대기
+    # MySQL, Elasticsearch가 준비될 때까지 대기
     depends_on:
       mysql:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
 
     # === Health Check (Local - 표준) ===
@@ -144,6 +151,41 @@ services:
       - --default-time-zone=+09:00  # MySQL 레벨 타임존 설정
       - --explicit_defaults_for_timestamp=1  # TIMESTAMP 기본값 명시 허용
 
+  # Elasticsearch
+  # Nori 플러그인 사용 시: build 섹션 주석 해제, image 주석 처리
+  # build:
+  #   context: ./docker/elasticsearch
+  #   dockerfile: Dockerfile
+  # image: open-api-batch-elasticsearch:local
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: open-api-batch-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=devnogi-es-cluster
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+      - "${ELASTICSEARCH_TRANSPORT_PORT:-9300}:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 512m
+
   # === Autoheal (Local - 표준) ===
   # unhealthy 컨테이너 자동 재시작 서비스
   autoheal:
@@ -168,6 +210,7 @@ services:
 
 volumes:
   mysql_data:
+  elasticsearch_data:
   app-logs:
     driver: local
 

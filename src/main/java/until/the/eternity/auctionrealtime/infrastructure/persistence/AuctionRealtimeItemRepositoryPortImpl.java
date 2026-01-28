@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemRepositoryPort;
+import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
 import until.the.eternity.common.enums.ItemCategory;
 
 /** AuctionRealtimeItemRepositoryPort 구현체. */
@@ -20,7 +23,19 @@ public class AuctionRealtimeItemRepositoryPortImpl implements AuctionRealtimeIte
     private static final int BATCH_SIZE = 500;
 
     private final AuctionRealtimeItemRepository jpaRepository;
+    private final AuctionRealtimeQueryDslRepository queryDslRepository;
     private final EntityManager entityManager;
+
+    @Override
+    public Page<AuctionRealtimeItem> search(
+            AuctionRealtimeSearchRequest condition, Pageable pageable) {
+        return queryDslRepository.search(condition, pageable);
+    }
+
+    @Override
+    public Optional<AuctionRealtimeItem> findById(Long id) {
+        return jpaRepository.findById(id);
+    }
 
     @Override
     public Optional<Instant> findLatestDateAuctionExpireBySubCategory(ItemCategory category) {

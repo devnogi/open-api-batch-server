@@ -25,4 +25,39 @@ public interface HornBugleJpaRepository extends JpaRepository<HornBugleWorldHist
     Page<HornBugleWorldHistory> findByServerName(String serverName, Pageable pageable);
 
     List<HornBugleWorldHistory> findByServerNameAndDateSend(String serverName, Instant dateSend);
+
+    /** FULLTEXT 인덱스를 사용한 키워드 검색 (전체 서버) */
+    @Query(
+            value =
+                    """
+                    SELECT * FROM horn_bugle_world_history
+                    WHERE MATCH(character_name, message, server_name, date_send_text) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+                    ORDER BY date_send DESC
+                    """,
+            countQuery =
+                    """
+                    SELECT COUNT(*) FROM horn_bugle_world_history
+                    WHERE MATCH(character_name, message, server_name, date_send_text) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+                    """,
+            nativeQuery = true)
+    Page<HornBugleWorldHistory> searchByKeyword(String keyword, Pageable pageable);
+
+    /** FULLTEXT 인덱스를 사용한 키워드 검색 (서버 필터 포함) */
+    @Query(
+            value =
+                    """
+                    SELECT * FROM horn_bugle_world_history
+                    WHERE MATCH(character_name, message, server_name, date_send_text) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+                    AND server_name = :serverName
+                    ORDER BY date_send DESC
+                    """,
+            countQuery =
+                    """
+                    SELECT COUNT(*) FROM horn_bugle_world_history
+                    WHERE MATCH(character_name, message, server_name, date_send_text) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+                    AND server_name = :serverName
+                    """,
+            nativeQuery = true)
+    Page<HornBugleWorldHistory> searchByKeywordAndServerName(
+            String keyword, String serverName, Pageable pageable);
 }

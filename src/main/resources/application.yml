@@ -18,6 +18,10 @@ management:
 spring:
   application:
     name: open-api-batch-server
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
   web:
     resources:
       static-locations: classpath:/static/
@@ -105,3 +109,10 @@ statistics:
     # AuctionHistoryScheduler 실행 이후 전날 23시대 거래까지 포함한 통계를 확정
     # 기본값: 매일 00:10 (AuctionHistory가 00:05에 실행되므로 그 이후)
     cron: ${STATISTICS_PREVIOUS_DAY_CRON:0 10 0 * * *}
+
+elasticsearch:
+  # Elasticsearch 기능 활성화 여부 (false면 ES 관련 기능 비활성화, DB 검색만 사용)
+  enabled: ${ELASTICSEARCH_ENABLED:false}
+  index:
+    # 서버 재기동 시 DB 데이터 일괄 색인 활성화 여부
+    enabled: ${ELASTICSEARCH_INDEX_ENABLED:false}

@@ -4,11 +4,18 @@ import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
+import until.the.eternity.auctionrealtime.domain.mapper.AuctionRealtimeMapper;
 import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemRepositoryPort;
+import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
+import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.AuctionRealtimeDetailResponse;
+import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.RealtimeItemOptionResponse;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.common.response.PageResponseDto;
 
 /** 실시간 경매장 데이터 Service. */
 @Slf4j
@@ -17,6 +24,42 @@ import until.the.eternity.common.enums.ItemCategory;
 public class AuctionRealtimeService {
 
     private final AuctionRealtimeItemRepositoryPort repository;
+    private final AuctionRealtimeMapper mapper;
+
+    /**
+     * 실시간 경매장 아이템을 검색한다.
+     *
+     * @param requestDto 검색 조건
+     * @param pageable 페이지 정보
+     * @return 검색 결과
+     */
+    @Transactional(readOnly = true)
+    public PageResponseDto<AuctionRealtimeDetailResponse<RealtimeItemOptionResponse>> search(
+            AuctionRealtimeSearchRequest requestDto, Pageable pageable) {
+
+        Page<AuctionRealtimeItem> page = repository.search(requestDto, pageable);
+        Page<AuctionRealtimeDetailResponse<RealtimeItemOptionResponse>> dtoPage =
+                page.map(mapper::toDto);
+        return PageResponseDto.of(dtoPage);
+    }
+
+    /**
+     * ID로 실시간 경매장 아이템을 조회한다.
+     *
+     * @param id 아이템 ID
+     * @return 아이템 상세 정보
+     */
+    @Transactional(readOnly = true)
+    public AuctionRealtimeDetailResponse<RealtimeItemOptionResponse> findByIdOrElseThrow(Long id) {
+        AuctionRealtimeItem item =
+                repository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "AuctionRealtimeItem not found: " + id));
+        return mapper.toDto(item);
+    }
 
     /**
      * 해당 카테고리 & 동일 date_auction_expire 레코드 삭제 후 새 엔티티들을 저장한다.
