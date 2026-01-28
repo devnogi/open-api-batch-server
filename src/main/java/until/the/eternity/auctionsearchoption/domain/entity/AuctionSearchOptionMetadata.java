@@ -1,12 +1,13 @@
 package until.the.eternity.auctionsearchoption.domain.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "auction_search_option_metadata")

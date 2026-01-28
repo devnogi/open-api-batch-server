@@ -1,9 +1,6 @@
 package until.the.eternity.auctionrealtime.infrastructure.persistence;
 
 import jakarta.persistence.EntityManager;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,6 +10,10 @@ import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemRepositoryPort;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 /** AuctionRealtimeItemRepositoryPort 구현체. */
 @Slf4j

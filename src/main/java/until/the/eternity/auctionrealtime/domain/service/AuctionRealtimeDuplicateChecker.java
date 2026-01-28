@@ -1,14 +1,15 @@
 package until.the.eternity.auctionrealtime.domain.service;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemRepositoryPort;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 실시간 경매장 데이터의 중복 체크 로직.

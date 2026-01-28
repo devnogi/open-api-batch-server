@@ -1,9 +1,5 @@
 package until.the.eternity.hornBugle.application.runner;
 
-import static org.mockito.Mockito.*;
-
-import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +13,11 @@ import org.springframework.data.domain.PageRequest;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.repository.HornBugleRepositoryPort;
 import until.the.eternity.hornBugle.infrastructure.elasticsearch.HornBugleIndexService;
+
+import java.time.Instant;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HornBugleIndexRunnerTest {
