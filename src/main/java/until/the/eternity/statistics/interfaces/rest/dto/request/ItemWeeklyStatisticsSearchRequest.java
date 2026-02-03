@@ -2,9 +2,8 @@ package until.the.eternity.statistics.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Schema(description = "아이템별 주간 통계 검색 요청")
 public record ItemWeeklyStatisticsSearchRequest(

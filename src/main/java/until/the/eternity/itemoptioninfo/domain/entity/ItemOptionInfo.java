@@ -18,4 +18,13 @@ public class ItemOptionInfo {
 
     @Column(name = "option_desc", columnDefinition = "text")
     private String optionDesc;
+
+    public ItemOptionInfo(ItemOptionInfoId id, String optionDesc) {
+        this.id = id;
+        this.optionDesc = optionDesc;
+    }
+
+    public void updateOptionDesc(String optionDesc) {
+        this.optionDesc = optionDesc;
+    }
 }
