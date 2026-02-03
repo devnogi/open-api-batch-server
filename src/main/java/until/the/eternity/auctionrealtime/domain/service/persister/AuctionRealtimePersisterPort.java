@@ -1,11 +1,10 @@
 package until.the.eternity.auctionrealtime.domain.service.persister;
 
+import java.time.Instant;
+import java.util.List;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.List;
 
 /** 실시간 경매장 데이터 Persister Port. */
 public interface AuctionRealtimePersisterPort {

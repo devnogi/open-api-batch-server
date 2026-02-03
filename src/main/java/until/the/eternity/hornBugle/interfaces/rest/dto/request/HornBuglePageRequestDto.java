@@ -25,9 +25,7 @@ public record HornBuglePageRequestDto(
                 resolvedPage, resolvedSize, Sort.by(Sort.Direction.DESC, SORT_BY_DATE_SEND));
     }
 
-    /**
-     * Native Query용 Pageable (정렬 없음). Native Query에서 ORDER BY를 직접 지정하므로 Sort를 제외한다.
-     */
+    /** Native Query용 Pageable (정렬 없음). Native Query에서 ORDER BY를 직접 지정하므로 Sort를 제외한다. */
     public Pageable toPageableWithoutSort() {
         int resolvedPage = this.page != null ? this.page - 1 : DEFAULT_PAGE - 1;
         int resolvedSize = this.size != null ? this.size : DEFAULT_SIZE;

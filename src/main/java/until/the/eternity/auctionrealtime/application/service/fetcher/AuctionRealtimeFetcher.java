@@ -1,5 +1,8 @@
 package until.the.eternity.auctionrealtime.application.service.fetcher;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,10 +13,6 @@ import until.the.eternity.auctionrealtime.infrastructure.client.AuctionRealtimeC
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeListResponse;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 /** 실시간 경매장 데이터 Fetcher 구현체. Cursor 기반 페이징으로 API를 호출하고, 중복 감지 시 호출을 중단한다. */
 @Slf4j

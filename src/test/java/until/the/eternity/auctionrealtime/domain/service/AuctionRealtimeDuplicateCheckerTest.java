@@ -1,5 +1,11 @@
 package until.the.eternity.auctionrealtime.domain.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,13 +17,6 @@ import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemR
 import until.the.eternity.auctionrealtime.domain.service.AuctionRealtimeDuplicateChecker.DuplicateCheckResult;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionRealtimeDuplicateCheckerTest {

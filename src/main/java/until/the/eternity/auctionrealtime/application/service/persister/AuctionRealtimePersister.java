@@ -1,5 +1,7 @@
 package until.the.eternity.auctionrealtime.application.service.persister;
 
+import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,9 +11,6 @@ import until.the.eternity.auctionrealtime.domain.service.AuctionRealtimeDuplicat
 import until.the.eternity.auctionrealtime.domain.service.persister.AuctionRealtimePersisterPort;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.List;
 
 /** 실시간 경매장 데이터 Persister 구현체. */
 @Slf4j
