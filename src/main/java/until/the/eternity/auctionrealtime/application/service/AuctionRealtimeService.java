@@ -65,12 +65,20 @@ public class AuctionRealtimeService {
      * 해당 카테고리의 기존 데이터를 모두 삭제하고 새 데이터를 저장한다. (Full Refresh)
      *
      * @param category 아이템 카테고리
-     * @param entities 저장할 엔티티 리스트
+     * @param entities 저장할 엔티티 리스트 (null인 경우 빈 리스트로 간주)
      */
     @Transactional
     public void replaceBySubCategory(ItemCategory category, List<AuctionRealtimeItem> entities) {
         int deleted = repository.deleteBySubCategory(category);
         log.info("[REALTIME] [{}] Deleted {} existing records", category.getSubCategory(), deleted);
+
+        // null 방어: null인 경우 빈 리스트로 간주
+        if (entities == null) {
+            log.info(
+                    "[REALTIME] [{}] Received null entities, treating as empty list",
+                    category.getSubCategory());
+            entities = List.of();
+        }
 
         repository.saveAll(entities);
         log.info(
