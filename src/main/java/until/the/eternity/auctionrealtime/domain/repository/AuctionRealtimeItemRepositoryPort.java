@@ -30,21 +30,12 @@ public interface AuctionRealtimeItemRepositoryPort {
     Optional<AuctionRealtimeItem> findById(Long id);
 
     /**
-     * 해당 subcategory의 최신 date_auction_expire를 조회한다.
+     * 해당 subcategory의 모든 레코드를 삭제한다.
      *
      * @param category 아이템 카테고리
-     * @return 최신 date_auction_expire (없으면 Optional.empty())
-     */
-    Optional<Instant> findLatestDateAuctionExpireBySubCategory(ItemCategory category);
-
-    /**
-     * 해당 subcategory & date_auction_expire에 해당하는 모든 레코드를 삭제한다.
-     *
-     * @param category 아이템 카테고리
-     * @param dateAuctionExpire 만료 시각
      * @return 삭제된 레코드 수
      */
-    int deleteBySubCategoryAndDateAuctionExpire(ItemCategory category, Instant dateAuctionExpire);
+    int deleteBySubCategory(ItemCategory category);
 
     /**
      * date_auction_expire가 현재 시각보다 이전인 모든 레코드를 삭제한다.

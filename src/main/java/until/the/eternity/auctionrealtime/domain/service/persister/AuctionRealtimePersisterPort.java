@@ -1,6 +1,5 @@
 package until.the.eternity.auctionrealtime.domain.service.persister;
 
-import java.time.Instant;
 import java.util.List;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
@@ -10,15 +9,12 @@ import until.the.eternity.common.enums.ItemCategory;
 public interface AuctionRealtimePersisterPort {
 
     /**
-     * API 응답 데이터를 Entity로 변환하고 필터링한다.
+     * API 응답 데이터를 Entity로 변환한다.
      *
      * @param dtoList API 응답 DTO 리스트
      * @param category 아이템 카테고리
-     * @param latestDate DB의 최신 date_auction_expire (null이면 모두 저장)
      * @return 저장할 Entity 리스트
      */
     List<AuctionRealtimeItem> prepareEntities(
-            List<OpenApiAuctionRealtimeResponse> dtoList,
-            ItemCategory category,
-            Instant latestDate);
+            List<OpenApiAuctionRealtimeResponse> dtoList, ItemCategory category);
 }

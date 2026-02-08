@@ -38,15 +38,8 @@ public class AuctionRealtimeItemRepositoryPortImpl implements AuctionRealtimeIte
     }
 
     @Override
-    public Optional<Instant> findLatestDateAuctionExpireBySubCategory(ItemCategory category) {
-        return jpaRepository.findLatestDateAuctionExpireBySubCategory(category.getSubCategory());
-    }
-
-    @Override
-    public int deleteBySubCategoryAndDateAuctionExpire(
-            ItemCategory category, Instant dateAuctionExpire) {
-        return jpaRepository.deleteBySubCategoryAndDateAuctionExpire(
-                category.getSubCategory(), dateAuctionExpire);
+    public int deleteBySubCategory(ItemCategory category) {
+        return jpaRepository.deleteBySubCategory(category.getSubCategory());
     }
 
     @Override
