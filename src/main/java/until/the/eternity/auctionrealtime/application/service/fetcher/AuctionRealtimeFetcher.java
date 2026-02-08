@@ -1,34 +1,32 @@
 package until.the.eternity.auctionrealtime.application.service.fetcher;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import until.the.eternity.auctionrealtime.domain.service.AuctionRealtimeDuplicateChecker;
-import until.the.eternity.auctionrealtime.domain.service.AuctionRealtimeDuplicateChecker.DuplicateCheckResult;
 import until.the.eternity.auctionrealtime.domain.service.fetcher.AuctionRealtimeFetcherPort;
 import until.the.eternity.auctionrealtime.infrastructure.client.AuctionRealtimeClient;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeListResponse;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
 
-/** 실시간 경매장 데이터 Fetcher 구현체. Cursor 기반 페이징으로 API를 호출하고, 중복 감지 시 호출을 중단한다. */
+/**
+ * 실시간 경매장 데이터 Fetcher 구현체.
+ *
+ * <p>Cursor 기반 페이징으로 API를 호출하여 해당 카테고리의 전체 데이터를 수집한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuctionRealtimeFetcher implements AuctionRealtimeFetcherPort {
 
     private final AuctionRealtimeClient client;
-    private final AuctionRealtimeDuplicateChecker duplicateChecker;
 
     @Override
     public FetchResult fetch(ItemCategory category) {
         List<OpenApiAuctionRealtimeResponse> result = new ArrayList<>();
         String cursor = "";
-        boolean hasEqualDate = false;
-        Instant latestDate = null;
 
         while (true) {
             OpenApiAuctionRealtimeListResponse response =
@@ -51,39 +49,7 @@ public class AuctionRealtimeFetcher implements AuctionRealtimeFetcherPort {
                 break;
             }
 
-            List<OpenApiAuctionRealtimeResponse> batch = response.auctionItems();
-
-            // 중복 체크
-            DuplicateCheckResult checkResult =
-                    duplicateChecker.checkDuplicateInBatch(batch, category);
-
-            if (checkResult.isDuplicate()) {
-                int index = checkResult.duplicateIndex();
-                latestDate = checkResult.latestDate();
-                hasEqualDate = checkResult.hasEqualDate();
-
-                if (index > 0) {
-                    result.addAll(batch.subList(0, index));
-                }
-
-                if (hasEqualDate) {
-                    log.debug(
-                            "[REALTIME] [{}] equal date found at index {}, need to delete and re-save, added {} items",
-                            category.getSubCategory(),
-                            index,
-                            index);
-                } else {
-                    log.debug(
-                            "[REALTIME] [{}] duplicate found at index {}, added {} items before duplicate",
-                            category.getSubCategory(),
-                            index,
-                            index);
-                }
-                break;
-            }
-
-            latestDate = checkResult.latestDate();
-            result.addAll(batch);
+            result.addAll(response.auctionItems());
 
             cursor = response.nextCursor();
 
@@ -95,6 +61,6 @@ public class AuctionRealtimeFetcher implements AuctionRealtimeFetcherPort {
             }
         }
 
-        return new FetchResult(result, hasEqualDate, latestDate);
+        return new FetchResult(result);
     }
 }
