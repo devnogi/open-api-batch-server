@@ -1,6 +1,5 @@
 package until.the.eternity.iteminfo.infrastructure.persistence;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor

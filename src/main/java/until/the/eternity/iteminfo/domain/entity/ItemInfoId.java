@@ -2,8 +2,9 @@ package until.the.eternity.iteminfo.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.io.Serializable;
 import lombok.*;
+
+import java.io.Serializable;
 
 @Embeddable
 @Getter
