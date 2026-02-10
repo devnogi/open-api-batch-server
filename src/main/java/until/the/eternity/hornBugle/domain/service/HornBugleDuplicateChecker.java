@@ -60,7 +60,9 @@ public class HornBugleDuplicateChecker {
                 responses.stream()
                         .filter(
                                 response -> {
-                                    Instant responseDateSend = response.dateSend();
+                                    // DB에는 KST(+9h)로 저장되므로 비교 시 동일하게 변환
+                                    Instant responseDateSend =
+                                            response.dateSend().plusSeconds(32400);
 
                                     // 최신 date_send보다 이전인 데이터는 제거
                                     if (responseDateSend.isBefore(latestDateSend)) {
