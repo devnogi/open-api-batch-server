@@ -24,6 +24,11 @@ public interface OpenApiRealtimeItemOptionMapper {
     // 그룹1: 스킬명, 그룹2: 괄호 전체 (option_desc), 그룹3: 숫자 (option_value2)
     Pattern PATTERN_LEVEL_PARENTHESIS = Pattern.compile("^(.+?)(\\((\\d+)레벨:.+\\))$");
 
+    // 패턴 3: "스킬명 설명텍스트" 형식 (레벨 정보 없이 텍스트 설명만 존재)
+    // (예: "돌진 인간 및 엘프일 때 방패 없이 사용 가능")
+    // 그룹1: 스킬명, 그룹2: 설명 텍스트 (option_desc)
+    Pattern PATTERN_DESCRIPTION_ONLY = Pattern.compile("^(.+?) (.+)$");
+
     @Mapping(target = "id", ignore = true) // PK 자동 생성
     @Mapping(target = "auctionRealtimeItem", ignore = true)
     AuctionRealtimeItemOption toEntity(OpenApiAuctionItemOptionResponse itemOption);
@@ -53,7 +58,14 @@ public interface OpenApiRealtimeItemOptionMapper {
             entity.setOptionValue(matcher2.group(1));
             entity.setOptionValue2(matcher2.group(3));
             entity.setOptionDesc(matcher2.group(2));
+            return;
         }
-        // 두 패턴 모두 매칭되지 않으면 원본 값 유지
+
+        // 패턴 3: "스킬명 설명텍스트" 형식 (레벨 정보 없는 텍스트 설명)
+        Matcher matcher3 = PATTERN_DESCRIPTION_ONLY.matcher(originalValue);
+        if (matcher3.matches()) {
+            entity.setOptionValue(matcher3.group(1));
+            entity.setOptionDesc(matcher3.group(2));
+        }
     }
 }
