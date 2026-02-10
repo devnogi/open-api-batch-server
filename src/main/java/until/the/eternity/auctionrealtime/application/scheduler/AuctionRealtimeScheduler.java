@@ -19,6 +19,8 @@ import until.the.eternity.common.enums.ItemCategory;
  * 실시간 경매장 데이터 수집 스케줄러.
  *
  * <p>10분 간격으로 Nexon Open API /auction/list를 호출하여 현재 판매 중인 아이템 정보를 수집한다.
+ *
+ * <p>각 서브 카테고리별로 전체 데이터를 수집한 뒤, 기존 데이터를 삭제하고 새 데이터로 교체한다. (Full Refresh)
  */
 @Slf4j
 @Component
@@ -53,7 +55,6 @@ public class AuctionRealtimeScheduler {
         for (int topIndex = 0; topIndex < topCategories.size(); topIndex++) {
             String topCategory = topCategories.get(topIndex);
             List<ItemCategory> subCategories = categoriesByTopCategory.get(topCategory);
-            List<AuctionRealtimeItem> newEntities = new ArrayList<>();
 
             log.debug("[REALTIME] Processing top category [{}]", topCategory);
 
@@ -62,7 +63,7 @@ public class AuctionRealtimeScheduler {
                 try {
                     log.debug("[REALTIME] Processing category [{}]", category.getSubCategory());
 
-                    // API 호출 및 데이터 수집
+                    // API 호출 및 전체 데이터 수집
                     FetchResult fetchResult = fetcher.fetch(category);
 
                     if (fetchResult.items().isEmpty()) {
@@ -70,21 +71,17 @@ public class AuctionRealtimeScheduler {
                         continue;
                     }
 
-                    // 엔티티 변환 및 필터링
+                    // 엔티티 변환
                     List<AuctionRealtimeItem> entities =
-                            persister.prepareEntities(
-                                    fetchResult.items(), category, fetchResult.latestDate());
+                            persister.prepareEntities(fetchResult.items(), category);
 
                     if (entities.isEmpty()) {
                         continue;
                     }
 
-                    // 동일 날짜 데이터가 있으면 삭제 후 저장
-                    if (fetchResult.hasEqualDate() && fetchResult.latestDate() != null) {
-                        service.deleteAndSave(category, fetchResult.latestDate(), entities);
-                    } else {
-                        newEntities.addAll(entities);
-                    }
+                    // 기존 데이터 삭제 후 새 데이터 저장 (Full Refresh)
+                    service.replaceBySubCategory(category, entities);
+                    totalSavedCount += entities.size();
 
                     // 마지막 서브 카테고리가 아닌 경우에만 delay 적용
                     if (subIndex < subCategories.size() - 1) {
@@ -106,16 +103,6 @@ public class AuctionRealtimeScheduler {
                             e);
                     totalFailedCount++;
                 }
-            }
-
-            // Top Category별로 저장 (동일 날짜가 아닌 신규 데이터)
-            if (!newEntities.isEmpty()) {
-                service.saveAll(newEntities);
-                totalSavedCount += newEntities.size();
-                log.info(
-                        "[REALTIME] Saved [{}] new auction realtime items for top category [{}]",
-                        newEntities.size(),
-                        topCategory);
             }
 
             // 마지막 탑 카테고리가 아닌 경우에만 delay 적용

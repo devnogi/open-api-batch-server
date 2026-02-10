@@ -62,45 +62,21 @@ public class AuctionRealtimeService {
     }
 
     /**
-     * 해당 카테고리 & 동일 date_auction_expire 레코드 삭제 후 새 엔티티들을 저장한다.
+     * 해당 카테고리의 기존 데이터를 모두 삭제하고 새 데이터를 저장한다. (Full Refresh)
      *
      * @param category 아이템 카테고리
-     * @param dateAuctionExpire 삭제할 date_auction_expire
      * @param entities 저장할 엔티티 리스트
      */
     @Transactional
-    public void deleteAndSave(
-            ItemCategory category, Instant dateAuctionExpire, List<AuctionRealtimeItem> entities) {
+    public void replaceBySubCategory(ItemCategory category, List<AuctionRealtimeItem> entities) {
+        int deleted = repository.deleteBySubCategory(category);
+        log.info("[REALTIME] [{}] Deleted {} existing records", category.getSubCategory(), deleted);
 
-        // 동일 date_auction_expire 레코드 삭제
-        int deleted =
-                repository.deleteBySubCategoryAndDateAuctionExpire(category, dateAuctionExpire);
-        log.info(
-                "[REALTIME] [{}] Deleted {} records with date_auction_expire={}",
-                category.getSubCategory(),
-                deleted,
-                dateAuctionExpire);
-
-        // 새 엔티티 저장
         repository.saveAll(entities);
         log.info(
                 "[REALTIME] [{}] Saved {} new auction realtime items",
                 category.getSubCategory(),
                 entities.size());
-    }
-
-    /**
-     * 엔티티들을 저장한다. (삭제 없이)
-     *
-     * @param entities 저장할 엔티티 리스트
-     */
-    @Transactional
-    public void saveAll(List<AuctionRealtimeItem> entities) {
-        if (entities == null || entities.isEmpty()) {
-            return;
-        }
-        repository.saveAll(entities);
-        log.debug("[REALTIME] Saved {} auction realtime items", entities.size());
     }
 
     /**

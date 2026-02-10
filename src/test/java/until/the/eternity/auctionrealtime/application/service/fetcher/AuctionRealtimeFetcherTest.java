@@ -15,8 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-import until.the.eternity.auctionrealtime.domain.service.AuctionRealtimeDuplicateChecker;
-import until.the.eternity.auctionrealtime.domain.service.AuctionRealtimeDuplicateChecker.DuplicateCheckResult;
 import until.the.eternity.auctionrealtime.domain.service.fetcher.AuctionRealtimeFetcherPort.FetchResult;
 import until.the.eternity.auctionrealtime.infrastructure.client.AuctionRealtimeClient;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeListResponse;
@@ -28,8 +26,6 @@ class AuctionRealtimeFetcherTest {
 
     @Mock AuctionRealtimeClient client;
 
-    @Mock AuctionRealtimeDuplicateChecker duplicateChecker;
-
     @InjectMocks AuctionRealtimeFetcher fetcher;
 
     private OpenApiAuctionRealtimeResponse dummy() {
@@ -38,8 +34,8 @@ class AuctionRealtimeFetcherTest {
     }
 
     @Nested
-    @DisplayName("OPEN API 끝까지 호출 시나리오")
-    class NormalFlow {
+    @DisplayName("전체 페이지 수집 시나리오")
+    class FullFetchFlow {
 
         @Test
         @DisplayName("모든 페이지를 수집하고 cursor가 null이면 종료한다")
@@ -52,114 +48,42 @@ class AuctionRealtimeFetcherTest {
             when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
             when(client.fetchAuctionList(ItemCategory.SWORD, "cursor-1"))
                     .thenReturn(Mono.just(page2));
-            when(duplicateChecker.checkDuplicateInBatch(any(), eq(ItemCategory.SWORD)))
-                    .thenReturn(DuplicateCheckResult.noDuplicate());
 
             // when
             FetchResult result = fetcher.fetch(ItemCategory.SWORD);
 
             // then
             assertThat(result.items()).hasSize(3);
-            assertThat(result.hasEqualDate()).isFalse();
-
             verify(client, times(2)).fetchAuctionList(eq(ItemCategory.SWORD), any());
-            verify(duplicateChecker, times(2)).checkDuplicateInBatch(any(), eq(ItemCategory.SWORD));
         }
-    }
-
-    @Nested
-    @DisplayName("OPEN API 호출 중단 시나리오")
-    class EarlyBreakFlow {
 
         @Test
-        @DisplayName("첫 배치 첫 항목에서 중복이면 빈 리스트를 반환한다")
-        void stopOnDuplicateAtFirstItem() {
+        @DisplayName("3페이지 이상도 끝까지 수집한다")
+        void fetchMultiplePages() {
             // given
             var page1 =
                     new OpenApiAuctionRealtimeListResponse(List.of(dummy(), dummy()), "cursor-1");
-            Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
-
-            when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(duplicateChecker.checkDuplicateInBatch(page1.auctionItems(), ItemCategory.SWORD))
-                    .thenReturn(DuplicateCheckResult.duplicateFound(0, latestDate));
-
-            // when
-            FetchResult result = fetcher.fetch(ItemCategory.SWORD);
-
-            // then
-            assertThat(result.items()).isEmpty();
-            assertThat(result.latestDate()).isEqualTo(latestDate);
-            verify(client, times(1)).fetchAuctionList(ItemCategory.SWORD, "");
-            verifyNoMoreInteractions(client);
-        }
-
-        @Test
-        @DisplayName("첫 배치 중간에서 중복이면 중복 전까지만 반환한다")
-        void stopOnDuplicateAtMiddle() {
-            // given
-            var batch = List.of(dummy(), dummy(), dummy());
-            var page1 = new OpenApiAuctionRealtimeListResponse(batch, "cursor-1");
-            Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
-
-            when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(duplicateChecker.checkDuplicateInBatch(batch, ItemCategory.SWORD))
-                    .thenReturn(DuplicateCheckResult.duplicateFound(2, latestDate));
-
-            // when
-            FetchResult result = fetcher.fetch(ItemCategory.SWORD);
-
-            // then
-            assertThat(result.items()).hasSize(2);
-            verify(client, times(1)).fetchAuctionList(ItemCategory.SWORD, "");
-            verifyNoMoreInteractions(client);
-        }
-
-        @Test
-        @DisplayName("동일 날짜 데이터가 감지되면 hasEqualDate가 true로 반환된다")
-        void stopOnEqualDate() {
-            // given
-            var batch = List.of(dummy(), dummy());
-            var page1 = new OpenApiAuctionRealtimeListResponse(batch, "cursor-1");
-            Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
-
-            when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(duplicateChecker.checkDuplicateInBatch(batch, ItemCategory.SWORD))
-                    .thenReturn(DuplicateCheckResult.equalDateFound(1, latestDate));
-
-            // when
-            FetchResult result = fetcher.fetch(ItemCategory.SWORD);
-
-            // then
-            assertThat(result.items()).hasSize(1);
-            assertThat(result.hasEqualDate()).isTrue();
-            assertThat(result.latestDate()).isEqualTo(latestDate);
-        }
-
-        @Test
-        @DisplayName("두 번째 배치에서 중복이면 첫 배치 전체 + 중복 전까지만 반환한다")
-        void stopOnDuplicateAtSecondBatch() {
-            // given
-            var batch1 = List.of(dummy(), dummy());
-            var batch2 = List.of(dummy(), dummy(), dummy());
-            var page1 = new OpenApiAuctionRealtimeListResponse(batch1, "cursor-1");
-            var page2 = new OpenApiAuctionRealtimeListResponse(batch2, "cursor-2");
-            Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
+            var page2 = new OpenApiAuctionRealtimeListResponse(List.of(dummy()), "cursor-2");
+            var page3 = new OpenApiAuctionRealtimeListResponse(List.of(dummy(), dummy()), null);
 
             when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
             when(client.fetchAuctionList(ItemCategory.SWORD, "cursor-1"))
                     .thenReturn(Mono.just(page2));
-            when(duplicateChecker.checkDuplicateInBatch(batch1, ItemCategory.SWORD))
-                    .thenReturn(DuplicateCheckResult.noDuplicate());
-            when(duplicateChecker.checkDuplicateInBatch(batch2, ItemCategory.SWORD))
-                    .thenReturn(DuplicateCheckResult.duplicateFound(1, latestDate));
+            when(client.fetchAuctionList(ItemCategory.SWORD, "cursor-2"))
+                    .thenReturn(Mono.just(page3));
 
             // when
             FetchResult result = fetcher.fetch(ItemCategory.SWORD);
 
             // then
-            assertThat(result.items()).hasSize(3); // 2 from batch1 + 1 from batch2
-            verify(client, times(2)).fetchAuctionList(eq(ItemCategory.SWORD), any());
+            assertThat(result.items()).hasSize(5);
+            verify(client, times(3)).fetchAuctionList(eq(ItemCategory.SWORD), any());
         }
+    }
+
+    @Nested
+    @DisplayName("수집 중단 시나리오")
+    class EarlyBreakFlow {
 
         @Test
         @DisplayName("첫 응답이 null(Mono.empty)이면 빈 리스트를 반환한다")
@@ -169,7 +93,6 @@ class AuctionRealtimeFetcherTest {
             FetchResult result = fetcher.fetch(ItemCategory.SWORD);
 
             assertThat(result.items()).isEmpty();
-            verify(duplicateChecker, never()).checkDuplicateInBatch(any(), any());
         }
 
         @Test
@@ -182,7 +105,6 @@ class AuctionRealtimeFetcherTest {
             FetchResult result = fetcher.fetch(ItemCategory.SWORD);
 
             assertThat(result.items()).isEmpty();
-            verify(duplicateChecker, never()).checkDuplicateInBatch(any(), any());
         }
 
         @Test
@@ -191,8 +113,6 @@ class AuctionRealtimeFetcherTest {
             // given
             var page1 = new OpenApiAuctionRealtimeListResponse(List.of(dummy()), "");
             when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
-            when(duplicateChecker.checkDuplicateInBatch(any(), eq(ItemCategory.SWORD)))
-                    .thenReturn(DuplicateCheckResult.noDuplicate());
 
             // when
             FetchResult result = fetcher.fetch(ItemCategory.SWORD);
@@ -213,8 +133,6 @@ class AuctionRealtimeFetcherTest {
             when(client.fetchAuctionList(ItemCategory.SWORD, "")).thenReturn(Mono.just(page1));
             when(client.fetchAuctionList(ItemCategory.SWORD, "cursor-1"))
                     .thenReturn(Mono.just(emptyPage));
-            when(duplicateChecker.checkDuplicateInBatch(any(), eq(ItemCategory.SWORD)))
-                    .thenReturn(DuplicateCheckResult.noDuplicate());
 
             // when
             FetchResult result = fetcher.fetch(ItemCategory.SWORD);
@@ -240,7 +158,6 @@ class AuctionRealtimeFetcherTest {
             assertThat(result.items()).isEmpty();
             verify(client, times(1)).fetchAuctionList(eq(ItemCategory.SWORD), any());
             verifyNoMoreInteractions(client);
-            verify(duplicateChecker, never()).checkDuplicateInBatch(any(), any());
         }
     }
 }
