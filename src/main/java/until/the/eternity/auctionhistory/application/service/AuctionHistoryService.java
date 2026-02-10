@@ -1,7 +1,6 @@
 package until.the.eternity.auctionhistory.application.service;
 
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,6 +14,8 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHis
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor

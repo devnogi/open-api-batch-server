@@ -1,10 +1,5 @@
 package until.the.eternity.hornBugle.domain.service;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,6 +7,12 @@ import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
 import until.the.eternity.hornBugle.domain.repository.HornBugleRepositoryPort;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
+
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -60,7 +61,9 @@ public class HornBugleDuplicateChecker {
                 responses.stream()
                         .filter(
                                 response -> {
-                                    Instant responseDateSend = response.dateSend();
+                                    // DB에는 KST(+9h)로 저장되므로 비교 시 동일하게 변환
+                                    Instant responseDateSend =
+                                            response.dateSend().plusSeconds(32400);
 
                                     // 최신 date_send보다 이전인 데이터는 제거
                                     if (responseDateSend.isBefore(latestDateSend)) {

@@ -2,6 +2,7 @@ package until.the.eternity.auctionsearchoption.interfaces.rest.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 @Schema(description = "검색 조건 필드 메타데이터")

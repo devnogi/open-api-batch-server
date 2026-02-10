@@ -2,6 +2,7 @@ package until.the.eternity.hornBugle.interfaces.rest.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.Instant;
 
 @Schema(description = "뿔피리 히스토리 응답")

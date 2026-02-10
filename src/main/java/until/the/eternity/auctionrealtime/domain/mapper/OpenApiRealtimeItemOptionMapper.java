@@ -1,13 +1,14 @@
 package until.the.eternity.auctionrealtime.domain.mapper;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItemOption;
 import until.the.eternity.auctionitemoption.domain.dto.external.OpenApiAuctionItemOptionResponse;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** OpenApiAuctionItemOptionResponse → AuctionRealtimeItemOption Entity 변환 Mapper. */
 @Mapper(componentModel = "spring")
