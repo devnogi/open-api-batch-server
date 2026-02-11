@@ -18,6 +18,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuctionHistoryDuplicateChecker {
 
+    private static final long KST_OFFSET_SECONDS = 32400;
+
     private final AuctionHistoryRepositoryPort repository;
 
     /**
@@ -89,7 +91,8 @@ public class AuctionHistoryDuplicateChecker {
 
     private boolean isDuplicate(
             OpenApiAuctionHistoryResponse dto, Instant latestDate, Set<String> existingIds) {
-        Instant dtoDate = dto.dateAuctionBuy();
+        // DB에는 KST(+9h) 기준으로 저장되므로 비교 시 동일하게 변환
+        Instant dtoDate = toKst(dto.dateAuctionBuy());
 
         if (dtoDate.isBefore(latestDate)) {
             return true;
@@ -100,5 +103,9 @@ public class AuctionHistoryDuplicateChecker {
         }
 
         return false;
+    }
+
+    private Instant toKst(Instant utcTime) {
+        return utcTime != null ? utcTime.plusSeconds(KST_OFFSET_SECONDS) : null;
     }
 }
