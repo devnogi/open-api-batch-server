@@ -4,4 +4,8 @@ import java.util.List;
 
 public interface MetalwareInfoRepositoryPort {
     List<String> findAllMetalwares();
+
+    int upsertLevelAttributeFromAttributeInfo();
+
+    int upsertLimitBreakLevelFromAttributeInfo();
 }

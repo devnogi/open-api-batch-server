@@ -6,13 +6,13 @@ import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionH
 import until.the.eternity.common.enums.ItemCategory;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = OpenApiItemOptionMapper.class)
 public interface OpenApiAuctionHistoryMapper {
 
     String UNKNOWN_ITEM_NAME = "(Unknown)";
+    long KST_OFFSET_SECONDS = 32400;
 
     @Named("toEntity(OpenApiAuctionHistoryResponse, ItemCategory)")
     @Mapping(source = "dateAuctionBuy", target = "dateAuctionBuy", qualifiedByName = "utcToKst")
@@ -38,6 +38,6 @@ public interface OpenApiAuctionHistoryMapper {
     @Named("utcToKst")
     default Instant utcToKst(Instant utcTime) {
         // API에서 받은 UTC 시간에 9시간을 더하여 KST로 변환
-        return utcTime != null ? utcTime.plus(9, ChronoUnit.HOURS) : null;
+        return utcTime != null ? utcTime.plusSeconds(KST_OFFSET_SECONDS) : null;
     }
 }

@@ -8,12 +8,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import until.the.eternity.metalwareinfo.domain.repository.MetalwareInfoRepositoryPort;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoResponse;
+import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoSyncResponse;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MetalwareInfoServiceTest {
@@ -52,5 +52,23 @@ class MetalwareInfoServiceTest {
         // then
         assertThat(result).isEmpty();
         verify(repositoryPort).findAllMetalwares();
+    }
+
+    @Test
+    @DisplayName("metalware_attribute_info 기반 동기화 시 두 업서트를 모두 수행하고 집계 결과를 반환한다")
+    void syncFromAttributeInfo_should_execute_both_upserts() {
+        // given
+        when(repositoryPort.upsertLevelAttributeFromAttributeInfo()).thenReturn(10);
+        when(repositoryPort.upsertLimitBreakLevelFromAttributeInfo()).thenReturn(7);
+
+        // when
+        MetalwareInfoSyncResponse result = service.syncFromAttributeInfo();
+
+        // then
+        assertThat(result.levelAttributeUpsertedCount()).isEqualTo(10);
+        assertThat(result.limitBreakLevelUpsertedCount()).isEqualTo(7);
+        assertThat(result.totalUpsertedCount()).isEqualTo(17);
+        verify(repositoryPort, times(1)).upsertLevelAttributeFromAttributeInfo();
+        verify(repositoryPort, times(1)).upsertLimitBreakLevelFromAttributeInfo();
     }
 }
