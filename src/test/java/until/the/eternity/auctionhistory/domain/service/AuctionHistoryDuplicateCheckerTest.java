@@ -23,22 +23,27 @@ import until.the.eternity.common.enums.ItemCategory;
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryDuplicateCheckerTest {
 
+    private static final long KST_OFFSET_SECONDS = 32400;
     @Mock AuctionHistoryRepositoryPort repository;
 
     @InjectMocks AuctionHistoryDuplicateChecker checker;
 
     private static final ItemCategory CATEGORY = ItemCategory.SWORD;
 
-    private OpenApiAuctionHistoryResponse dto(String id, Instant dateAuctionBuy) {
+    private OpenApiAuctionHistoryResponse dto(String id, Instant dateAuctionBuyUtc) {
         return new OpenApiAuctionHistoryResponse(
                 "페러시우스 타이탄 블레이드",
                 "신성한 페러시우스 타이탄 블레이드",
                 CATEGORY.getSubCategory(),
                 1L,
                 100L,
-                dateAuctionBuy,
+                dateAuctionBuyUtc,
                 id,
                 null);
+    }
+
+    private OpenApiAuctionHistoryResponse dtoKst(String id, Instant dateAuctionBuyKst) {
+        return dto(id, dateAuctionBuyKst.minusSeconds(KST_OFFSET_SECONDS));
     }
 
     @Nested
@@ -50,7 +55,7 @@ class AuctionHistoryDuplicateCheckerTest {
         void noDuplicateWhenNoDataInDb() {
             // given
             Instant now = Instant.now();
-            var batch = List.of(dto("1", now), dto("2", now.minusSeconds(10)));
+            var batch = List.of(dtoKst("1", now), dtoKst("2", now.minusSeconds(10)));
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(Optional.empty());
 
@@ -80,7 +85,7 @@ class AuctionHistoryDuplicateCheckerTest {
             // given
             Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
             Instant afterLatest = latestDate.plusSeconds(100);
-            var batch = List.of(dto("1", afterLatest), dto("2", afterLatest.plusSeconds(10)));
+            var batch = List.of(dtoKst("1", afterLatest), dtoKst("2", afterLatest.plusSeconds(10)));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(
@@ -101,7 +106,10 @@ class AuctionHistoryDuplicateCheckerTest {
             Instant afterLatest = latestDate.plusSeconds(100);
             Instant beforeLatest = latestDate.minusSeconds(100);
             var batch =
-                    List.of(dto("1", afterLatest), dto("2", afterLatest), dto("3", beforeLatest));
+                    List.of(
+                            dtoKst("1", afterLatest),
+                            dtoKst("2", afterLatest),
+                            dtoKst("3", beforeLatest));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(Optional.of(new LatestDateWithIds(latestDate, Set.of())));
@@ -118,7 +126,7 @@ class AuctionHistoryDuplicateCheckerTest {
         void sameDateDifferentIdIsNew() {
             // given
             Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
-            var batch = List.of(dto("new-id-1", latestDate), dto("new-id-2", latestDate));
+            var batch = List.of(dtoKst("new-id-1", latestDate), dtoKst("new-id-2", latestDate));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(
@@ -138,7 +146,7 @@ class AuctionHistoryDuplicateCheckerTest {
         void sameDateSameIdIsDuplicate() {
             // given
             Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
-            var batch = List.of(dto("new-id", latestDate), dto("existing-1", latestDate));
+            var batch = List.of(dtoKst("new-id", latestDate), dtoKst("existing-1", latestDate));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(
@@ -159,10 +167,29 @@ class AuctionHistoryDuplicateCheckerTest {
             // given
             Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
             Instant beforeLatest = latestDate.minusSeconds(100);
-            var batch = List.of(dto("1", beforeLatest), dto("2", latestDate));
+            var batch = List.of(dtoKst("1", beforeLatest), dtoKst("2", latestDate));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(Optional.of(new LatestDateWithIds(latestDate, Set.of())));
+
+            // when
+            OptionalInt result = checker.checkDuplicateInBatch(batch, CATEGORY);
+
+            // then
+            assertThat(result).hasValue(0);
+        }
+
+        @Test
+        @DisplayName("API UTC 원본이어도 KST 변환 후 동일 날짜, 기존 ID는 중복으로 판정")
+        void sameDateAfterKstConversionIsDuplicate() {
+            // given
+            Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
+            Instant sameDateInApiUtc = latestDate.minusSeconds(KST_OFFSET_SECONDS);
+            var batch = List.of(dto("existing-1", sameDateInApiUtc));
+
+            when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
+                    .thenReturn(
+                            Optional.of(new LatestDateWithIds(latestDate, Set.of("existing-1"))));
 
             // when
             OptionalInt result = checker.checkDuplicateInBatch(batch, CATEGORY);
@@ -181,7 +208,7 @@ class AuctionHistoryDuplicateCheckerTest {
         void returnAllWhenNoDataInDb() {
             // given
             Instant now = Instant.now();
-            var dtos = List.of(dto("1", now), dto("2", now.minusSeconds(10)));
+            var dtos = List.of(dtoKst("1", now), dtoKst("2", now.minusSeconds(10)));
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(Optional.empty());
 
@@ -213,7 +240,10 @@ class AuctionHistoryDuplicateCheckerTest {
             Instant afterLatest = latestDate.plusSeconds(100);
             Instant beforeLatest = latestDate.minusSeconds(100);
             var dtos =
-                    List.of(dto("1", afterLatest), dto("2", beforeLatest), dto("3", afterLatest));
+                    List.of(
+                            dtoKst("1", afterLatest),
+                            dtoKst("2", beforeLatest),
+                            dtoKst("3", afterLatest));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(Optional.of(new LatestDateWithIds(latestDate, Set.of())));
@@ -233,7 +263,7 @@ class AuctionHistoryDuplicateCheckerTest {
         void includeSameDateNewId() {
             // given
             Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
-            var dtos = List.of(dto("new-1", latestDate), dto("new-2", latestDate));
+            var dtos = List.of(dtoKst("new-1", latestDate), dtoKst("new-2", latestDate));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(
@@ -253,9 +283,9 @@ class AuctionHistoryDuplicateCheckerTest {
             Instant latestDate = Instant.parse("2024-01-01T00:00:00Z");
             var dtos =
                     List.of(
-                            dto("new-1", latestDate),
-                            dto("existing-1", latestDate),
-                            dto("new-2", latestDate));
+                            dtoKst("new-1", latestDate),
+                            dtoKst("existing-1", latestDate),
+                            dtoKst("new-2", latestDate));
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
                     .thenReturn(
@@ -281,11 +311,11 @@ class AuctionHistoryDuplicateCheckerTest {
 
             var dtos =
                     List.of(
-                            dto("after-1", afterLatest), // 신규: 포함
-                            dto("before-1", beforeLatest), // 과거: 제외
-                            dto("same-new", latestDate), // 동일 날짜, 신규 ID: 포함
-                            dto("existing-1", latestDate), // 동일 날짜, 기존 ID: 제외
-                            dto("after-2", afterLatest) // 신규: 포함
+                            dtoKst("after-1", afterLatest), // 신규: 포함
+                            dtoKst("before-1", beforeLatest), // 과거: 제외
+                            dtoKst("same-new", latestDate), // 동일 날짜, 신규 ID: 포함
+                            dtoKst("existing-1", latestDate), // 동일 날짜, 기존 ID: 제외
+                            dtoKst("after-2", afterLatest) // 신규: 포함
                             );
 
             when(repository.findLatestDateWithIdsBySubCategory(CATEGORY))
