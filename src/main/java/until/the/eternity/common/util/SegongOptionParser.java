@@ -2,6 +2,7 @@ package until.the.eternity.common.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 세공 옵션의 option_value를 파싱하여 스킬명(option_value), 레벨(option_value2), 설명(option_desc)을 분리하는 유틸리티.
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
  *   <li>패턴 3: "스킬명 설명텍스트" (예: "돌진 인간 및 엘프일 때 방패 없이 사용 가능")
  * </ul>
  */
+@Slf4j
 public final class SegongOptionParser {
 
     public static final String SEGONG_OPTION_TYPE = "세공 옵션";
@@ -46,25 +48,44 @@ public final class SegongOptionParser {
      */
     public static ParseResult parse(String optionType, String optionValue) {
         if (!SEGONG_OPTION_TYPE.equals(optionType) || optionValue == null) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "[SegongOptionParser] Skip parse: optionType='{}', optionValue='{}'",
+                        optionType,
+                        optionValue);
+            }
             return null;
         }
 
         // 패턴 1: "스킬명 숫자 레벨" 또는 "스킬명 숫자레벨"
         Matcher matcher1 = PATTERN_LEVEL_SUFFIX.matcher(optionValue);
         if (matcher1.matches()) {
+            if (log.isDebugEnabled()) {
+                log.debug("[SegongOptionParser] Matched LEVEL_SUFFIX: '{}'", optionValue);
+            }
             return new ParseResult(matcher1.group(1), matcher1.group(3), matcher1.group(2));
         }
 
         // 패턴 2: "스킬명(숫자레벨:효과)" 또는 "스킬명(설명)(숫자레벨:효과)"
         Matcher matcher2 = PATTERN_LEVEL_PARENTHESIS.matcher(optionValue);
         if (matcher2.matches()) {
+            if (log.isDebugEnabled()) {
+                log.debug("[SegongOptionParser] Matched LEVEL_PARENTHESIS: '{}'", optionValue);
+            }
             return new ParseResult(matcher2.group(1), matcher2.group(3), matcher2.group(2));
         }
 
         // 패턴 3: "스킬명 설명텍스트" (레벨 정보 없는 텍스트 설명)
         Matcher matcher3 = PATTERN_DESCRIPTION_ONLY.matcher(optionValue);
         if (matcher3.matches()) {
+            if (log.isDebugEnabled()) {
+                log.debug("[SegongOptionParser] Matched DESCRIPTION_ONLY: '{}'", optionValue);
+            }
             return new ParseResult(matcher3.group(1), null, matcher3.group(2));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("[SegongOptionParser] No pattern matched for value: '{}'", optionValue);
         }
 
         return null;

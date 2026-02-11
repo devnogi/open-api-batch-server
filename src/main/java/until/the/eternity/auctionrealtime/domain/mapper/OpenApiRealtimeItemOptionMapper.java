@@ -18,13 +18,14 @@ public interface OpenApiRealtimeItemOptionMapper {
 
     @AfterMapping
     default void afterMapping(
-            OpenApiAuctionItemOptionResponse dto, @MappingTarget AuctionRealtimeItemOption entity) {
+            OpenApiAuctionItemOptionResponse dto,
+            @MappingTarget AuctionRealtimeItemOption.AuctionRealtimeItemOptionBuilder entity) {
         SegongOptionParser.ParseResult result =
-                SegongOptionParser.parse(entity.getOptionType(), entity.getOptionValue());
+                SegongOptionParser.parse(dto.optionType(), dto.optionValue());
         if (result != null) {
-            entity.setOptionValue(result.optionValue());
-            entity.setOptionValue2(result.optionValue2());
-            entity.setOptionDesc(result.optionDesc());
+            entity.optionValue(result.optionValue());
+            entity.optionValue2(result.optionValue2());
+            entity.optionDesc(result.optionDesc());
         }
     }
 }
