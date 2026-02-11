@@ -14,4 +14,14 @@ public class MetalwareInfoRepositoryPortImpl implements MetalwareInfoRepositoryP
     public List<String> findAllMetalwares() {
         return jpaRepository.findAllMetalwares();
     }
+
+    @Override
+    public int upsertLevelAttributeFromAttributeInfo() {
+        return jpaRepository.upsertLevelAttributeFromAttributeInfo();
+    }
+
+    @Override
+    public int upsertLimitBreakLevelFromAttributeInfo() {
+        return jpaRepository.upsertLimitBreakLevelFromAttributeInfo();
+    }
 }
