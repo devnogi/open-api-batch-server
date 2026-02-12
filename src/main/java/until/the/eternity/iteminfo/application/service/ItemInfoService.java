@@ -7,10 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
-import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
-import until.the.eternity.iteminfo.domain.exception.ItemInfoExceptionCode;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
@@ -53,7 +51,6 @@ public class ItemInfoService {
 
     public Page<ItemInfoResponse> findAllDetail(
             ItemInfoSearchRequest searchRequest, Pageable pageable) {
-        validateTopCategory(searchRequest);
         Page<ItemInfo> itemInfoPage =
                 itemInfoRepository.searchWithPagination(searchRequest, pageable);
         return itemInfoPage.map(ItemInfoResponse::from);
@@ -62,7 +59,6 @@ public class ItemInfoService {
     public List<ItemInfoSummaryResponse> findAllSummary(
             ItemInfoSearchRequest searchRequest,
             org.springframework.data.domain.Sort.Direction direction) {
-        validateTopCategory(searchRequest);
         // direction을 Pageable로 변환
         Pageable pageable =
                 org.springframework.data.domain.PageRequest.of(
@@ -71,12 +67,6 @@ public class ItemInfoService {
                         org.springframework.data.domain.Sort.by(direction, "id.name"));
         List<ItemInfo> itemInfos = itemInfoRepository.search(searchRequest, pageable);
         return ItemInfoSummaryResponse.from(itemInfos);
-    }
-
-    private void validateTopCategory(ItemInfoSearchRequest searchRequest) {
-        if (searchRequest.topCategory() == null || searchRequest.topCategory().isBlank()) {
-            throw new CustomException(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED);
-        }
     }
 
     @Transactional
