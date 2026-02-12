@@ -1,5 +1,6 @@
 package until.the.eternity.hornBugle.application.runner;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -13,8 +14,6 @@ import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.repository.HornBugleRepositoryPort;
 import until.the.eternity.hornBugle.infrastructure.elasticsearch.HornBugleIndexService;
 
-import java.util.List;
-
 /**
  * 서버 재기동 시 DB 데이터를 Elasticsearch에 일괄 색인하는 Runner. application.yml에서
  * elasticsearch.index.enabled=true로 설정 시 활성화됩니다.
@@ -23,7 +22,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(
-        name = "elasticsearch.index.enabled",
+        name = {"elasticsearch.enabled", "elasticsearch.index.enabled"},
         havingValue = "true",
         matchIfMissing = false)
 public class HornBugleIndexRunner implements ApplicationRunner {

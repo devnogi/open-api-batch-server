@@ -2,6 +2,8 @@ package until.the.eternity.auctionsearchoption.application.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,9 +12,6 @@ import until.the.eternity.auctionsearchoption.domain.entity.AuctionSearchOptionM
 import until.the.eternity.auctionsearchoption.domain.repository.AuctionSearchOptionRepositoryPort;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.FieldMetadata;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.SearchOptionMetadataResponse;
-
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
