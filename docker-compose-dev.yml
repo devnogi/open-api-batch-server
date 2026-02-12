@@ -46,6 +46,11 @@ services:
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON}"
       STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
 
+      # === Elasticsearch Configuration (Dev 기본 비활성화) ===
+      ELASTICSEARCH_ENABLED: "false"
+      ELASTICSEARCH_INDEX_ENABLED: "false"
+      MANAGEMENT_HEALTH_ELASTICSEARCH_ENABLED: "false"
+
       # === Docker Configuration ===
       DOCKER_USERNAME: ${DOCKER_USERNAME}
       DOCKER_REPO: ${DOCKER_REPO}
