@@ -12,7 +12,7 @@ import until.the.eternity.common.enums.SortField;
 @Schema(description = "페이지 요청 파라미터")
 public record PageRequestDto(
         @Schema(description = "요청할 페이지 번호 (1부터 시작)", example = "1") @Min(1) Integer page,
-        @Schema(description = "페이지당 항목 수", example = "20") @Min(1) @Max(100) Integer size,
+        @Schema(description = "페이지당 항목 수 (10~50)", example = "20") @Min(10) @Max(50) Integer size,
         @Schema(
                         description = "정렬 필드 (dateAuctionBuy, auctionPricePerUnit, itemName)",
                         example = "dateAuctionBuy")
@@ -20,12 +20,15 @@ public record PageRequestDto(
         @Schema(description = "정렬 방향 (ASC, DESC)", example = "DESC") SortDirection direction) {
     private static final int DEFAULT_PAGE = 1;
     private static final int DEFAULT_SIZE = 20;
+    private static final int MIN_SIZE = 10;
+    private static final int MAX_SIZE = 50;
     private static final SortField DEFAULT_SORT_BY = SortField.DATE_AUCTION_BUY;
     private static final SortDirection DEFAULT_DIRECTION = SortDirection.DESC;
 
     public Pageable toPageable() {
         int resolvedPage = this.page != null ? this.page - 1 : DEFAULT_PAGE - 1;
         int resolvedSize = this.size != null ? this.size : DEFAULT_SIZE;
+        resolvedSize = Math.max(MIN_SIZE, Math.min(MAX_SIZE, resolvedSize));
         SortField resolvedSortBy = this.sortBy != null ? this.sortBy : DEFAULT_SORT_BY;
         SortDirection resolvedDirection =
                 this.direction != null ? this.direction : DEFAULT_DIRECTION;

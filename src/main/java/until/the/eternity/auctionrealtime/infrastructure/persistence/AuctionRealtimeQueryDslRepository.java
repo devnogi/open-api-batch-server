@@ -409,13 +409,13 @@ class AuctionRealtimeQueryDslRepository {
                             case "auctionPricePerUnit" ->
                                     new OrderSpecifier<>(direction, ar.auctionPricePerUnit);
                             case "itemName" -> new OrderSpecifier<>(direction, ar.itemName);
-                            default -> new OrderSpecifier<>(Order.ASC, ar.dateAuctionExpire);
+                            default -> new OrderSpecifier<>(Order.DESC, ar.dateAuctionExpire);
                         };
 
                 orders.add(orderSpecifier);
             }
         } else {
-            orders.add(new OrderSpecifier<>(Order.ASC, ar.dateAuctionExpire));
+            orders.add(new OrderSpecifier<>(Order.DESC, ar.dateAuctionExpire));
         }
 
         return orders;
