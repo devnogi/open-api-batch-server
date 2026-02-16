@@ -54,6 +54,11 @@ spring:
       favor-path-extension: true
       # Accept 헤더 무시
       ignore-accept-header: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
@@ -116,3 +121,8 @@ elasticsearch:
   index:
     # 서버 재기동 시 DB 데이터 일괄 색인 활성화 여부
     enabled: ${ELASTICSEARCH_INDEX_ENABLED:true}
+
+app:
+  kafka:
+    topics:
+      user-verification-verify: ${KAFKA_TOPIC_USER_VERIFICATION_VERIFY:USER_VERIFICATION_VERIFY_EVENT}

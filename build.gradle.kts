@@ -66,6 +66,7 @@ dependencies {
 
     // Elasticsearch
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    implementation("org.springframework.kafka:spring-kafka")
 
     // QueryDSL (with Jakarta API)
     implementation("com.querydsl:querydsl-core:5.1.0")

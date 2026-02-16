@@ -2,16 +2,21 @@ package until.the.eternity.hornBugle.application.scheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import until.the.eternity.hornBugle.application.service.HornBugleService;
+import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
 import until.the.eternity.hornBugle.infrastructure.client.HornBugleClient;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryListResponse;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
+import until.the.eternity.hornBugle.kafka.application.HornBugleKafkaProducerService;
+import until.the.eternity.hornBugle.kafka.dto.UserVerificationVerifyEvent;
 
 @Slf4j
 @Component
@@ -20,8 +25,10 @@ public class HornBugleScheduler {
 
     private final HornBugleClient client;
     private final HornBugleService service;
+    private final HornBugleKafkaProducerService hornBugleKafkaProducerService;
 
     private static final long RATE_LIMIT_DELAY_MS = 1000L;
+    private static final Pattern CERTIFICATE_PATTERN = Pattern.compile("메모노기_([A-Z0-9]{20})");
 
     @Value("${openapi.horn-bugle.max-retries:3}")
     private int maxRetries;
@@ -84,7 +91,11 @@ public class HornBugleScheduler {
             }
 
             List<OpenApiHornBugleHistoryResponse> histories = response.hornBugleWorldHistory();
-            int savedCount = service.saveAll(server, histories);
+            List<HornBugleWorldHistory> savedHistories =
+                    service.saveAllAndReturnSaved(server, histories);
+            int savedCount = savedHistories.size();
+
+            publishVerificationEvents(savedHistories);
 
             log.info(
                     "[HornBugle] [{}] Fetched {} records, saved {} new records",
@@ -100,6 +111,32 @@ public class HornBugleScheduler {
                     e.getMessage(),
                     e);
             return -1;
+        }
+    }
+
+    private void publishVerificationEvents(List<HornBugleWorldHistory> savedHistories) {
+        for (HornBugleWorldHistory history : savedHistories) {
+            Matcher matcher = CERTIFICATE_PATTERN.matcher(history.getMessage());
+
+            while (matcher.find()) {
+                String verificationValue = matcher.group(1);
+
+                UserVerificationVerifyEvent event =
+                        new UserVerificationVerifyEvent(
+                                history.getCharacterName(),
+                                history.getServerName(),
+                                verificationValue,
+                                history.getMessage(),
+                                history.getDateSend());
+
+                hornBugleKafkaProducerService.sendUserVerificationVerifyEvent(event);
+
+                log.info(
+                        "[HornBugle] Verification event published. characterName={}, serverName={}, verificationValue={}",
+                        history.getCharacterName(),
+                        history.getServerName(),
+                        verificationValue);
+            }
         }
     }
 

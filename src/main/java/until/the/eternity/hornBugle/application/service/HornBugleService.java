@@ -48,9 +48,15 @@ public class HornBugleService {
      */
     @Transactional
     public int saveAll(HornBugleServer server, List<OpenApiHornBugleHistoryResponse> responses) {
+        return saveAllAndReturnSaved(server, responses).size();
+    }
+
+    @Transactional
+    public List<HornBugleWorldHistory> saveAllAndReturnSaved(
+            HornBugleServer server, List<OpenApiHornBugleHistoryResponse> responses) {
         if (responses == null || responses.isEmpty()) {
             log.debug("[HornBugle] [{}] No data to save.", server.getServerName());
-            return 0;
+            return List.of();
         }
 
         // 중복 제거
@@ -61,7 +67,7 @@ public class HornBugleService {
             log.debug(
                     "[HornBugle] [{}] All data is duplicated. Nothing to save.",
                     server.getServerName());
-            return 0;
+            return List.of();
         }
 
         // Entity 변환 및 저장
@@ -76,7 +82,7 @@ public class HornBugleService {
 
         log.info("[HornBugle] [{}] Saved {} new records.", server.getServerName(), entities.size());
 
-        return entities.size();
+        return entities;
     }
 
     /**
