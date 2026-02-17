@@ -2,6 +2,7 @@ package until.the.eternity.hornBugle.infrastructure.elasticsearch;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,8 +18,6 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,7 +28,6 @@ public class HornBugleIndexService {
     private static final int BATCH_SIZE = 500;
 
     private final ElasticsearchOperations elasticsearchOperations;
-    private final HornBugleElasticsearchRepository repository;
 
     /**
      * 단일 엔티티를 Elasticsearch에 색인한다.
@@ -39,7 +37,7 @@ public class HornBugleIndexService {
     public void index(HornBugleWorldHistory entity) {
         try {
             HornBugleDocument document = HornBugleDocument.from(entity);
-            repository.save(document);
+            elasticsearchOperations.save(document, IndexCoordinates.of(INDEX_NAME));
             log.debug("[ES] Indexed document: id={}", entity.getId());
         } catch (Exception e) {
             log.error(
@@ -67,7 +65,9 @@ public class HornBugleIndexService {
             for (int i = 0; i < documents.size(); i += BATCH_SIZE) {
                 int toIndex = Math.min(i + BATCH_SIZE, documents.size());
                 List<HornBugleDocument> batch = documents.subList(i, toIndex);
-                repository.saveAll(batch);
+                for (HornBugleDocument document : batch) {
+                    elasticsearchOperations.save(document, IndexCoordinates.of(INDEX_NAME));
+                }
                 log.debug("[ES] Indexed batch: {} documents", batch.size());
             }
 

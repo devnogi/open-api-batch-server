@@ -1,5 +1,8 @@
 package until.the.eternity.hornBugle.application.service;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -15,10 +18,6 @@ import until.the.eternity.hornBugle.infrastructure.elasticsearch.HornBugleIndexS
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
 import until.the.eternity.hornBugle.interfaces.rest.dto.request.HornBuglePageRequestDto;
 import until.the.eternity.hornBugle.interfaces.rest.dto.response.HornBugleHistoryResponse;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -49,9 +48,15 @@ public class HornBugleService {
      */
     @Transactional
     public int saveAll(HornBugleServer server, List<OpenApiHornBugleHistoryResponse> responses) {
+        return saveAllAndReturnSaved(server, responses).size();
+    }
+
+    @Transactional
+    public List<HornBugleWorldHistory> saveAllAndReturnSaved(
+            HornBugleServer server, List<OpenApiHornBugleHistoryResponse> responses) {
         if (responses == null || responses.isEmpty()) {
             log.debug("[HornBugle] [{}] No data to save.", server.getServerName());
-            return 0;
+            return List.of();
         }
 
         // 중복 제거
@@ -62,7 +67,7 @@ public class HornBugleService {
             log.debug(
                     "[HornBugle] [{}] All data is duplicated. Nothing to save.",
                     server.getServerName());
-            return 0;
+            return List.of();
         }
 
         // Entity 변환 및 저장
@@ -77,7 +82,7 @@ public class HornBugleService {
 
         log.info("[HornBugle] [{}] Saved {} new records.", server.getServerName(), entities.size());
 
-        return entities.size();
+        return entities;
     }
 
     /**

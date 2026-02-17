@@ -16,10 +16,8 @@ import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResp
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSyncResponse;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 

@@ -43,6 +43,7 @@ services:
 
       # === External API Configuration ===
       NEXON_OPEN_API_KEY: ${NEXON_OPEN_API_KEY}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-119.194.235.11:9102}
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS:-1000}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON:-0 0 * * * *}"
       STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
@@ -77,6 +78,8 @@ services:
       - app-logs:/app/logs  # Named volume 사용 (권한 문제 해결)
       # 로컬 개발 시 설정 파일 마운트 (선택사항)
       # - ./config:/app/config:ro
+    extra_hosts:
+      - "devnogi.ddns.net:119.194.235.11"  # Kafka advertised hostname 임시 해석
     restart: on-failure:3
 
     # === Docker Resource Limits (Local - 경량) ===
@@ -143,6 +146,7 @@ services:
       start_period: 30s
     command:
       - --port=${DB_PORT:-3318}
+      - --skip-log-bin  # 로컬 개발환경: 불필요한 binlog 폭증 방지
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_0900_ai_ci
       - --skip-character-set-client-handshake

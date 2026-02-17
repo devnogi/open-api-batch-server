@@ -2,12 +2,11 @@ package until.the.eternity.itemoptioninfo.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 @Embeddable
 @Getter
