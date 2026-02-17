@@ -45,8 +45,9 @@ public class ItemInfoController {
             summary = "아이템 상세 정보 페이지네이션 조회",
             description =
                     "아이템 정보를 페이지네이션과 함께 조회합니다. "
-                            + "topCategory는 필수 파라미터이며, name, subCategory로 추가 필터링 가능합니다. "
-                            + "name 컬럼 기준으로 정렬됩니다.")
+                            + "topCategory는 선택 파라미터이며, name, subCategory로 추가 필터링 가능합니다. "
+                            + "정렬 기준은 item_name(ASC/DESC)이고 기본값은 ASC입니다. "
+                            + "page는 1 이상, size는 10~50 사이 값만 허용됩니다.")
     @GetMapping("/detail")
     public ResponseEntity<ApiResponse<Page<ItemInfoResponse>>> getItemInfosDetail(
             @Valid @ModelAttribute ItemInfoPageRequestDto pageRequest,
@@ -60,8 +61,8 @@ public class ItemInfoController {
             summary = "아이템 요약 정보 조회",
             description =
                     "아이템의 이름, 상위 카테고리, 하위 카테고리만 조회합니다. "
-                            + "topCategory는 필수 파라미터이며, name, subCategory로 추가 필터링 가능합니다. "
-                            + "name 컬럼 기준으로 정렬됩니다.")
+                            + "topCategory는 선택 파라미터이며, name, subCategory로 추가 필터링 가능합니다. "
+                            + "정렬 기준은 item_name이며 direction 파라미터로 ASC/DESC를 지정합니다.")
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<List<ItemInfoSummaryResponse>>> getItemInfosSummary(
             @Parameter(description = "정렬 방향 (ASC, DESC)", example = "ASC")
