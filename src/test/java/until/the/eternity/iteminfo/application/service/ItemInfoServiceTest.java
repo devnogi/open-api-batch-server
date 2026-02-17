@@ -1,11 +1,5 @@
 package until.the.eternity.iteminfo.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,16 +8,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
-import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
-import until.the.eternity.iteminfo.domain.exception.ItemInfoExceptionCode;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSyncResponse;
+import java.util.ArrayList;
+import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemInfoServiceTest {
@@ -117,29 +113,37 @@ class ItemInfoServiceTest {
     }
 
     @Test
-    @DisplayName("상세 정보 조회 시 topCategory가 없으면 예외가 발생한다")
-    void findAllDetail_should_throw_exception_when_topCategory_is_null() {
+    @DisplayName("상세 정보 조회 시 topCategory가 없어도 조회된다")
+    void findAllDetail_should_allow_null_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, null);
         Pageable pageable = PageRequest.of(0, 20);
+        Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable)).thenReturn(emptyPage);
 
-        // when & then
-        assertThatThrownBy(() -> itemInfoService.findAllDetail(searchRequest, pageable))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED.getMessage());
+        // when
+        Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
+
+        // then
+        assertThat(result.getContent()).isEmpty();
+        verify(itemInfoRepository).searchWithPagination(searchRequest, pageable);
     }
 
     @Test
-    @DisplayName("상세 정보 조회 시 topCategory가 빈 문자열이면 예외가 발생한다")
-    void findAllDetail_should_throw_exception_when_topCategory_is_blank() {
+    @DisplayName("상세 정보 조회 시 topCategory가 공백이어도 조회된다")
+    void findAllDetail_should_allow_blank_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
         Pageable pageable = PageRequest.of(0, 20);
+        Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable)).thenReturn(emptyPage);
 
-        // when & then
-        assertThatThrownBy(() -> itemInfoService.findAllDetail(searchRequest, pageable))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED.getMessage());
+        // when
+        Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
+
+        // then
+        assertThat(result.getContent()).isEmpty();
+        verify(itemInfoRepository).searchWithPagination(searchRequest, pageable);
     }
 
     @Test
@@ -190,15 +194,19 @@ class ItemInfoServiceTest {
     }
 
     @Test
-    @DisplayName("요약 정보 조회 시 topCategory가 없으면 예외가 발생한다")
-    void findAllSummary_should_throw_exception_when_topCategory_is_null() {
+    @DisplayName("요약 정보 조회 시 topCategory 없이도 조회된다")
+    void findAllSummary_should_allow_null_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, null);
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class))).thenReturn(List.of());
 
-        // when & then
-        assertThatThrownBy(() -> itemInfoService.findAllSummary(searchRequest, Sort.Direction.ASC))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED.getMessage());
+        // when
+        List<ItemInfoSummaryResponse> result =
+                itemInfoService.findAllSummary(searchRequest, Sort.Direction.ASC);
+
+        // then
+        assertThat(result).isEmpty();
+        verify(itemInfoRepository).search(eq(searchRequest), any(Pageable.class));
     }
 
     @Test
@@ -318,15 +326,19 @@ class ItemInfoServiceTest {
     }
 
     @Test
-    @DisplayName("요약 정보 조회 시 topCategory가 빈 문자열이면 예외가 발생한다")
-    void findAllSummary_should_throw_exception_when_topCategory_is_blank() {
+    @DisplayName("요약 정보 조회 시 topCategory가 공백이어도 조회된다")
+    void findAllSummary_should_allow_blank_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class))).thenReturn(List.of());
 
-        // when & then
-        assertThatThrownBy(() -> itemInfoService.findAllSummary(searchRequest, Sort.Direction.ASC))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ItemInfoExceptionCode.TOP_CATEGORY_REQUIRED.getMessage());
+        // when
+        List<ItemInfoSummaryResponse> result =
+                itemInfoService.findAllSummary(searchRequest, Sort.Direction.ASC);
+
+        // then
+        assertThat(result).isEmpty();
+        verify(itemInfoRepository).search(eq(searchRequest), any(Pageable.class));
     }
 
     @Test

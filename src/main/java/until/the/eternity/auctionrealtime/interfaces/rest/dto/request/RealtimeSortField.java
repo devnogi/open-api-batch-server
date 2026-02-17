@@ -9,7 +9,7 @@ import java.util.Arrays;
 @Schema(description = "실시간 경매장 정렬 필드", enumAsRef = true)
 public enum RealtimeSortField {
     DATE_AUCTION_EXPIRE("dateAuctionExpire", "경매 만료 일시"),
-    DATE_REGISTER("dateRegister", "등록 일시"),
+    DATE_AUCTION_REGISTER("dateRegister", "등록 일시"),
     AUCTION_PRICE_PER_UNIT("auctionPricePerUnit", "개당 가격"),
     ITEM_NAME("itemName", "아이템 이름");
 

@@ -18,10 +18,6 @@ services:
     labels:
       autoheal: "true"
 
-    depends_on:
-      devnogi-elastic-search:
-        condition: service_healthy
-
     environment:
       # === Application Configuration ===
       SPRING_PROFILES_ACTIVE: prod
@@ -51,6 +47,7 @@ services:
       ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
       ELASTICSEARCH_INDEX_ENABLED: ${ELASTICSEARCH_INDEX_ENABLED:-true}
       SPRING_ELASTICSEARCH_URIS: http://devnogi-elastic-search:9200
+      MANAGEMENT_HEALTH_ELASTICSEARCH_ENABLED: "false"
 
       # === Docker Configuration ===
       DOCKER_USERNAME: ${DOCKER_USERNAME}

@@ -52,6 +52,7 @@ services:
       ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
       ELASTICSEARCH_INDEX_ENABLED: ${ELASTICSEARCH_INDEX_ENABLED:-true}
       SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+      MANAGEMENT_HEALTH_ELASTICSEARCH_ENABLED: "false"
 
       # === JVM Configuration (Local - 경량 개발용) ===
       # Heap: 256m~512m, Non-Heap: 256m, Total: ~768m
@@ -93,11 +94,9 @@ services:
       - app-network
       - my-network  # MySQL 컨테이너와 통신을 위해 추가
 
-    # MySQL, Elasticsearch가 준비될 때까지 대기
+    # MySQL 준비될 때까지 대기 (Elasticsearch는 선택 의존성)
     depends_on:
       mysql:
-        condition: service_healthy
-      elasticsearch:
         condition: service_healthy
 
     # === Health Check (Local - 표준) ===
