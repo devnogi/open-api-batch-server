@@ -1,9 +1,10 @@
 package until.the.eternity.auctionitem.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.Instant;
 import java.util.List;
-import lombok.*;
 
 /** 실시간 경매장에서 판매 중인 아이템 정보. V15 마이그레이션에서 auction_item → auction_realtime_item으로 변경됨. */
 @Entity

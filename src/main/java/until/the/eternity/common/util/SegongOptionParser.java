@@ -1,8 +1,9 @@
 package until.the.eternity.common.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 세공 옵션의 option_value를 파싱하여 스킬명(option_value), 레벨(option_value2), 설명(option_desc)을 분리하는 유틸리티.

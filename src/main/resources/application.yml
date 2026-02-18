@@ -80,12 +80,12 @@ springdoc:
 decorator:
   datasource:
     p6spy:
-      enable-logging: true
+      enable-logging: false
 
 logging:
   config: classpath:logback/logback-display.xml
   level:
-    until.the.eternity: DEBUG
+    until.the.eternity: INFO
 
 openapi:
   nexon:

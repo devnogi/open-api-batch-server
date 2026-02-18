@@ -1,5 +1,8 @@
 package until.the.eternity.ranking.domain.mapper;
 
+import org.springframework.stereotype.Component;
+import until.the.eternity.ranking.interfaces.rest.dto.response.*;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -7,8 +10,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;
-import org.springframework.stereotype.Component;
-import until.the.eternity.ranking.interfaces.rest.dto.response.*;
 
 @Component
 public class RankingMapper {

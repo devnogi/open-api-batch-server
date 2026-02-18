@@ -1,12 +1,9 @@
 package until.the.eternity.hornBugle.application.scheduler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import until.the.eternity.hornBugle.application.service.HornBugleService;
@@ -17,6 +14,12 @@ import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHist
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
 import until.the.eternity.hornBugle.kafka.application.HornBugleKafkaProducerService;
 import until.the.eternity.hornBugle.kafka.dto.UserVerificationVerifyEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -129,13 +132,25 @@ public class HornBugleScheduler {
                                 history.getMessage(),
                                 history.getDateSend());
 
-                hornBugleKafkaProducerService.sendUserVerificationVerifyEvent(event);
+                CompletableFuture<SendResult<String, Object>> publishFuture =
+                        hornBugleKafkaProducerService.sendUserVerificationVerifyEvent(event);
 
-                log.info(
-                        "[HornBugle] Verification event published. characterName={}, serverName={}, verificationValue={}",
-                        history.getCharacterName(),
-                        history.getServerName(),
-                        verificationValue);
+                publishFuture.whenComplete(
+                        (result, ex) -> {
+                            if (ex == null && result != null) {
+                                log.info(
+                                        "[HornBugle] Verification event publish success. topic={}, partition={}, offset={}, payload={}",
+                                        result.getRecordMetadata().topic(),
+                                        result.getRecordMetadata().partition(),
+                                        result.getRecordMetadata().offset(),
+                                        event);
+                            } else {
+                                log.error(
+                                        "[HornBugle] Verification event publish failed. payload={}",
+                                        event,
+                                        ex);
+                            }
+                        });
             }
         }
     }
