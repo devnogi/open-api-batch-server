@@ -1,8 +1,10 @@
 package until.the.eternity.hornBugle.kafka.application;
 
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import until.the.eternity.common.constant.KafkaTopicConstant;
 import until.the.eternity.hornBugle.kafka.dto.UserVerificationVerifyEvent;
@@ -19,7 +21,8 @@ public class HornBugleKafkaProducerService {
                     + "}")
     private String userVerificationVerifyTopic;
 
-    public void sendUserVerificationVerifyEvent(UserVerificationVerifyEvent event) {
-        kafkaTemplate.send(userVerificationVerifyTopic, event);
+    public CompletableFuture<SendResult<String, Object>> sendUserVerificationVerifyEvent(
+            UserVerificationVerifyEvent event) {
+        return kafkaTemplate.send(userVerificationVerifyTopic, event);
     }
 }

@@ -2,6 +2,7 @@ package until.the.eternity.hornBugle.application.scheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.kafka.support.SendResult;
 import until.the.eternity.hornBugle.application.service.HornBugleService;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
@@ -129,13 +131,25 @@ public class HornBugleScheduler {
                                 history.getMessage(),
                                 history.getDateSend());
 
-                hornBugleKafkaProducerService.sendUserVerificationVerifyEvent(event);
+                CompletableFuture<SendResult<String, Object>> publishFuture =
+                        hornBugleKafkaProducerService.sendUserVerificationVerifyEvent(event);
 
-                log.info(
-                        "[HornBugle] Verification event published. characterName={}, serverName={}, verificationValue={}",
-                        history.getCharacterName(),
-                        history.getServerName(),
-                        verificationValue);
+                publishFuture.whenComplete(
+                        (result, ex) -> {
+                            if (ex == null && result != null) {
+                                log.info(
+                                        "[HornBugle] Verification event publish success. topic={}, partition={}, offset={}, payload={}",
+                                        result.getRecordMetadata().topic(),
+                                        result.getRecordMetadata().partition(),
+                                        result.getRecordMetadata().offset(),
+                                        event);
+                            } else {
+                                log.error(
+                                        "[HornBugle] Verification event publish failed. payload={}",
+                                        event,
+                                        ex);
+                            }
+                        });
             }
         }
     }
