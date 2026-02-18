@@ -2,7 +2,6 @@ package until.the.eternity.metalwareinfo.interfaces.rest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import until.the.eternity.metalwareinfo.application.service.MetalwareInfoService;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoResponse;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoSyncResponse;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/metalware-infos")

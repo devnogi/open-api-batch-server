@@ -1,16 +1,11 @@
 package until.the.eternity.hornBugle.application.scheduler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.kafka.support.SendResult;
 import until.the.eternity.hornBugle.application.service.HornBugleService;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
@@ -19,6 +14,12 @@ import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHist
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
 import until.the.eternity.hornBugle.kafka.application.HornBugleKafkaProducerService;
 import until.the.eternity.hornBugle.kafka.dto.UserVerificationVerifyEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component

@@ -1,11 +1,6 @@
 package until.the.eternity.auctionsearchoption.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +11,12 @@ import until.the.eternity.auctionsearchoption.domain.entity.AuctionSearchOptionM
 import until.the.eternity.auctionsearchoption.domain.repository.AuctionSearchOptionRepositoryPort;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.FieldMetadata;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.SearchOptionMetadataResponse;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionSearchOptionServiceTest {
