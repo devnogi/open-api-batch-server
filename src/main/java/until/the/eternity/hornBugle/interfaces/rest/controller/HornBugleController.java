@@ -52,7 +52,9 @@ public class HornBugleController {
 
     @PostMapping("/batch")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @Operation(summary = "뿔피리 히스토리 배치 실행", description = "모든 서버의 거대한 외침의 뿔피리 내역을 수집하여 저장합니다. **[ADMIN, SUPER_ADMIN 전용]**")
+    @Operation(
+            summary = "뿔피리 히스토리 배치 실행",
+            description = "모든 서버의 거대한 외침의 뿔피리 내역을 수집하여 저장합니다. **[ADMIN, SUPER_ADMIN 전용]**")
     @ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
     public ResponseEntity<Void> triggerBatch() {
         log.info("[HornBugle] Batch API triggered");
