@@ -109,7 +109,11 @@ class AuctionRealtimeQueryDslRepository {
             builder.and(ar.itemSubCategory.eq(c.itemSubCategory()));
         }
         if (c.itemName() != null && !c.itemName().isBlank()) {
-            builder.and(ar.itemName.containsIgnoreCase(c.itemName()));
+            if (Boolean.TRUE.equals(c.isExactItemName())) {
+                builder.and(ar.itemName.eq(c.itemName()));
+            } else {
+                builder.and(ar.itemName.containsIgnoreCase(c.itemName()));
+            }
         }
 
         if (c.priceSearchRequest() != null) {
