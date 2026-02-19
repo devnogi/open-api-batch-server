@@ -121,7 +121,8 @@ class ItemInfoServiceTest {
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, null);
         Pageable pageable = PageRequest.of(0, 20);
         Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(itemInfoRepository.searchWithPagination(searchRequest, pageable)).thenReturn(emptyPage);
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable))
+                .thenReturn(emptyPage);
 
         // when
         Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
@@ -138,7 +139,8 @@ class ItemInfoServiceTest {
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
         Pageable pageable = PageRequest.of(0, 20);
         Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(itemInfoRepository.searchWithPagination(searchRequest, pageable)).thenReturn(emptyPage);
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable))
+                .thenReturn(emptyPage);
 
         // when
         Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
@@ -200,7 +202,8 @@ class ItemInfoServiceTest {
     void findAllSummary_should_allow_null_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, null);
-        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class))).thenReturn(List.of());
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class)))
+                .thenReturn(List.of());
 
         // when
         List<ItemInfoSummaryResponse> result =
@@ -332,7 +335,8 @@ class ItemInfoServiceTest {
     void findAllSummary_should_allow_blank_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
-        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class))).thenReturn(List.of());
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class)))
+                .thenReturn(List.of());
 
         // when
         List<ItemInfoSummaryResponse> result =

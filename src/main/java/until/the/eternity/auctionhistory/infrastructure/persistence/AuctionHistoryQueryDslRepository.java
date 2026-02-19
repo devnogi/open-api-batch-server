@@ -120,7 +120,11 @@ class AuctionHistoryQueryDslRepository {
             builder.and(ah.itemSubCategory.eq(c.itemSubCategory()));
         }
         if (c.itemName() != null && !c.itemName().isBlank()) {
-            builder.and(ah.itemName.containsIgnoreCase(c.itemName()));
+            if (Boolean.TRUE.equals(c.isExactItemName())) {
+                builder.and(ah.itemName.eq(c.itemName()));
+            } else {
+                builder.and(ah.itemName.containsIgnoreCase(c.itemName()));
+            }
         }
 
         // 가격 조건 (PriceSearchRequest가 있으면)
