@@ -2,6 +2,7 @@ package until.the.eternity.hornBugle.interfaces.rest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import until.the.eternity.common.response.PageResponseDto;
@@ -49,7 +51,9 @@ public class HornBugleController {
     }
 
     @PostMapping("/batch")
-    @Operation(summary = "뿔피리 히스토리 배치 실행", description = "모든 서버의 거대한 외침의 뿔피리 내역을 수집하여 저장합니다.")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "뿔피리 히스토리 배치 실행", description = "모든 서버의 거대한 외침의 뿔피리 내역을 수집하여 저장합니다. **[ADMIN, SUPER_ADMIN 전용]**")
+    @ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
     public ResponseEntity<Void> triggerBatch() {
         log.info("[HornBugle] Batch API triggered");
         try {
