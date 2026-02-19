@@ -8,6 +8,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,9 +23,6 @@ import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionitem.domain.entity.QAuctionRealtimeItem;
 import until.the.eternity.auctionitem.domain.entity.QAuctionRealtimeItemOption;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -109,7 +108,11 @@ class AuctionRealtimeQueryDslRepository {
             builder.and(ar.itemSubCategory.eq(c.itemSubCategory()));
         }
         if (c.itemName() != null && !c.itemName().isBlank()) {
-            builder.and(ar.itemName.containsIgnoreCase(c.itemName()));
+            if (Boolean.TRUE.equals(c.isExactItemName())) {
+                builder.and(ar.itemName.eq(c.itemName()));
+            } else {
+                builder.and(ar.itemName.containsIgnoreCase(c.itemName()));
+            }
         }
 
         if (c.priceSearchRequest() != null) {

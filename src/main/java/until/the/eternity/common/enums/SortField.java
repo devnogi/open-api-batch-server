@@ -3,7 +3,6 @@ package until.the.eternity.common.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.Arrays;
 
 /** 정렬 필드 */

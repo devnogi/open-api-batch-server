@@ -8,6 +8,11 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,12 +27,6 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.request.DateAuction
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
 import until.the.eternity.auctionitemoption.domain.entity.QAuctionHistoryItemOption;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -120,7 +119,11 @@ class AuctionHistoryQueryDslRepository {
             builder.and(ah.itemSubCategory.eq(c.itemSubCategory()));
         }
         if (c.itemName() != null && !c.itemName().isBlank()) {
-            builder.and(ah.itemName.containsIgnoreCase(c.itemName()));
+            if (Boolean.TRUE.equals(c.isExactItemName())) {
+                builder.and(ah.itemName.eq(c.itemName()));
+            } else {
+                builder.and(ah.itemName.containsIgnoreCase(c.itemName()));
+            }
         }
 
         // 가격 조건 (PriceSearchRequest가 있으면)

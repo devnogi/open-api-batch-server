@@ -1,5 +1,10 @@
 package until.the.eternity.iteminfo.application.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +21,6 @@ import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResp
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSyncResponse;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemInfoServiceTest {
@@ -121,7 +120,8 @@ class ItemInfoServiceTest {
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, null);
         Pageable pageable = PageRequest.of(0, 20);
         Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(itemInfoRepository.searchWithPagination(searchRequest, pageable)).thenReturn(emptyPage);
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable))
+                .thenReturn(emptyPage);
 
         // when
         Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
@@ -138,7 +138,8 @@ class ItemInfoServiceTest {
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
         Pageable pageable = PageRequest.of(0, 20);
         Page<ItemInfo> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(itemInfoRepository.searchWithPagination(searchRequest, pageable)).thenReturn(emptyPage);
+        when(itemInfoRepository.searchWithPagination(searchRequest, pageable))
+                .thenReturn(emptyPage);
 
         // when
         Page<ItemInfoResponse> result = itemInfoService.findAllDetail(searchRequest, pageable);
@@ -200,7 +201,8 @@ class ItemInfoServiceTest {
     void findAllSummary_should_allow_null_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, null);
-        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class))).thenReturn(List.of());
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class)))
+                .thenReturn(List.of());
 
         // when
         List<ItemInfoSummaryResponse> result =
@@ -332,7 +334,8 @@ class ItemInfoServiceTest {
     void findAllSummary_should_allow_blank_topCategory() {
         // given
         ItemInfoSearchRequest searchRequest = new ItemInfoSearchRequest(null, null, "");
-        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class))).thenReturn(List.of());
+        when(itemInfoRepository.search(eq(searchRequest), any(Pageable.class)))
+                .thenReturn(List.of());
 
         // when
         List<ItemInfoSummaryResponse> result =
