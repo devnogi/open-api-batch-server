@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import until.the.eternity.common.enums.SortDirection;
 import until.the.eternity.common.response.ApiResponse;
@@ -78,7 +79,10 @@ public class ItemInfoController {
             summary = "경매 내역에서 아이템 정보 동기화",
             description =
                     "AuctionHistory 테이블에서 아이템 정보를 조회하여 ItemInfo 테이블에 동기화합니다. "
-                            + "이미 존재하는 아이템은 제외하고 새로운 아이템만 추가합니다.")
+                            + "이미 존재하는 아이템은 제외하고 새로운 아이템만 추가합니다. "
+                            + "**[ADMIN, SUPER_ADMIN 전용]**")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/sync")
     public ResponseEntity<ApiResponse<ItemInfoSyncResponse>> syncItemInfoFromAuctionHistory() {
         ItemInfoSyncResponse response = itemInfoService.syncItemInfoFromAuctionHistory();

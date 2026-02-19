@@ -1,11 +1,13 @@
 package until.the.eternity.metalwareinfo.interfaces.rest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.metalwareinfo.application.service.MetalwareAttributeInfoService;
@@ -20,7 +22,9 @@ public class MetalwareAttributeInfoController {
 
     private final MetalwareAttributeInfoService metalwareAttributeInfoService;
 
-    @Operation(summary = "세공 능력치 정보 동기화", description = "경매 기록에서 세공 능력치 정보를 추출하여 동기화합니다.")
+    @Operation(summary = "세공 능력치 정보 동기화", description = "경매 기록에서 세공 능력치 정보를 추출하여 동기화합니다. **[ADMIN, SUPER_ADMIN 전용]**")
+    @ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/sync")
     public ResponseEntity<Integer> sync() {
         int syncedCount = metalwareAttributeInfoService.sync();
