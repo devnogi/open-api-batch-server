@@ -1,6 +1,8 @@
 package until.the.eternity.batchlog.infrastructure.persistence;
 
-import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +23,16 @@ public class BatchExecutionLogRepositoryPortImpl implements BatchExecutionLogRep
     }
 
     @Override
-    public Page<BatchExecutionLog> search(
-            BatchType batchType, LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        return jpaRepository.search(batchType, from, to, pageable);
+    public Page<BatchExecutionLog> findByBatchType(BatchType batchType, Pageable pageable) {
+        return jpaRepository.findByBatchTypeOrderByStartedAtDesc(batchType, pageable);
+    }
+
+    @Override
+    public List<BatchExecutionLog> findLatestPerBatchType() {
+        return Arrays.stream(BatchType.values())
+                .map(jpaRepository::findTopByBatchTypeOrderByStartedAtDesc)
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .collect(Collectors.toList());
     }
 }

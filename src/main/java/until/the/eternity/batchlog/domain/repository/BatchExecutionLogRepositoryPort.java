@@ -1,6 +1,6 @@
 package until.the.eternity.batchlog.domain.repository;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.batchlog.domain.entity.BatchExecutionLog;
@@ -10,6 +10,7 @@ public interface BatchExecutionLogRepositoryPort {
 
     void save(BatchExecutionLog log);
 
-    Page<BatchExecutionLog> search(
-            BatchType batchType, LocalDateTime from, LocalDateTime to, Pageable pageable);
+    Page<BatchExecutionLog> findByBatchType(BatchType batchType, Pageable pageable);
+
+    List<BatchExecutionLog> findLatestPerBatchType();
 }

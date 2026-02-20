@@ -1,12 +1,10 @@
 package until.the.eternity.batchlog.application.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,12 +56,12 @@ public class BatchExecutionLogService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BatchExecutionLog> search(
-            BatchType batchType, LocalDate fromDate, LocalDate toDate, int page, int size) {
-        LocalDateTime from = fromDate != null ? fromDate.atStartOfDay() : null;
-        LocalDateTime to = toDate != null ? toDate.plusDays(1).atStartOfDay() : null;
-        Pageable pageable =
-                PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "startedAt"));
-        return repository.search(batchType, from, to, pageable);
+    public Page<BatchExecutionLog> findByBatchType(BatchType batchType, int page, int size) {
+        return repository.findByBatchType(batchType, PageRequest.of(page - 1, size));
+    }
+
+    @Transactional(readOnly = true)
+    public List<BatchExecutionLog> findLatestPerBatchType() {
+        return repository.findLatestPerBatchType();
     }
 }
