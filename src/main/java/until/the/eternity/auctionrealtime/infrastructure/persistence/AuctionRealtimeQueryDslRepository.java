@@ -125,6 +125,42 @@ class AuctionRealtimeQueryDslRepository {
             }
         }
 
+        // 인챈트 검색 조건
+        if (c.enchantSearchRequest() != null) {
+            String enchantPrefix = c.enchantSearchRequest().enchantPrefix();
+            String enchantSuffix = c.enchantSearchRequest().enchantSuffix();
+
+            if (enchantPrefix != null && !enchantPrefix.isBlank()) {
+                QAuctionRealtimeItemOption optPrefix =
+                        new QAuctionRealtimeItemOption("enchantPrefix");
+                var subPrefix =
+                        JPAExpressions.select(optPrefix.auctionRealtimeItem.id)
+                                .from(optPrefix)
+                                .where(
+                                        optPrefix
+                                                .optionType
+                                                .eq("인챈트")
+                                                .and(optPrefix.optionSubType.eq("접두"))
+                                                .and(optPrefix.optionValue.eq(enchantPrefix)));
+                builder.and(ar.id.in(subPrefix));
+            }
+
+            if (enchantSuffix != null && !enchantSuffix.isBlank()) {
+                QAuctionRealtimeItemOption optSuffix =
+                        new QAuctionRealtimeItemOption("enchantSuffix");
+                var subSuffix =
+                        JPAExpressions.select(optSuffix.auctionRealtimeItem.id)
+                                .from(optSuffix)
+                                .where(
+                                        optSuffix
+                                                .optionType
+                                                .eq("인챈트")
+                                                .and(optSuffix.optionSubType.eq("접미"))
+                                                .and(optSuffix.optionValue.eq(enchantSuffix)));
+                builder.and(ar.id.in(subSuffix));
+            }
+        }
+
         return builder;
     }
 
