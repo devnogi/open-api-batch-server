@@ -1,6 +1,7 @@
 package until.the.eternity.enchantinfo.interfaces.rest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import until.the.eternity.enchantinfo.application.service.EnchantInfoService;
 import until.the.eternity.enchantinfo.interfaces.rest.dto.request.EnchantInfoPageRequestDto;
@@ -41,10 +43,16 @@ public class EnchantInfoController {
 
     @Operation(
             summary = "모든 인챈트 fullname 조회",
-            description = "페이지네이션 없이 저장된 모든 인챈트의 fullname(이름 및 랭크)을 한 번에 조회합니다.")
+            description =
+                    "페이지네이션 없이 저장된 모든 인챈트의 fullname(이름 및 랭크)을 한 번에 조회합니다. "
+                            + "affix_position을 지정하면 해당 위치(접두/접미)의 인챈트만 필터링합니다.")
+    @ApiResponse(responseCode = "400", description = "잘못된 affix_position 값 (접두 또는 접미만 허용)")
     @GetMapping("/fullnames")
-    public List<String> getAllEnchantFullnames() {
-        return enchantInfoService.findAllFullnames();
+    public List<String> getAllEnchantFullnames(
+            @Parameter(description = "접두/접미 구분 필터 (허용값: 접두, 접미)", example = "접두")
+                    @RequestParam(name = "affix_position", required = false)
+                    String affixPosition) {
+        return enchantInfoService.findAllFullnames(affixPosition);
     }
 
     @Operation(

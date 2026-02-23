@@ -1,6 +1,7 @@
 package until.the.eternity.auctionrealtime.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.EnchantSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
 
@@ -17,4 +18,5 @@ public record AuctionRealtimeSearchRequest(
         @Schema(description = "대분류 카테고리", example = "근거리 장비") String itemTopCategory,
         @Schema(description = "소분류 카테고리", example = "검") String itemSubCategory,
         @Schema(description = "가격 검색 조건") PriceSearchRequest priceSearchRequest,
-        @Schema(description = "아이템 옵션 검색 조건") ItemOptionSearchRequest itemOptionSearchRequest) {}
+        @Schema(description = "아이템 옵션 검색 조건") ItemOptionSearchRequest itemOptionSearchRequest,
+        @Schema(description = "인챈트 검색 조건") EnchantSearchRequest enchantSearchRequest) {}

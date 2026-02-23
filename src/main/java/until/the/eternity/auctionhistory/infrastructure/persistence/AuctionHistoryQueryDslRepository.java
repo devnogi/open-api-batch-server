@@ -157,6 +157,42 @@ class AuctionHistoryQueryDslRepository {
             }
         }
 
+        // 인챈트 검색 조건
+        if (c.enchantSearchRequest() != null) {
+            String enchantPrefix = c.enchantSearchRequest().enchantPrefix();
+            String enchantSuffix = c.enchantSearchRequest().enchantSuffix();
+
+            if (enchantPrefix != null && !enchantPrefix.isBlank()) {
+                QAuctionHistoryItemOption optPrefix =
+                        new QAuctionHistoryItemOption("enchantPrefix");
+                var subPrefix =
+                        JPAExpressions.select(optPrefix.auctionHistory.auctionBuyId)
+                                .from(optPrefix)
+                                .where(
+                                        optPrefix
+                                                .optionType
+                                                .eq("인챈트")
+                                                .and(optPrefix.optionSubType.eq("접두"))
+                                                .and(optPrefix.optionValue.eq(enchantPrefix)));
+                builder.and(ah.auctionBuyId.in(subPrefix));
+            }
+
+            if (enchantSuffix != null && !enchantSuffix.isBlank()) {
+                QAuctionHistoryItemOption optSuffix =
+                        new QAuctionHistoryItemOption("enchantSuffix");
+                var subSuffix =
+                        JPAExpressions.select(optSuffix.auctionHistory.auctionBuyId)
+                                .from(optSuffix)
+                                .where(
+                                        optSuffix
+                                                .optionType
+                                                .eq("인챈트")
+                                                .and(optSuffix.optionSubType.eq("접미"))
+                                                .and(optSuffix.optionValue.eq(enchantSuffix)));
+                builder.and(ah.auctionBuyId.in(subSuffix));
+            }
+        }
+
         return builder;
     }
 

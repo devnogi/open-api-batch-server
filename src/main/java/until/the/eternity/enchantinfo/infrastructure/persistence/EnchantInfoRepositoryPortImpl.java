@@ -24,6 +24,11 @@ public class EnchantInfoRepositoryPortImpl implements EnchantInfoRepositoryPort 
     }
 
     @Override
+    public List<String> findAllFullnamesByAffixPosition(String affixPosition) {
+        return jpaRepository.findAllFullnamesByAffixPosition(affixPosition);
+    }
+
+    @Override
     public int upsertFromAuctionHistory() {
         return jpaRepository.upsertFromAuctionHistory();
     }

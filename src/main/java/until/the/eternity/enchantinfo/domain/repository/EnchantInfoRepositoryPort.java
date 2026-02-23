@@ -11,5 +11,7 @@ public interface EnchantInfoRepositoryPort {
 
     List<String> findAllFullnames();
 
+    List<String> findAllFullnamesByAffixPosition(String affixPosition);
+
     int upsertFromAuctionHistory();
 }
