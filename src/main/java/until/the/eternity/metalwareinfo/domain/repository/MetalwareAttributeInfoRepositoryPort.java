@@ -8,5 +8,7 @@ public interface MetalwareAttributeInfoRepositoryPort {
 
     int syncFromAuctionHistory();
 
+    long count();
+
     Page<MetalwareAttributeInfoEntity> searchByMetalware(String metalware, Pageable pageable);
 }

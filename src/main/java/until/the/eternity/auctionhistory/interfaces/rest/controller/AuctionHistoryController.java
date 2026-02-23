@@ -50,7 +50,8 @@ public class AuctionHistoryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(
             summary = "경매장 거래 내역 배치 실행",
-            description = "Nexon Open API 경매장 거래 내역 모든 카테고리 데이터 INSERT 배치 실행. **[ADMIN, SUPER_ADMIN 전용]**")
+            description =
+                    "Nexon Open API 경매장 거래 내역 모든 카테고리 데이터 INSERT 배치 실행. **[ADMIN, SUPER_ADMIN 전용]**")
     @ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
     public ResponseEntity<Void> triggerMinPriceBatch() {
         scheduler.fetchAndSaveAuctionHistoryAll();

@@ -19,6 +19,11 @@ public class MetalwareAttributeInfoRepositoryPortImpl
     }
 
     @Override
+    public long count() {
+        return jpaRepository.count();
+    }
+
+    @Override
     public Page<MetalwareAttributeInfoEntity> searchByMetalware(
             String metalware, Pageable pageable) {
         return jpaRepository.findByMetalwareContaining(metalware, pageable);

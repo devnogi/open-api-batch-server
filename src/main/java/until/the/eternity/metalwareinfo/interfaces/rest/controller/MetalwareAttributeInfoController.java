@@ -22,7 +22,9 @@ public class MetalwareAttributeInfoController {
 
     private final MetalwareAttributeInfoService metalwareAttributeInfoService;
 
-    @Operation(summary = "세공 능력치 정보 동기화", description = "경매 기록에서 세공 능력치 정보를 추출하여 동기화합니다. **[ADMIN, SUPER_ADMIN 전용]**")
+    @Operation(
+            summary = "세공 능력치 정보 동기화",
+            description = "경매 기록에서 세공 능력치 정보를 추출하여 동기화합니다. **[ADMIN, SUPER_ADMIN 전용]**")
     @ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/sync")
