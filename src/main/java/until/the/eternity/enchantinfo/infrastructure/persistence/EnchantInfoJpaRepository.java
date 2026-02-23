@@ -10,8 +10,10 @@ public interface EnchantInfoJpaRepository extends JpaRepository<EnchantInfoEntit
     @Query("SELECT e.fullname FROM EnchantInfoEntity e ORDER BY e.id ASC")
     List<String> findAllFullnames();
 
-    @Query("SELECT e.fullname FROM EnchantInfoEntity e WHERE e.affixPosition = :affixPosition ORDER BY e.id ASC")
-    List<String> findAllFullnamesByAffixPosition(@org.springframework.data.repository.query.Param("affixPosition") String affixPosition);
+    @Query(
+            "SELECT e.fullname FROM EnchantInfoEntity e WHERE e.affixPosition = :affixPosition ORDER BY e.id ASC")
+    List<String> findAllFullnamesByAffixPosition(
+            @org.springframework.data.repository.query.Param("affixPosition") String affixPosition);
 
     @Modifying
     @Query(

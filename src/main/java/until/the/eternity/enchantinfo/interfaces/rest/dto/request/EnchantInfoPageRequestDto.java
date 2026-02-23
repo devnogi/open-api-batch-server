@@ -28,6 +28,8 @@ public record EnchantInfoPageRequestDto(
                 this.direction != null ? this.direction : DEFAULT_DIRECTION;
 
         return PageRequest.of(
-                resolvedPage, resolvedSize, Sort.by(resolvedDirection.toSpringDirection(), SORT_FIELD));
+                resolvedPage,
+                resolvedSize,
+                Sort.by(resolvedDirection.toSpringDirection(), SORT_FIELD));
     }
 }
