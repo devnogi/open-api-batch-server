@@ -1,5 +1,6 @@
-delete from metalware_info;
-insert into metalware_info (metalware)
-select distinct regexp_replace(regexp_substr(option_value, ' ?[^\(]+'), ' ?[0-9][0-9]? ?레벨', '') as metalware
-from auction_item_option
-where option_type = '세공 옵션';
+-- TODO: upsert문으로 변경
+-- delete from metalware_info;
+-- insert into metalware_info (metalware)
+-- select distinct regexp_replace(regexp_substr(option_value, ' ?[^\(]+'), ' ?[0-9][0-9]? ?레벨', '') as metalware
+-- from auction_item_option
+-- where option_type = '세공 옵션';

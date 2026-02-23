@@ -1,5 +1,9 @@
 package until.the.eternity.iteminfo.application.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -7,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
+import until.the.eternity.batchlog.domain.enums.BatchType;
+import until.the.eternity.common.annotation.BatchLog;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
@@ -15,11 +21,6 @@ import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResp
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSyncResponse;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -69,6 +70,7 @@ public class ItemInfoService {
         return ItemInfoSummaryResponse.from(itemInfos);
     }
 
+    @BatchLog(type = BatchType.ITEM_INFO_SYNC)
     @Transactional
     public ItemInfoSyncResponse syncItemInfoFromAuctionHistory() {
         log.info("Starting to sync ItemInfo from AuctionHistory");

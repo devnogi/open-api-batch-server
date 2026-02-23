@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.scheduler;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +14,9 @@ import until.the.eternity.auctionhistory.application.service.persister.AuctionHi
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.event.AuctionHistorySavedEvent;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
+import until.the.eternity.batchlog.domain.enums.BatchType;
+import until.the.eternity.common.annotation.BatchLog;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -30,8 +31,9 @@ public class AuctionHistoryScheduler {
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
 
+    @BatchLog(type = BatchType.AUCTION_HISTORY_BATCH)
     @Scheduled(cron = "${openapi.auction-history.cron:0 0 * * * *}", zone = "Asia/Seoul")
-    public void fetchAndSaveAuctionHistoryAll() {
+    public int fetchAndSaveAuctionHistoryAll() {
         // ItemCategory를 topCategory별로 그룹화
         Map<String, List<ItemCategory>> categoriesByTopCategory =
                 Arrays.stream(ItemCategory.values())
@@ -117,5 +119,7 @@ public class AuctionHistoryScheduler {
                 "> [SCHEDULE] Publishing AuctionHistorySavedEvent with {} records",
                 totalSavedCount);
         eventPublisher.publishEvent(new AuctionHistorySavedEvent(totalSavedCount));
+
+        return totalSavedCount;
     }
 }

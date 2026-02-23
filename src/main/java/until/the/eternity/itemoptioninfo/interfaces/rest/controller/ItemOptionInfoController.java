@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,9 +16,6 @@ import until.the.eternity.itemoptioninfo.domain.entity.ItemOptionInfoId;
 import until.the.eternity.itemoptioninfo.domain.mapper.ItemOptionInfoMapper;
 import until.the.eternity.itemoptioninfo.interfaces.rest.dto.request.ItemOptionInfoRequest;
 import until.the.eternity.itemoptioninfo.interfaces.rest.dto.response.ItemOptionInfoResponse;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/item-option-infos")
@@ -38,7 +37,9 @@ public class ItemOptionInfoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @Operation(summary = "아이템 옵션 정보 생성", description = "새로운 아이템 옵션 정보를 생성합니다. **[ADMIN, SUPER_ADMIN 전용]**")
+    @Operation(
+            summary = "아이템 옵션 정보 생성",
+            description = "새로운 아이템 옵션 정보를 생성합니다. **[ADMIN, SUPER_ADMIN 전용]**")
     @ApiResponse(responseCode = "403", description = "권한 없음 (ADMIN, SUPER_ADMIN 전용)")
     public ItemOptionInfoResponse create(@Valid @RequestBody ItemOptionInfoRequest request) {
         ItemOptionInfo itemOptionInfo = itemOptionInfoMapper.toEntity(request);
