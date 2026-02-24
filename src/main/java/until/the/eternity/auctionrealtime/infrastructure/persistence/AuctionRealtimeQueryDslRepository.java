@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.enums.SearchStandard;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
+import until.the.eternity.auctionhistory.interfaces.rest.dto.request.MetalwareSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionitem.domain.entity.QAuctionRealtimeItem;
@@ -158,6 +159,32 @@ class AuctionRealtimeQueryDslRepository {
                                                 .and(optSuffix.optionSubType.eq("접미"))
                                                 .and(optSuffix.optionValue.eq(enchantSuffix)));
                 builder.and(ar.id.in(subSuffix));
+            }
+        }
+
+        // 세공 검색 조건 (각 세공 이름마다 별도 서브쿼리, AND 조건)
+        if (c.metalwareSearchRequests() != null && !c.metalwareSearchRequests().isEmpty()) {
+            for (int i = 0; i < c.metalwareSearchRequests().size(); i++) {
+                MetalwareSearchRequest mw = c.metalwareSearchRequests().get(i);
+                if (mw.metalware() == null || mw.metalware().isBlank()) continue;
+
+                QAuctionRealtimeItemOption mwOpt = new QAuctionRealtimeItemOption("mw" + i);
+                NumberTemplate<Integer> mwLevel =
+                        Expressions.numberTemplate(
+                                Integer.class, "CAST({0} AS UNSIGNED)", mwOpt.optionValue2);
+
+                var mwSubQuery =
+                        JPAExpressions.select(mwOpt.auctionRealtimeItem.id)
+                                .from(mwOpt)
+                                .where(
+                                        mwOpt.optionType
+                                                .eq("세공 옵션")
+                                                .and(mwOpt.optionValue.eq(mw.metalware()))
+                                                .and(
+                                                        mwLevel.between(
+                                                                mw.resolvedLevelFrom(),
+                                                                mw.resolvedLevelTo())));
+                builder.and(ar.id.in(mwSubQuery));
             }
         }
 
