@@ -1,6 +1,7 @@
 package until.the.eternity.auctionhistory.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 
 /** 경매 히스토리 검색 조건 DTO - 페이지네이션 포함 */
 @Schema(description = "경매 거래내역 검색 조건")
@@ -17,4 +18,8 @@ public record AuctionHistorySearchRequest(
         @Schema(description = "거래 일자 조건") DateAuctionBuyRequest dateAuctionBuyRequest,
         @Schema(description = "가격 검색 조건") PriceSearchRequest priceSearchRequest,
         @Schema(description = "아이템 옵션 검색 조건") ItemOptionSearchRequest itemOptionSearchRequest,
-        @Schema(description = "인챈트 검색 조건") EnchantSearchRequest enchantSearchRequest) {}
+        @Schema(description = "인챈트 검색 조건") EnchantSearchRequest enchantSearchRequest,
+        @Schema(
+                        description = "세공 검색 조건 목록 (최대 3개, AND 조건으로 검색)",
+                        requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+                List<MetalwareSearchRequest> metalwareSearchRequests) {}
