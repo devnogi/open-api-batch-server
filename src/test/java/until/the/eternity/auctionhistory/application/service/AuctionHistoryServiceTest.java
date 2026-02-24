@@ -42,7 +42,7 @@ class AuctionHistoryServiceTest {
     void search_should_return_paged_response() {
         // given
         AuctionHistorySearchRequest searchRequest =
-                new AuctionHistorySearchRequest(null, null, null, null, null, null, null, null);
+                new AuctionHistorySearchRequest(null, null, null, null, null, null, null, null, null);
         PageRequestDto pageRequestDto = mock(PageRequestDto.class);
         Pageable pageable = PageRequest.of(0, 10);
         when(pageRequestDto.toPageable()).thenReturn(pageable);
