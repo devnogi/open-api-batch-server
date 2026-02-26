@@ -171,7 +171,7 @@ class AuctionRealtimeQueryDslRepository {
                 QAuctionRealtimeItemOption mwOpt = new QAuctionRealtimeItemOption("mw" + i);
                 NumberTemplate<Integer> mwLevel =
                         Expressions.numberTemplate(
-                                Integer.class, "CAST({0} AS UNSIGNED)", mwOpt.optionValue2);
+                                Integer.class, "CAST({0} AS integer)", mwOpt.optionValue2);
 
                 var mwSubQuery =
                         JPAExpressions.select(mwOpt.auctionRealtimeItem.id)

@@ -203,7 +203,7 @@ class AuctionHistoryQueryDslRepository {
                 QAuctionHistoryItemOption mwOpt = new QAuctionHistoryItemOption("mw" + i);
                 NumberTemplate<Integer> mwLevel =
                         Expressions.numberTemplate(
-                                Integer.class, "CAST({0} AS UNSIGNED)", mwOpt.optionValue2);
+                                Integer.class, "CAST({0} AS integer)", mwOpt.optionValue2);
 
                 var mwSubQuery =
                         JPAExpressions.select(mwOpt.auctionHistory.auctionBuyId)
