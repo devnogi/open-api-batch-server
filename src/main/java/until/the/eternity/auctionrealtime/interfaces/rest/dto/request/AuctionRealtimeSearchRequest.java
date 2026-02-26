@@ -24,5 +24,6 @@ public record AuctionRealtimeSearchRequest(
         @Schema(description = "인챈트 검색 조건") EnchantSearchRequest enchantSearchRequest,
         @Schema(
                         description = "세공 검색 조건 목록 (최대 3개, AND 조건으로 검색)",
-                        requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+                        requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                        hidden = true)
                 List<MetalwareSearchRequest> metalwareSearchRequests) {}
