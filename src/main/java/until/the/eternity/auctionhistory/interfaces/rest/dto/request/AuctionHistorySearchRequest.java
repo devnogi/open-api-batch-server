@@ -7,8 +7,7 @@ import java.util.List;
 @Schema(description = "경매 거래내역 검색 조건")
 public record AuctionHistorySearchRequest(
         @Schema(description = "아이템 이름 (like 검색)", example = "페러시우스 타이탄 블레이드") String itemName,
-        @Schema(
-                        description = "아이템 이름 완전 일치 검색 여부 (true: eq, false: like)",
+        @Schema(description = "아이템 이름 완전 일치 검색 여부 (true: eq, false: like)",
                         requiredMode = Schema.RequiredMode.NOT_REQUIRED,
                         defaultValue = "false",
                         example = "false")
@@ -19,8 +18,7 @@ public record AuctionHistorySearchRequest(
         @Schema(description = "가격 검색 조건") PriceSearchRequest priceSearchRequest,
         @Schema(description = "아이템 옵션 검색 조건") ItemOptionSearchRequest itemOptionSearchRequest,
         @Schema(description = "인챈트 검색 조건") EnchantSearchRequest enchantSearchRequest,
-        @Schema(
-                        description = "세공 검색 조건 목록 (최대 3개, AND 조건으로 검색)",
+        @Schema(description = "세공 검색 조건 목록 (최대 3개, AND 조건으로 검색)",
                         requiredMode = Schema.RequiredMode.NOT_REQUIRED,
                         hidden = true)
                 List<MetalwareSearchRequest> metalwareSearchRequests) {}
