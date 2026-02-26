@@ -3,6 +3,7 @@ package until.the.eternity.auctionhistory.interfaces.rest.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import until.the.eternity.common.annotation.MetalwareParameters;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -28,6 +29,7 @@ public class AuctionHistoryController {
 
     @GetMapping("/search")
     @Operation(summary = "경매장 거래 내역 검색", description = "Nexon Open API 경매장 거래 내역 검색")
+    @MetalwareParameters
     public ResponseEntity<PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>>> search(
             @ParameterObject @ModelAttribute PageRequestDto pageDto,
             @ParameterObject @ModelAttribute @Valid AuctionHistorySearchRequest requestDto) {

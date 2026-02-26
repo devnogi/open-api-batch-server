@@ -2,6 +2,7 @@ package until.the.eternity.auctionrealtime.interfaces.rest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import until.the.eternity.common.annotation.MetalwareParameters;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -24,6 +25,7 @@ public class AuctionRealtimeController {
 
     @GetMapping("/search")
     @Operation(summary = "실시간 경매장 아이템 검색", description = "실시간 경매장에 등록된 아이템 검색")
+    @MetalwareParameters
     public ResponseEntity<
                     PageResponseDto<AuctionRealtimeDetailResponse<RealtimeItemOptionResponse>>>
             search(
