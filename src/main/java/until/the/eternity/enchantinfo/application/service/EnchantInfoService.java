@@ -28,7 +28,7 @@ public class EnchantInfoService {
 
     @Cacheable(
             cacheNames = CacheNames.ENCHANT_INFO_ALL,
-            key = "#pageable.pageNumber + ':' + #pageable.pageSize")
+            key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
     public Page<EnchantInfoResponse> findAll(Pageable pageable) {
         return enchantInfoRepository.findAll(pageable).map(EnchantInfoResponse::from);
     }

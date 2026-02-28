@@ -60,10 +60,11 @@ public class ItemInfoService {
     @Cacheable(
             cacheNames = CacheNames.ITEM_INFO_DETAIL,
             key =
-                    "(#searchRequest.itemName() ?: '') + ':'"
-                            + " + (#searchRequest.itemTopCategory() ?: '') + ':'"
-                            + " + (#searchRequest.itemSubCategory() ?: '') + ':'"
-                            + " + #pageable.pageNumber + ':' + #pageable.pageSize")
+                    "(#searchRequest.name() ?: '') + ':'"
+                            + " + (#searchRequest.topCategory() ?: '') + ':'"
+                            + " + (#searchRequest.subCategory() ?: '') + ':'"
+                            + " + #pageable.pageNumber + ':' + #pageable.pageSize"
+                            + " + ':' + #pageable.sort")
     public Page<ItemInfoResponse> findAllDetail(
             ItemInfoSearchRequest searchRequest, Pageable pageable) {
         Page<ItemInfo> itemInfoPage =
@@ -74,9 +75,9 @@ public class ItemInfoService {
     @Cacheable(
             cacheNames = CacheNames.ITEM_INFO_SUMMARY,
             key =
-                    "(#searchRequest.itemName() ?: '') + ':'"
-                            + " + (#searchRequest.itemTopCategory() ?: '') + ':'"
-                            + " + (#searchRequest.itemSubCategory() ?: '') + ':'"
+                    "(#searchRequest.name() ?: '') + ':'"
+                            + " + (#searchRequest.topCategory() ?: '') + ':'"
+                            + " + (#searchRequest.subCategory() ?: '') + ':'"
                             + " + #direction.name()")
     public List<ItemInfoSummaryResponse> findAllSummary(
             ItemInfoSearchRequest searchRequest,
