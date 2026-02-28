@@ -40,8 +40,11 @@ public class AuctionHistoryService {
                             + " + (#pageRequestDto.sortBy() != null ? #pageRequestDto.sortBy().fieldName : 'dateAuctionBuy') + ':'"
                             + " + (#pageRequestDto.direction() != null ? #pageRequestDto.direction().code : 'DESC') + ':'"
                             + " + (#requestDto.itemName() ?: '') + ':'"
+                            + " + (#requestDto.isExactItemName() ?: false) + ':'"
                             + " + (#requestDto.itemTopCategory() ?: '') + ':'"
-                            + " + (#requestDto.itemSubCategory() ?: '')",
+                            + " + (#requestDto.itemSubCategory() ?: '') + ':'"
+                            + " + (#requestDto.dateAuctionBuyRequest()?.dateAuctionBuyFrom() ?: '') + ':'"
+                            + " + (#requestDto.dateAuctionBuyRequest()?.dateAuctionBuyTo() ?: '')",
             condition =
                     "#requestDto.itemOptionSearchRequest() == null"
                             + " and #requestDto.enchantSearchRequest() == null"
