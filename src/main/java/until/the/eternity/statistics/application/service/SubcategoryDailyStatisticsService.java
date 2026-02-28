@@ -25,7 +25,7 @@ public class SubcategoryDailyStatisticsService {
     /** 서브카테고리별 일간 통계 조회 (subCategory, 날짜 범위) */
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_SUBCATEGORY_DAILY,
-            key = "(#topCategory ?: '') + ':' + (#subCategory ?: '') + ':' + #startDate + ':' + #endDate")
+            key = "(#subCategory ?: '') + ':' + #startDate + ':' + #endDate")
     @Transactional(readOnly = true)
     public List<SubcategoryDailyStatisticsResponse> search(
             String topCategory,
