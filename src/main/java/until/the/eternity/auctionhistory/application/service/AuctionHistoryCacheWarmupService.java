@@ -19,7 +19,7 @@ import until.the.eternity.config.CacheNames;
  * <ol>
  *   <li>auction-history:search 캐시 전체 무효화
  *   <li>auction_history 기반 역대 랭킹 캐시 무효화 (ALLTIME_HIGHEST, ALLTIME_MONTH_VOLUME)
- *   <li>page 1~5 × size 20 × sortField 3종 × direction 2종 = 30가지 조합 캐시 워밍
+ *   <li>page 1~2 × size 20 × sortField 3종 × direction 2종 = 12가지 조합 캐시 워밍
  * </ol>
  */
 @Slf4j
@@ -28,7 +28,7 @@ import until.the.eternity.config.CacheNames;
 public class AuctionHistoryCacheWarmupService {
 
     private static final int WARMUP_SIZE = 20;
-    private static final int WARMUP_MAX_PAGE = 5;
+    private static final int WARMUP_MAX_PAGE = 2;
 
     private final AuctionHistoryService auctionHistoryService;
     private final CacheManager cacheManager;
