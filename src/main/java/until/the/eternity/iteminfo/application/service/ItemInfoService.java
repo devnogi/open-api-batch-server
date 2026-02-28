@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.batchlog.domain.enums.BatchType;
 import until.the.eternity.common.annotation.BatchLog;
+import until.the.eternity.config.CacheNames;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
 import until.the.eternity.iteminfo.domain.repository.ItemInfoRepositoryPort;
@@ -35,21 +39,31 @@ public class ItemInfoService {
         return ItemCategoryResponse.from();
     }
 
+    @Cacheable(cacheNames = CacheNames.ITEM_INFO_ALL, key = "'all'")
     public List<ItemInfoResponse> findAll() {
         List<ItemInfo> itemInfos = itemInfoRepository.findAll();
         return ItemInfoResponse.from(itemInfos);
     }
 
+    @Cacheable(cacheNames = CacheNames.ITEM_INFO_BY_TOP_CATEGORY, key = "#topCategory")
     public List<ItemInfoResponse> findByTopCategory(String topCategory) {
         List<ItemInfo> itemInfos = itemInfoRepository.findByTopCategory(topCategory);
         return ItemInfoResponse.from(itemInfos);
     }
 
+    @Cacheable(cacheNames = CacheNames.ITEM_INFO_BY_SUB_CATEGORY, key = "#subCategory")
     public List<ItemInfoResponse> findBySubCategory(String subCategory) {
         List<ItemInfo> itemInfos = itemInfoRepository.findBySubCategory(subCategory);
         return ItemInfoResponse.from(itemInfos);
     }
 
+    @Cacheable(
+            cacheNames = CacheNames.ITEM_INFO_DETAIL,
+            key =
+                    "(#searchRequest.itemName() ?: '') + ':'"
+                            + " + (#searchRequest.itemTopCategory() ?: '') + ':'"
+                            + " + (#searchRequest.itemSubCategory() ?: '') + ':'"
+                            + " + #pageable.pageNumber + ':' + #pageable.pageSize")
     public Page<ItemInfoResponse> findAllDetail(
             ItemInfoSearchRequest searchRequest, Pageable pageable) {
         Page<ItemInfo> itemInfoPage =
@@ -57,10 +71,16 @@ public class ItemInfoService {
         return itemInfoPage.map(ItemInfoResponse::from);
     }
 
+    @Cacheable(
+            cacheNames = CacheNames.ITEM_INFO_SUMMARY,
+            key =
+                    "(#searchRequest.itemName() ?: '') + ':'"
+                            + " + (#searchRequest.itemTopCategory() ?: '') + ':'"
+                            + " + (#searchRequest.itemSubCategory() ?: '') + ':'"
+                            + " + #direction.name()")
     public List<ItemInfoSummaryResponse> findAllSummary(
             ItemInfoSearchRequest searchRequest,
             org.springframework.data.domain.Sort.Direction direction) {
-        // direction을 Pageable로 변환
         Pageable pageable =
                 org.springframework.data.domain.PageRequest.of(
                         0,
@@ -70,6 +90,14 @@ public class ItemInfoService {
         return ItemInfoSummaryResponse.from(itemInfos);
     }
 
+    @Caching(
+            evict = {
+                @CacheEvict(cacheNames = CacheNames.ITEM_INFO_ALL, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.ITEM_INFO_BY_TOP_CATEGORY, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.ITEM_INFO_BY_SUB_CATEGORY, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.ITEM_INFO_DETAIL, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.ITEM_INFO_SUMMARY, allEntries = true)
+            })
     @BatchLog(type = BatchType.ITEM_INFO_SYNC)
     @Transactional
     public ItemInfoSyncResponse syncItemInfoFromAuctionHistory() {

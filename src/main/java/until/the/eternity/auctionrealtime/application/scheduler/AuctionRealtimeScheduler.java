@@ -21,6 +21,8 @@ import until.the.eternity.common.enums.ItemCategory;
  * <p>10분 간격으로 Nexon Open API /auction/list를 호출하여 현재 판매 중인 아이템 정보를 수집한다.
  *
  * <p>각 서브 카테고리별로 전체 데이터를 수집한 뒤, 기존 데이터를 삭제하고 새 데이터로 교체한다. (Full Refresh)
+ *
+ * <p>Full Refresh 완료 후 auction-realtime:search 캐시 전체를 무효화한다.
  */
 @Slf4j
 @Component
@@ -130,5 +132,8 @@ public class AuctionRealtimeScheduler {
                 totalSavedCount,
                 totalFailedCount,
                 deletedExpired);
+
+        // Full Refresh 완료 후 실시간 경매 검색 캐시 전체 무효화
+        service.evictSearchCache();
     }
 }

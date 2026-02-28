@@ -2,8 +2,11 @@ package until.the.eternity.statistics.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import until.the.eternity.config.CacheNames;
 import until.the.eternity.statistics.repository.daily.ItemDailyStatisticsRepository;
 import until.the.eternity.statistics.repository.daily.SubcategoryDailyStatisticsRepository;
 import until.the.eternity.statistics.repository.daily.TopCategoryDailyStatisticsRepository;
@@ -20,7 +23,45 @@ public class DailyStatisticsService {
     /**
      * 당일의 경매 거래 내역을 기반으로 일간 통계를 업데이트 AuctionHistoryScheduler가 실행될 때마다 호출되어 당일 통계만 갱신 순서:
      * auction_history → ItemDaily → SubcategoryDaily → TopCategoryDaily
+     *
+     * <p>통계 계산 완료 후 일간 통계 캐시 + 오늘/카테고리 기반 랭킹 캐시를 무효화한다.
      */
+    @Caching(
+            evict = {
+                // 일간 통계 캐시
+                @CacheEvict(cacheNames = CacheNames.STATISTICS_ITEM_DAILY, allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.STATISTICS_SUBCATEGORY_DAILY,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.STATISTICS_TOPCATEGORY_DAILY,
+                        allEntries = true),
+                // 오늘 기준 랭킹 캐시 (item_daily_statistics 기반)
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_VOLUME_TODAY_POPULAR,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
+                        allEntries = true),
+            })
     @Transactional
     public void calculateAndSaveCurrentDayStatistics() {
         log.info("[Current Day Statistics] Starting current day statistics calculation...");
@@ -58,7 +99,43 @@ public class DailyStatisticsService {
     /**
      * 전날의 경매 거래 내역을 기반으로 일간 통계를 최종 확정 매일 새벽 한 번 실행되어 전날 23시대 거래까지 포함한 통계를 완성 순서: auction_history →
      * ItemDaily → SubcategoryDaily → TopCategoryDaily
+     *
+     * <p>전날 통계 확정 후 변동률 랭킹(어제 대비 오늘)도 함께 무효화한다.
      */
+    @Caching(
+            evict = {
+                @CacheEvict(cacheNames = CacheNames.STATISTICS_ITEM_DAILY, allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.STATISTICS_SUBCATEGORY_DAILY,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.STATISTICS_TOPCATEGORY_DAILY,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_VOLUME_TODAY_POPULAR,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
+                        allEntries = true),
+                @CacheEvict(
+                        cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
+                        allEntries = true),
+            })
     @Transactional
     public void calculateAndSavePreviousDayStatistics() {
         log.info("[Previous Day Statistics] Starting previous day statistics finalization...");

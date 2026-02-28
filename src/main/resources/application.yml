@@ -18,6 +18,20 @@ management:
 spring:
   application:
     name: open-api-batch-server
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 2
+          max-wait: 1000ms
+  cache:
+    type: redis
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
     username: ${ELASTICSEARCH_USERNAME:}
