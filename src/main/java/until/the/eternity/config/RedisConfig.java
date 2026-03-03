@@ -6,9 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
-import org.springframework.cache.interceptor.CachingConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -69,8 +69,7 @@ public class RedisConfig implements CachingConfigurer {
 
         // 검색 옵션 메타데이터 - 24시간 TTL (사실상 정적 데이터)
         configs.put(
-                CacheNames.SEARCH_OPTION_ALL_ACTIVE,
-                defaultConfig.entryTtl(Duration.ofHours(24)));
+                CacheNames.SEARCH_OPTION_ALL_ACTIVE, defaultConfig.entryTtl(Duration.ofHours(24)));
 
         // 마스터 데이터 - 1시간 TTL (sync API 호출 시 evict)
         Duration masterTtl = Duration.ofHours(1);
@@ -82,8 +81,7 @@ public class RedisConfig implements CachingConfigurer {
         configs.put(CacheNames.ENCHANT_INFO_ALL, defaultConfig.entryTtl(masterTtl));
         configs.put(CacheNames.ENCHANT_INFO_FULLNAMES, defaultConfig.entryTtl(masterTtl));
         configs.put(CacheNames.METALWARE_INFO_ALL, defaultConfig.entryTtl(masterTtl));
-        configs.put(
-                CacheNames.METALWARE_ATTRIBUTE_INFO_SEARCH, defaultConfig.entryTtl(masterTtl));
+        configs.put(CacheNames.METALWARE_ATTRIBUTE_INFO_SEARCH, defaultConfig.entryTtl(masterTtl));
 
         // 통계 - 30분 TTL (이벤트 기반 eviction으로 실시간 반영)
         Duration statsTtl = Duration.ofMinutes(30);
@@ -96,12 +94,10 @@ public class RedisConfig implements CachingConfigurer {
 
         // 실시간 경매 - 12분 TTL (10분 배치 + 여유 2분)
         configs.put(
-                CacheNames.AUCTION_REALTIME_SEARCH,
-                defaultConfig.entryTtl(Duration.ofMinutes(12)));
+                CacheNames.AUCTION_REALTIME_SEARCH, defaultConfig.entryTtl(Duration.ofMinutes(12)));
 
         // 경매 거래 내역 - 2시간 TTL (배치 완료 시 evict + warmup)
-        configs.put(
-                CacheNames.AUCTION_HISTORY_SEARCH, defaultConfig.entryTtl(Duration.ofHours(2)));
+        configs.put(CacheNames.AUCTION_HISTORY_SEARCH, defaultConfig.entryTtl(Duration.ofHours(2)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
