@@ -2,8 +2,10 @@ package until.the.eternity.ranking.application.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import until.the.eternity.config.CacheNames;
 import until.the.eternity.ranking.domain.mapper.RankingMapper;
 import until.the.eternity.ranking.interfaces.rest.dto.response.PriceChangeRankingResponse;
 import until.the.eternity.ranking.interfaces.rest.dto.response.VolumeChangeRankingResponse;
@@ -18,18 +20,21 @@ public class PriceChangeRankingService {
     private final RankingMapper rankingMapper;
 
     /** 가격 급등 TOP N (API 6) */
+    @Cacheable(cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE, key = "#limit")
     public List<PriceChangeRankingResponse> getPriceSurge(int limit) {
         List<Object[]> results = rankingRepository.findPriceSurge(limit);
         return rankingMapper.toPriceChangeRankingResponses(results);
     }
 
     /** 가격 급락 TOP N (API 7) */
+    @Cacheable(cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP, key = "#limit")
     public List<PriceChangeRankingResponse> getPriceDrop(int limit) {
         List<Object[]> results = rankingRepository.findPriceDrop(limit);
         return rankingMapper.toPriceChangeRankingResponses(results);
     }
 
     /** 거래량 급증 TOP N (API 8) */
+    @Cacheable(cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE, key = "#limit")
     public List<VolumeChangeRankingResponse> getVolumeSurge(int limit) {
         List<Object[]> results = rankingRepository.findVolumeSurge(limit);
         return rankingMapper.toVolumeChangeRankingResponses(results);

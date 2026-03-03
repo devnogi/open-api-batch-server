@@ -2,8 +2,10 @@ package until.the.eternity.ranking.application.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import until.the.eternity.config.CacheNames;
 import until.the.eternity.ranking.domain.mapper.RankingMapper;
 import until.the.eternity.ranking.interfaces.rest.dto.response.PriceRankingResponse;
 import until.the.eternity.ranking.interfaces.rest.dto.response.VolumeRankingResponse;
@@ -18,6 +20,9 @@ public class CategoryRankingService {
     private final RankingMapper rankingMapper;
 
     /** 카테고리별 최고가 TOP N (API 9) */
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
+            key = "#topCategory + ':' + #subCategory + ':' + #limit")
     public List<PriceRankingResponse> getCategoryTopPriced(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
@@ -26,6 +31,9 @@ public class CategoryRankingService {
     }
 
     /** 카테고리별 인기 아이템 TOP N (API 10) */
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
+            key = "#topCategory + ':' + #subCategory + ':' + #limit")
     public List<VolumeRankingResponse> getCategoryPopular(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =

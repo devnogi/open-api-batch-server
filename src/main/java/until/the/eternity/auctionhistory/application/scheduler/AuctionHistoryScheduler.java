@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import until.the.eternity.auctionhistory.application.service.AuctionHistoryCacheWarmupService;
 import until.the.eternity.auctionhistory.application.service.AuctionHistoryService;
 import until.the.eternity.auctionhistory.application.service.fetcher.AuctionHistoryFetcher;
 import until.the.eternity.auctionhistory.application.service.persister.AuctionHistoryPersister;
@@ -27,6 +28,7 @@ public class AuctionHistoryScheduler {
     private final AuctionHistoryFetcher fetcher;
     private final AuctionHistoryPersister persister;
     private final ApplicationEventPublisher eventPublisher;
+    private final AuctionHistoryCacheWarmupService cacheWarmupService;
 
     @Value("${openapi.auction-history.delay-ms}")
     private long delayMs;
@@ -114,11 +116,15 @@ public class AuctionHistoryScheduler {
                 "> [SCHEDULE] AuctionHistoryScheduler saved [{}] new auction history records complete",
                 totalSavedCount);
 
-        // 통계 업데이트를 위한 이벤트 발행
+        // 통계 업데이트를 위한 이벤트 발행 (DailyStatisticsService가 일간/랭킹 캐시를 함께 무효화)
         log.debug(
                 "> [SCHEDULE] Publishing AuctionHistorySavedEvent with {} records",
                 totalSavedCount);
         eventPublisher.publishEvent(new AuctionHistorySavedEvent(totalSavedCount));
+
+        // 경매 거래 내역 캐시 무효화 + 역대 랭킹 캐시 무효화 + 30가지 조합 워밍업
+        log.info("> [SCHEDULE] Starting cache eviction and warmup");
+        cacheWarmupService.evictAndWarm();
 
         return totalSavedCount;
     }

@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionsearchoption.domain.entity.AuctionSearchOptionMetadata;
 import until.the.eternity.auctionsearchoption.domain.repository.AuctionSearchOptionRepositoryPort;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.FieldMetadata;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.SearchOptionMetadataResponse;
+import until.the.eternity.config.CacheNames;
 
 @Slf4j
 @Service
@@ -26,6 +28,7 @@ public class AuctionSearchOptionService {
      *
      * @return 검색 옵션 메타데이터 리스트
      */
+    @Cacheable(cacheNames = CacheNames.SEARCH_OPTION_ALL_ACTIVE, key = "'all'")
     @Transactional(readOnly = true)
     public List<SearchOptionMetadataResponse> getAllActiveSearchOptions() {
         List<AuctionSearchOptionMetadata> entities = repositoryPort.findAllActive();
