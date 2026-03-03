@@ -33,9 +33,7 @@ public class EnchantInfoService {
         return enchantInfoRepository.findAll(pageable).map(EnchantInfoResponse::from);
     }
 
-    @Cacheable(
-            cacheNames = CacheNames.ENCHANT_INFO_FULLNAMES,
-            key = "#affixPosition ?: 'all'")
+    @Cacheable(cacheNames = CacheNames.ENCHANT_INFO_FULLNAMES, key = "#affixPosition ?: 'all'")
     public List<String> findAllFullnames(String affixPosition) {
         if (affixPosition != null) {
             if (!ALLOWED_AFFIX_POSITIONS.contains(affixPosition)) {

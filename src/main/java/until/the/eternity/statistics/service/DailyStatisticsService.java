@@ -37,30 +37,16 @@ public class DailyStatisticsService {
                         cacheNames = CacheNames.STATISTICS_TOPCATEGORY_DAILY,
                         allEntries = true),
                 // 오늘 기준 랭킹 캐시 (item_daily_statistics 기반)
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME,
-                        allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME, allEntries = true),
                 @CacheEvict(
                         cacheNames = CacheNames.RANKING_VOLUME_TODAY_POPULAR,
                         allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
-                        allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CATEGORY_POPULAR, allEntries = true),
             })
     @Transactional
     public void calculateAndSaveCurrentDayStatistics() {
@@ -111,30 +97,16 @@ public class DailyStatisticsService {
                 @CacheEvict(
                         cacheNames = CacheNames.STATISTICS_TOPCATEGORY_DAILY,
                         allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME,
-                        allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME, allEntries = true),
                 @CacheEvict(
                         cacheNames = CacheNames.RANKING_VOLUME_TODAY_POPULAR,
                         allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
-                        allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_CATEGORY_POPULAR, allEntries = true),
             })
     @Transactional
     public void calculateAndSavePreviousDayStatistics() {

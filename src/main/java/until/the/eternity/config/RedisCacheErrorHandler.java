@@ -42,7 +42,6 @@ public class RedisCacheErrorHandler implements CacheErrorHandler {
 
     @Override
     public void handleCacheClearError(RuntimeException exception, Cache cache) {
-        log.warn(
-                "[Cache] CLEAR 실패 - cache={}, error={}", cache.getName(), exception.getMessage());
+        log.warn("[Cache] CLEAR 실패 - cache={}, error={}", cache.getName(), exception.getMessage());
     }
 }

@@ -37,12 +37,8 @@ public class WeeklyStatisticsService {
                         cacheNames = CacheNames.STATISTICS_TOPCATEGORY_WEEKLY,
                         allEntries = true),
                 // 주간 기준 랭킹 캐시 (item_weekly_statistics 기반)
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_PRICE_WEEK_HIGHEST,
-                        allEntries = true),
-                @CacheEvict(
-                        cacheNames = CacheNames.RANKING_VOLUME_WEEK_POPULAR,
-                        allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_PRICE_WEEK_HIGHEST, allEntries = true),
+                @CacheEvict(cacheNames = CacheNames.RANKING_VOLUME_WEEK_POPULAR, allEntries = true),
             })
     @Transactional
     public void calculateAndSaveWeeklyStatistics() {

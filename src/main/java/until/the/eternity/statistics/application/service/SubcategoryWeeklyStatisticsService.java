@@ -28,10 +28,7 @@ public class SubcategoryWeeklyStatisticsService {
             key = "(#subCategory ?: '') + ':' + #startDate + ':' + #endDate")
     @Transactional(readOnly = true)
     public List<SubcategoryWeeklyStatisticsResponse> search(
-            String topCategory,
-            String subCategory,
-            LocalDate startDate,
-            LocalDate endDate) {
+            String topCategory, String subCategory, LocalDate startDate, LocalDate endDate) {
         until.the.eternity.statistics.util.DateRangeValidator.validateWeeklyDateRange(
                 startDate, endDate);
 
