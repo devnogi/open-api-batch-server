@@ -98,7 +98,7 @@ class AuctionRealtimeQueryDslRepository {
                         .fetch();
 
         // Count 쿼리
-        Long total = queryFactory.select(ar.countDistinct()).from(ar).where(itemBuilder).fetchOne();
+        Long total = queryFactory.select(ar.count()).from(ar).where(itemBuilder).fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }

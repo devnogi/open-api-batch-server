@@ -1,6 +1,7 @@
 package until.the.eternity.auctionhistory.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.util.List;
 
 /** 경매 히스토리 검색 조건 DTO - 페이지네이션 포함 */
@@ -23,4 +24,17 @@ public record AuctionHistorySearchRequest(
                         description = "세공 검색 조건 목록 (최대 3개, AND 조건으로 검색)",
                         requiredMode = Schema.RequiredMode.NOT_REQUIRED,
                         hidden = true)
-                List<MetalwareSearchRequest> metalwareSearchRequests) {}
+                List<MetalwareSearchRequest> metalwareSearchRequests) {
+
+    public AuctionHistorySearchRequest {
+        if (dateAuctionBuyRequest == null
+                || ((dateAuctionBuyRequest.dateAuctionBuyFrom() == null
+                                || dateAuctionBuyRequest.dateAuctionBuyFrom().isBlank())
+                        && (dateAuctionBuyRequest.dateAuctionBuyTo() == null
+                                || dateAuctionBuyRequest.dateAuctionBuyTo().isBlank()))) {
+            dateAuctionBuyRequest =
+                    new DateAuctionBuyRequest(
+                            LocalDate.now().minusMonths(1).toString(), LocalDate.now().toString());
+        }
+    }
+}

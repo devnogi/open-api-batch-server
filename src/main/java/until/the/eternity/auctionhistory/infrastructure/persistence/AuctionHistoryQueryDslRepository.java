@@ -98,8 +98,7 @@ class AuctionHistoryQueryDslRepository {
                         .fetch();
 
         // Count 쿼리 (JOIN 없이 실행)
-        Long total =
-                queryFactory.select(ah.countDistinct()).from(ah).where(historyBuilder).fetchOne();
+        Long total = queryFactory.select(ah.count()).from(ah).where(historyBuilder).fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }
