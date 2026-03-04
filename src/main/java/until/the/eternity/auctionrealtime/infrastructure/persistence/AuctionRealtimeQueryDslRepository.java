@@ -8,6 +8,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionitem.domain.entity.QAuctionRealtimeItem;
 import until.the.eternity.auctionitem.domain.entity.QAuctionRealtimeItemOption;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
+import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.DateAuctionExpireRequest;
 
 @Component
 @RequiredArgsConstructor
@@ -40,25 +44,27 @@ class AuctionRealtimeQueryDslRepository {
         QAuctionRealtimeItem ar = QAuctionRealtimeItem.auctionRealtimeItem;
         QAuctionRealtimeItemOption aro = QAuctionRealtimeItemOption.auctionRealtimeItemOption;
 
+        OptionConditionResult optionResult = buildOptionConditionResult(condition);
+        boolean hasItemOptionFilter = hasEffectiveItemOptionFilter(optionResult);
+        boolean hasEnchantFilter = hasEnchantFilter(condition);
+        boolean hasMetalwareFilter = hasMetalwareFilter(condition);
+        boolean isBasicSearchOnly =
+                !(hasItemOptionFilter || hasEnchantFilter || hasMetalwareFilter);
+
         // 1단계: 기본 조건 빌드
-        BooleanBuilder itemBuilder = buildItemPredicate(condition, ar);
+        BooleanBuilder itemBuilder = buildItemPredicate(condition, ar, !isBasicSearchOnly);
 
         // 2단계: 옵션 조건이 있으면 서브쿼리 추가
-        if (condition.itemOptionSearchRequest() != null) {
+        if (hasItemOptionFilter) {
             QAuctionRealtimeItemOption subOption = new QAuctionRealtimeItemOption("subOption");
-            OptionConditionResult optionResult =
-                    buildItemOptionConditions(condition.itemOptionSearchRequest(), subOption);
+            var subQuery =
+                    JPAExpressions.select(subOption.auctionRealtimeItem.id)
+                            .from(subOption)
+                            .where(optionResult.builder())
+                            .groupBy(subOption.auctionRealtimeItem.id)
+                            .having(subOption.count().eq((long) optionResult.count()));
 
-            if (optionResult.builder().hasValue() && optionResult.count() > 0) {
-                var subQuery =
-                        JPAExpressions.select(subOption.auctionRealtimeItem.id)
-                                .from(subOption)
-                                .where(optionResult.builder())
-                                .groupBy(subOption.auctionRealtimeItem.id)
-                                .having(subOption.count().eq((long) optionResult.count()));
-
-                itemBuilder.and(ar.id.in(subQuery));
-            }
+            itemBuilder.and(ar.id.in(subQuery));
         }
 
         // 3단계: 정렬 조건 빌드
@@ -99,7 +105,9 @@ class AuctionRealtimeQueryDslRepository {
 
     /** 기본 조건 빌드 (카테고리, 아이템명, 가격) */
     private BooleanBuilder buildItemPredicate(
-            AuctionRealtimeSearchRequest c, QAuctionRealtimeItem ar) {
+            AuctionRealtimeSearchRequest c,
+            QAuctionRealtimeItem ar,
+            boolean includeAdvancedFilters) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (c.itemTopCategory() != null && !c.itemTopCategory().isBlank()) {
@@ -124,6 +132,29 @@ class AuctionRealtimeQueryDslRepository {
             if (price.priceTo() != null) {
                 builder.and(ar.auctionPricePerUnit.loe(price.priceTo()));
             }
+        }
+
+        if (c.dateAuctionExpireRequest() != null) {
+            DateAuctionExpireRequest date = c.dateAuctionExpireRequest();
+            if (date.dateAuctionExpireFrom() != null && !date.dateAuctionExpireFrom().isBlank()) {
+                Instant fromInstant =
+                        LocalDate.parse(date.dateAuctionExpireFrom())
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant();
+                builder.and(ar.dateAuctionExpire.goe(fromInstant));
+            }
+            if (date.dateAuctionExpireTo() != null && !date.dateAuctionExpireTo().isBlank()) {
+                Instant toInstant =
+                        LocalDate.parse(date.dateAuctionExpireTo())
+                                .plusDays(1)
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant();
+                builder.and(ar.dateAuctionExpire.lt(toInstant));
+            }
+        }
+
+        if (!includeAdvancedFilters) {
+            return builder;
         }
 
         // 인챈트 검색 조건
@@ -191,6 +222,40 @@ class AuctionRealtimeQueryDslRepository {
         }
 
         return builder;
+    }
+
+    private OptionConditionResult buildOptionConditionResult(
+            AuctionRealtimeSearchRequest condition) {
+        if (condition.itemOptionSearchRequest() == null) {
+            return null;
+        }
+        QAuctionRealtimeItemOption subOption = new QAuctionRealtimeItemOption("subOption");
+        return buildItemOptionConditions(condition.itemOptionSearchRequest(), subOption);
+    }
+
+    private boolean hasEffectiveItemOptionFilter(OptionConditionResult optionResult) {
+        return optionResult != null
+                && optionResult.builder().hasValue()
+                && optionResult.count() > 0;
+    }
+
+    private boolean hasEnchantFilter(AuctionRealtimeSearchRequest condition) {
+        if (condition.enchantSearchRequest() == null) {
+            return false;
+        }
+        String prefix = condition.enchantSearchRequest().enchantPrefix();
+        String suffix = condition.enchantSearchRequest().enchantSuffix();
+        return (prefix != null && !prefix.isBlank()) || (suffix != null && !suffix.isBlank());
+    }
+
+    private boolean hasMetalwareFilter(AuctionRealtimeSearchRequest condition) {
+        return condition.metalwareSearchRequests() != null
+                && condition.metalwareSearchRequests().stream()
+                        .anyMatch(
+                                mw ->
+                                        mw != null
+                                                && mw.metalware() != null
+                                                && !mw.metalware().isBlank());
     }
 
     /** 옵션 검색 조건 빌드 (서브쿼리용) */

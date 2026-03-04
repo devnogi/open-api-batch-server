@@ -43,30 +43,27 @@ class AuctionHistoryQueryDslRepository {
         QAuctionHistory ah = QAuctionHistory.auctionHistory;
         QAuctionHistoryItemOption aio = QAuctionHistoryItemOption.auctionHistoryItemOption;
 
+        OptionConditionResult optionResult = buildOptionConditionResult(condition);
+        boolean hasItemOptionFilter = hasEffectiveItemOptionFilter(optionResult);
+        boolean hasEnchantFilter = hasEnchantFilter(condition);
+        boolean hasMetalwareFilter = hasMetalwareFilter(condition);
+        boolean isBasicSearchOnly =
+                !(hasItemOptionFilter || hasEnchantFilter || hasMetalwareFilter);
+
         // 1단계: 거래내역 조건 빌드
-        BooleanBuilder historyBuilder = buildHistoryPredicate(condition, ah);
+        BooleanBuilder historyBuilder = buildHistoryPredicate(condition, ah, !isBasicSearchOnly);
 
         // 2단계: 옵션 조건이 있으면 서브쿼리 추가
-        if (condition.itemOptionSearchRequest() != null) {
-            // 서브쿼리용 별도 QAuctionHistoryItemOption 인스턴스
+        if (hasItemOptionFilter) {
             QAuctionHistoryItemOption subOption = new QAuctionHistoryItemOption("subOption");
-            OptionConditionResult optionResult =
-                    buildItemOptionConditions(condition.itemOptionSearchRequest(), subOption);
+            var subQuery =
+                    JPAExpressions.select(subOption.auctionHistory.auctionBuyId)
+                            .from(subOption)
+                            .where(optionResult.builder())
+                            .groupBy(subOption.auctionHistory.auctionBuyId)
+                            .having(subOption.count().eq((long) optionResult.count()));
 
-            // 옵션 조건이 실제로 있는 경우에만 서브쿼리 추가
-            if (optionResult.builder().hasValue() && optionResult.count() > 0) {
-                // 서브쿼리: 옵션 조건을 만족하는 auction_history_id 찾기
-                // GROUP BY + HAVING COUNT로 모든 조건을 만족하는 거래내역만 필터링
-                var subQuery =
-                        JPAExpressions.select(subOption.auctionHistory.auctionBuyId)
-                                .from(subOption)
-                                .where(optionResult.builder())
-                                .groupBy(subOption.auctionHistory.auctionBuyId)
-                                .having(subOption.count().eq((long) optionResult.count()));
-
-                // 메인 쿼리에 서브쿼리 결과 적용
-                historyBuilder.and(ah.auctionBuyId.in(subQuery));
-            }
+            historyBuilder.and(ah.auctionBuyId.in(subQuery));
         }
 
         // 3단계: 정렬 조건 빌드
@@ -109,7 +106,7 @@ class AuctionHistoryQueryDslRepository {
 
     /** 거래내역 기본 조건 빌드 (카테고리, 아이템명, 가격, 거래일자) */
     private BooleanBuilder buildHistoryPredicate(
-            AuctionHistorySearchRequest c, QAuctionHistory ah) {
+            AuctionHistorySearchRequest c, QAuctionHistory ah, boolean includeAdvancedFilters) {
         BooleanBuilder builder = new BooleanBuilder();
 
         // 기본 조건들
@@ -156,6 +153,10 @@ class AuctionHistoryQueryDslRepository {
                                 .toInstant();
                 builder.and(ah.dateAuctionBuy.lt(toInstant));
             }
+        }
+
+        if (!includeAdvancedFilters) {
+            return builder;
         }
 
         // 인챈트 검색 조건
@@ -223,6 +224,40 @@ class AuctionHistoryQueryDslRepository {
         }
 
         return builder;
+    }
+
+    private OptionConditionResult buildOptionConditionResult(
+            AuctionHistorySearchRequest condition) {
+        if (condition.itemOptionSearchRequest() == null) {
+            return null;
+        }
+        QAuctionHistoryItemOption subOption = new QAuctionHistoryItemOption("subOption");
+        return buildItemOptionConditions(condition.itemOptionSearchRequest(), subOption);
+    }
+
+    private boolean hasEffectiveItemOptionFilter(OptionConditionResult optionResult) {
+        return optionResult != null
+                && optionResult.builder().hasValue()
+                && optionResult.count() > 0;
+    }
+
+    private boolean hasEnchantFilter(AuctionHistorySearchRequest condition) {
+        if (condition.enchantSearchRequest() == null) {
+            return false;
+        }
+        String prefix = condition.enchantSearchRequest().enchantPrefix();
+        String suffix = condition.enchantSearchRequest().enchantSuffix();
+        return (prefix != null && !prefix.isBlank()) || (suffix != null && !suffix.isBlank());
+    }
+
+    private boolean hasMetalwareFilter(AuctionHistorySearchRequest condition) {
+        return condition.metalwareSearchRequests() != null
+                && condition.metalwareSearchRequests().stream()
+                        .anyMatch(
+                                mw ->
+                                        mw != null
+                                                && mw.metalware() != null
+                                                && !mw.metalware().isBlank());
     }
 
     /** 옵션 검색 조건 빌드 (서브쿼리용) */
