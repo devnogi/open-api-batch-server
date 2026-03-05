@@ -12,8 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.auctionhistory.application.service.persister.AuctionHistoryPersister;
@@ -26,6 +25,7 @@ import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHis
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
+import until.the.eternity.config.CacheNames;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryServiceTest {
@@ -34,6 +34,7 @@ class AuctionHistoryServiceTest {
     @Mock private AuctionHistoryFetcherPort fetcherPort;
     @Mock private AuctionHistoryPersister persister;
     @Mock private AuctionHistoryMapper mapper;
+    @Mock private CacheManager cacheManager;
 
     @InjectMocks private AuctionHistoryService service;
 
@@ -51,9 +52,10 @@ class AuctionHistoryServiceTest {
         AuctionHistory entity = new AuctionHistory();
         AuctionHistoryDetailResponse<ItemOptionResponse> detailDto =
                 mock(AuctionHistoryDetailResponse.class);
-        Page<AuctionHistory> entityPage = new PageImpl<>(List.of(entity), pageable, 1);
 
-        when(repositoryPort.search(searchRequest, pageable)).thenReturn(entityPage);
+        when(cacheManager.getCache(CacheNames.AUCTION_HISTORY_COUNT)).thenReturn(null);
+        when(repositoryPort.searchContent(searchRequest, pageable)).thenReturn(List.of(entity));
+        when(repositoryPort.count(searchRequest)).thenReturn(1L);
         when(mapper.toDto(entity)).thenReturn(detailDto);
 
         // when
@@ -62,7 +64,8 @@ class AuctionHistoryServiceTest {
 
         // then
         assertThat(result.items()).hasSize(1).contains(detailDto);
-        verify(repositoryPort).search(searchRequest, pageable);
+        verify(repositoryPort).searchContent(searchRequest, pageable);
+        verify(repositoryPort).count(searchRequest);
         verify(mapper).toDto(entity);
     }
 

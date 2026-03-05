@@ -110,6 +110,7 @@ public class RedisConfig implements CachingConfigurer {
 
         // 경매 거래 내역 - 2시간 TTL (배치 완료 시 evict + warmup)
         configs.put(CacheNames.AUCTION_HISTORY_SEARCH, defaultConfig.entryTtl(Duration.ofHours(2)));
+        configs.put(CacheNames.AUCTION_HISTORY_COUNT, defaultConfig.entryTtl(Duration.ofHours(2)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)

@@ -52,4 +52,5 @@ public final class CacheNames {
 
     // ===== 경매 거래 내역 =====
     public static final String AUCTION_HISTORY_SEARCH = "auction-history:search";
+    public static final String AUCTION_HISTORY_COUNT = "auction-history:count";
 }

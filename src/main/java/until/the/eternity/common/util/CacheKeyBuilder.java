@@ -114,12 +114,9 @@ public final class CacheKeyBuilder {
     public static String buildAuctionHistorySearchKey(
             AuctionHistorySearchRequest requestDto, PageRequestDto pageRequestDto) {
         Pageable pageable = pageRequestDto.toPageable();
-        String dateFrom = "";
-        String dateTo = "";
-        if (requestDto.dateAuctionBuyRequest() != null) {
-            dateFrom = normalize(requestDto.dateAuctionBuyRequest().dateAuctionBuyFrom());
-            dateTo = normalize(requestDto.dateAuctionBuyRequest().dateAuctionBuyTo());
-        }
+        String[] dateRange = resolveAuctionHistoryDateRange(requestDto);
+        String dateFrom = dateRange[0];
+        String dateTo = dateRange[1];
 
         return pageable.getPageNumber()
                 + ":"
@@ -128,6 +125,24 @@ public final class CacheKeyBuilder {
                 + pageable.getSort()
                 + ":"
                 + normalize(requestDto.itemName())
+                + ":"
+                + isExactItemName(requestDto.isExactItemName())
+                + ":"
+                + normalize(requestDto.itemTopCategory())
+                + ":"
+                + normalize(requestDto.itemSubCategory())
+                + ":"
+                + dateFrom
+                + ":"
+                + dateTo;
+    }
+
+    public static String buildAuctionHistoryCountKey(AuctionHistorySearchRequest requestDto) {
+        String[] dateRange = resolveAuctionHistoryDateRange(requestDto);
+        String dateFrom = dateRange[0];
+        String dateTo = dateRange[1];
+
+        return normalize(requestDto.itemName())
                 + ":"
                 + isExactItemName(requestDto.isExactItemName())
                 + ":"
@@ -174,6 +189,16 @@ public final class CacheKeyBuilder {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? "" : trimmed;
+    }
+
+    private static String[] resolveAuctionHistoryDateRange(AuctionHistorySearchRequest requestDto) {
+        String dateFrom = "";
+        String dateTo = "";
+        if (requestDto.dateAuctionBuyRequest() != null) {
+            dateFrom = normalize(requestDto.dateAuctionBuyRequest().dateAuctionBuyFrom());
+            dateTo = normalize(requestDto.dateAuctionBuyRequest().dateAuctionBuyTo());
+        }
+        return new String[] {dateFrom, dateTo};
     }
 
     private static boolean isExactItemName(Boolean isExactItemName) {
