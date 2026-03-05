@@ -1,11 +1,10 @@
 package until.the.eternity.auctionhistory.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import until.the.eternity.auctionitemoption.domain.entity.AuctionHistoryItemOption;
-
 import java.time.Instant;
 import java.util.List;
+import lombok.*;
+import until.the.eternity.auctionitemoption.domain.entity.AuctionHistoryItemOption;
 
 @Entity
 @Table(name = "auction_history")

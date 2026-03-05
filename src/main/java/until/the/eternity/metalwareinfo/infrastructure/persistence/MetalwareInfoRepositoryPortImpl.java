@@ -1,10 +1,9 @@
 package until.the.eternity.metalwareinfo.infrastructure.persistence;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import until.the.eternity.metalwareinfo.domain.repository.MetalwareInfoRepositoryPort;
-
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
