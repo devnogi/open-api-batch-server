@@ -1,12 +1,11 @@
 package until.the.eternity.auctionrealtime.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.EnchantSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.ItemOptionSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.MetalwareSearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
-
-import java.util.List;
 
 /** 실시간 경매장 검색 조건 DTO */
 @Schema(description = "실시간 경매장 검색 조건")
@@ -28,4 +27,11 @@ public record AuctionRealtimeSearchRequest(
                         description = "세공 검색 조건 목록 (최대 3개, AND 조건으로 검색)",
                         requiredMode = Schema.RequiredMode.NOT_REQUIRED,
                         hidden = true)
-                List<MetalwareSearchRequest> metalwareSearchRequests) {}
+                List<MetalwareSearchRequest> metalwareSearchRequests) {
+
+    public AuctionRealtimeSearchRequest {
+        if (isExactItemName == null) {
+            isExactItemName = true;
+        }
+    }
+}

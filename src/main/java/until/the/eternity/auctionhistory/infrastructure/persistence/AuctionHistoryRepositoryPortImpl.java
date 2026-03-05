@@ -1,6 +1,10 @@
 package until.the.eternity.auctionhistory.infrastructure.persistence;
 
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -11,11 +15,6 @@ import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 
 /** AuctionHistoryRepository Interface 구현체 */
 @Repository

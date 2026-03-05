@@ -1,19 +1,21 @@
 package until.the.eternity.config;
 
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionhistory.application.service.AuctionHistoryCacheWarmupService;
-import until.the.eternity.auctionrealtime.application.service.AuctionRealtimeService;
-import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
-import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.DateAuctionExpireRequest;
+import until.the.eternity.auctionrealtime.application.service.AuctionRealtimeCacheWarmupService;
 import until.the.eternity.auctionsearchoption.application.service.AuctionSearchOptionService;
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.enums.SortDirection;
@@ -29,9 +31,6 @@ import until.the.eternity.ranking.application.service.*;
 import until.the.eternity.ranking.util.RankingConstants;
 import until.the.eternity.statistics.application.service.*;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Slf4j
 @Component
 @Order(200)
@@ -42,8 +41,11 @@ import java.util.List;
         matchIfMissing = true)
 public class CacheStartupWarmupRunner implements ApplicationRunner {
 
+    @Qualifier("applicationTaskExecutor")
+    private final TaskExecutor taskExecutor;
+
     private final AuctionHistoryCacheWarmupService auctionHistoryCacheWarmupService;
-    private final AuctionRealtimeService auctionRealtimeService;
+    private final AuctionRealtimeCacheWarmupService auctionRealtimeCacheWarmupService;
     private final AuctionSearchOptionService auctionSearchOptionService;
     private final ItemInfoService itemInfoService;
     private final EnchantInfoService enchantInfoService;
@@ -66,10 +68,15 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        log.info("[Cache Warmup] Startup warmup scheduled (async)");
+        taskExecutor.execute(this::warmupAll);
+    }
+
+    private void warmupAll() {
         log.info("[Cache Warmup] Startup warmup started");
 
         tryWarm("auction-history", auctionHistoryCacheWarmupService::evictAndWarm);
-        tryWarm("auction-realtime", this::warmAuctionRealtime);
+        tryWarm("auction-realtime", auctionRealtimeCacheWarmupService::evictAndWarm);
         tryWarm("search-option", auctionSearchOptionService::getAllActiveSearchOptions);
         tryWarm("item-info", this::warmItemInfoCaches);
         tryWarm("enchant-info", this::warmEnchantCaches);
@@ -78,24 +85,6 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
         tryWarm("statistics", this::warmStatisticsCaches);
 
         log.info("[Cache Warmup] Startup warmup finished");
-    }
-
-    private void warmAuctionRealtime() {
-        AuctionRealtimeSearchRequest request =
-                new AuctionRealtimeSearchRequest(
-                        null,
-                        false,
-                        null,
-                        null,
-                        null,
-                        new DateAuctionExpireRequest(
-                                LocalDate.now().minusMonths(1).toString(),
-                                LocalDate.now().toString()),
-                        null,
-                        null,
-                        null);
-        auctionRealtimeService.search(
-                request, PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "dateAuctionExpire")));
     }
 
     private void warmItemInfoCaches() {

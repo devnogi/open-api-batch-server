@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,6 @@ import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemCategoryResp
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSummaryResponse;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoSyncResponse;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/item-infos")

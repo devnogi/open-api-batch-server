@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,6 @@ import until.the.eternity.batchlog.domain.entity.BatchExecutionLog;
 import until.the.eternity.batchlog.domain.enums.BatchType;
 import until.the.eternity.batchlog.interfaces.rest.dto.response.BatchExecutionLogResponse;
 import until.the.eternity.common.response.PageResponseDto;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/batch-logs")

@@ -1,5 +1,7 @@
 package until.the.eternity.auctionhistory.application.scheduler;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +18,6 @@ import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionH
 import until.the.eternity.batchlog.domain.enums.BatchType;
 import until.the.eternity.common.annotation.BatchLog;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component

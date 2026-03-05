@@ -1,20 +1,20 @@
 package until.the.eternity.auctionrealtime.application.scheduler;
 
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
+import until.the.eternity.auctionrealtime.application.service.AuctionRealtimeCacheWarmupService;
 import until.the.eternity.auctionrealtime.application.service.AuctionRealtimeService;
 import until.the.eternity.auctionrealtime.application.service.fetcher.AuctionRealtimeFetcher;
 import until.the.eternity.auctionrealtime.application.service.persister.AuctionRealtimePersister;
 import until.the.eternity.auctionrealtime.domain.service.fetcher.AuctionRealtimeFetcherPort.FetchResult;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 실시간 경매장 데이터 수집 스케줄러.
@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class AuctionRealtimeScheduler {
 
     private final AuctionRealtimeService service;
+    private final AuctionRealtimeCacheWarmupService cacheWarmupService;
     private final AuctionRealtimeFetcher fetcher;
     private final AuctionRealtimePersister persister;
 
@@ -134,7 +135,7 @@ public class AuctionRealtimeScheduler {
                 totalFailedCount,
                 deletedExpired);
 
-        // Full Refresh 완료 후 실시간 경매 검색 캐시 전체 무효화
-        service.evictSearchCache();
+        // Full Refresh 완료 후 실시간 경매 검색 캐시 무효화 + 기본 조합 워밍업
+        cacheWarmupService.evictAndWarm();
     }
 }

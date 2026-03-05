@@ -1,9 +1,8 @@
 package until.the.eternity.hornBugle.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.Instant;
+import lombok.*;
 
 @Entity
 @Table(
