@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
@@ -25,6 +26,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableCaching
 public class RedisConfig implements CachingConfigurer {
 
+    @Value("${app.cache.redis-prefix:oab:v2}")
+    private String cacheKeyPrefix;
+
     @Override
     public CacheErrorHandler errorHandler() {
         return new RedisCacheErrorHandler();
@@ -38,7 +42,7 @@ public class RedisConfig implements CachingConfigurer {
                         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.activateDefaultTyping(
                 LaissezFaireSubTypeValidator.instance,
-                DefaultTyping.NON_FINAL,
+                DefaultTyping.EVERYTHING,
                 JsonTypeInfo.As.PROPERTY);
 
         GenericJackson2JsonRedisSerializer jsonSerializer =
@@ -46,6 +50,7 @@ public class RedisConfig implements CachingConfigurer {
 
         RedisCacheConfiguration defaultConfig =
                 RedisCacheConfiguration.defaultCacheConfig()
+                        .computePrefixWith(cacheName -> cacheKeyPrefix + ":" + cacheName + "::")
                         .entryTtl(Duration.ofMinutes(10))
                         .serializeKeysWith(
                                 RedisSerializationContext.SerializationPair.fromSerializer(
