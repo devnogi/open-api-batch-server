@@ -1,6 +1,5 @@
 package until.the.eternity.hornBugle.infrastructure.elasticsearch;
 
-import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +10,8 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
+
+import java.time.Instant;
 
 @Document(indexName = "horn_bugle_world_history")
 @Setting(settingPath = "elasticsearch/horn-bugle-settings.json")

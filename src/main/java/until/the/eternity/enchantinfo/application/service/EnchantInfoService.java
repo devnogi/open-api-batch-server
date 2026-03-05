@@ -1,7 +1,5 @@
 package until.the.eternity.enchantinfo.application.service;
 
-import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,6 +15,9 @@ import until.the.eternity.enchantinfo.domain.repository.EnchantInfoRepositoryPor
 import until.the.eternity.enchantinfo.interfaces.rest.dto.response.EnchantInfoResponse;
 import until.the.eternity.enchantinfo.interfaces.rest.dto.response.EnchantInfoSyncResponse;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -28,12 +29,18 @@ public class EnchantInfoService {
 
     @Cacheable(
             cacheNames = CacheNames.ENCHANT_INFO_ALL,
-            key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildEnchantInfoAllKey(#pageable)")
     public Page<EnchantInfoResponse> findAll(Pageable pageable) {
         return enchantInfoRepository.findAll(pageable).map(EnchantInfoResponse::from);
     }
 
-    @Cacheable(cacheNames = CacheNames.ENCHANT_INFO_FULLNAMES, key = "#affixPosition ?: 'all'")
+    @Cacheable(
+            cacheNames = CacheNames.ENCHANT_INFO_FULLNAMES,
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildEnchantInfoFullnamesKey(#affixPosition)")
     public List<String> findAllFullnames(String affixPosition) {
         if (affixPosition != null) {
             if (!ALLOWED_AFFIX_POSITIONS.contains(affixPosition)) {

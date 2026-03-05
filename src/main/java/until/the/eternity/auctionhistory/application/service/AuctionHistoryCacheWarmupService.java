@@ -43,6 +43,17 @@ public class AuctionHistoryCacheWarmupService {
         warmup();
     }
 
+    /** 앱 시작 시 기본 화면 1개 키만 경량 워밍업한다. */
+    public void warmupForStartup() {
+        AuctionHistorySearchRequest emptyRequest =
+                new AuctionHistorySearchRequest(
+                        null, null, null, null, null, null, null, null, null);
+        PageRequestDto pageRequest =
+                new PageRequestDto(1, WARMUP_SIZE, SortField.DATE_AUCTION_BUY, SortDirection.DESC);
+        auctionHistoryService.search(emptyRequest, pageRequest);
+        log.info("[Cache Warmup] Startup warmup completed: auction-history default key");
+    }
+
     private void evictCaches() {
         clearCache(CacheNames.AUCTION_HISTORY_SEARCH);
         // auction_history 전체를 직접 쿼리하는 역대 랭킹도 함께 무효화

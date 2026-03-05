@@ -1,8 +1,9 @@
 package until.the.eternity.iteminfo.interfaces.rest.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import lombok.Builder;
+
+import java.util.List;
 
 @Builder
 @Schema(description = "아이템 정보 동기화 응답 DTO")

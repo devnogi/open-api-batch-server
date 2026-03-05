@@ -1,8 +1,5 @@
 package until.the.eternity.statistics.application.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,6 +10,10 @@ import until.the.eternity.statistics.domain.entity.daily.ItemDailyStatistics;
 import until.the.eternity.statistics.domain.mapper.ItemDailyStatisticsMapper;
 import until.the.eternity.statistics.interfaces.rest.dto.response.ItemDailyStatisticsResponse;
 import until.the.eternity.statistics.repository.daily.ItemDailyStatisticsRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,10 +27,8 @@ public class ItemDailyStatisticsService {
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_ITEM_DAILY,
             key =
-                    "(#itemName ?: '') + ':'"
-                            + " + (#subCategory ?: '') + ':'"
-                            + " + (#topCategory ?: '') + ':'"
-                            + " + #startDate + ':' + #endDate")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildStatisticsItemKey(#itemName, #subCategory, #topCategory, #startDate, #endDate)")
     @Transactional(readOnly = true)
     public List<ItemDailyStatisticsResponse> search(
             String itemName,

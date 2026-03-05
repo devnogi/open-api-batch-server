@@ -1,7 +1,5 @@
 package until.the.eternity.auctionrealtime.application.service;
 
-import java.time.Instant;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -19,6 +17,9 @@ import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.RealtimeI
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.config.CacheNames;
+
+import java.time.Instant;
+import java.util.List;
 
 /** 실시간 경매장 데이터 Service. */
 @Slf4j
@@ -41,11 +42,13 @@ public class AuctionRealtimeService {
     @Cacheable(
             cacheNames = CacheNames.AUCTION_REALTIME_SEARCH,
             key =
-                    "(#requestDto.itemTopCategory() ?: '_') + ':'"
-                            + " + (#requestDto.itemSubCategory() ?: '_') + ':'"
-                            + " + (#requestDto.itemName() ?: '_') + ':'"
-                            + " + (#requestDto.isExactItemName() ?: false) + ':'"
-                            + " + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildAuctionRealtimeSearchKey(#requestDto, #pageable)",
+            condition =
+                    "#requestDto.itemOptionSearchRequest() == null"
+                            + " and #requestDto.enchantSearchRequest() == null"
+                            + " and (#requestDto.metalwareSearchRequests() == null or #requestDto.metalwareSearchRequests().isEmpty())"
+                            + " and #requestDto.priceSearchRequest() == null")
     @Transactional(readOnly = true)
     public PageResponseDto<AuctionRealtimeDetailResponse<RealtimeItemOptionResponse>> search(
             AuctionRealtimeSearchRequest requestDto, Pageable pageable) {

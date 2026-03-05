@@ -1,6 +1,5 @@
 package until.the.eternity.ranking.application.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,8 @@ import until.the.eternity.ranking.domain.mapper.RankingMapper;
 import until.the.eternity.ranking.interfaces.rest.dto.response.PriceRankingResponse;
 import until.the.eternity.ranking.interfaces.rest.dto.response.VolumeRankingResponse;
 import until.the.eternity.ranking.repository.RankingRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,9 @@ public class CategoryRankingService {
     /** 카테고리별 최고가 TOP N (API 9) */
     @Cacheable(
             cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
-            key = "#topCategory + ':' + #subCategory + ':' + #limit")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
     public List<PriceRankingResponse> getCategoryTopPriced(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
@@ -33,7 +36,9 @@ public class CategoryRankingService {
     /** 카테고리별 인기 아이템 TOP N (API 10) */
     @Cacheable(
             cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
-            key = "#topCategory + ':' + #subCategory + ':' + #limit")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
     public List<VolumeRankingResponse> getCategoryPopular(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =

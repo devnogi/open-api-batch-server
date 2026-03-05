@@ -1,8 +1,5 @@
 package until.the.eternity.statistics.application.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,6 +10,10 @@ import until.the.eternity.statistics.domain.entity.weekly.TopCategoryWeeklyStati
 import until.the.eternity.statistics.domain.mapper.TopCategoryWeeklyStatisticsMapper;
 import until.the.eternity.statistics.interfaces.rest.dto.response.TopCategoryWeeklyStatisticsResponse;
 import until.the.eternity.statistics.repository.weekly.TopCategoryWeeklyStatisticsRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,7 +26,9 @@ public class TopCategoryWeeklyStatisticsService {
     /** 탑카테고리별 주간 통계 조회 (topCategory, 날짜 범위) */
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_TOPCATEGORY_WEEKLY,
-            key = "(#topCategory ?: '') + ':' + #startDate + ':' + #endDate")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildStatisticsTopCategoryKey(#topCategory, #startDate, #endDate)")
     @Transactional(readOnly = true)
     public List<TopCategoryWeeklyStatisticsResponse> search(
             String topCategory, LocalDate startDate, LocalDate endDate) {

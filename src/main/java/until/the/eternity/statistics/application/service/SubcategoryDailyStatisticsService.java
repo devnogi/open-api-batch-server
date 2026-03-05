@@ -1,8 +1,5 @@
 package until.the.eternity.statistics.application.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,6 +10,10 @@ import until.the.eternity.statistics.domain.entity.daily.SubcategoryDailyStatist
 import until.the.eternity.statistics.domain.mapper.SubcategoryDailyStatisticsMapper;
 import until.the.eternity.statistics.interfaces.rest.dto.response.SubcategoryDailyStatisticsResponse;
 import until.the.eternity.statistics.repository.daily.SubcategoryDailyStatisticsRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,7 +26,9 @@ public class SubcategoryDailyStatisticsService {
     /** 서브카테고리별 일간 통계 조회 (subCategory, 날짜 범위) */
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_SUBCATEGORY_DAILY,
-            key = "(#subCategory ?: '') + ':' + #startDate + ':' + #endDate")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildStatisticsSubcategoryKey(#subCategory, #startDate, #endDate)")
     @Transactional(readOnly = true)
     public List<SubcategoryDailyStatisticsResponse> search(
             String topCategory, String subCategory, LocalDate startDate, LocalDate endDate) {
