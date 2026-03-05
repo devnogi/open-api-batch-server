@@ -35,16 +35,8 @@ public class AuctionHistoryService {
     @Cacheable(
             cacheNames = CacheNames.AUCTION_HISTORY_SEARCH,
             key =
-                    "#pageRequestDto.page() + ':'"
-                            + " + #pageRequestDto.size() + ':'"
-                            + " + (#pageRequestDto.sortBy() != null ? #pageRequestDto.sortBy().fieldName : 'dateAuctionBuy') + ':'"
-                            + " + (#pageRequestDto.direction() != null ? #pageRequestDto.direction().code : 'DESC') + ':'"
-                            + " + (#requestDto.itemName() ?: '') + ':'"
-                            + " + (#requestDto.isExactItemName() ?: false) + ':'"
-                            + " + (#requestDto.itemTopCategory() ?: '') + ':'"
-                            + " + (#requestDto.itemSubCategory() ?: '') + ':'"
-                            + " + (#requestDto.dateAuctionBuyRequest()?.dateAuctionBuyFrom() ?: '') + ':'"
-                            + " + (#requestDto.dateAuctionBuyRequest()?.dateAuctionBuyTo() ?: '')",
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildAuctionHistorySearchKey(#requestDto, #pageRequestDto)",
             condition =
                     "#requestDto.itemOptionSearchRequest() == null"
                             + " and #requestDto.enchantSearchRequest() == null"

@@ -41,11 +41,13 @@ public class AuctionRealtimeService {
     @Cacheable(
             cacheNames = CacheNames.AUCTION_REALTIME_SEARCH,
             key =
-                    "(#requestDto.itemTopCategory() ?: '_') + ':'"
-                            + " + (#requestDto.itemSubCategory() ?: '_') + ':'"
-                            + " + (#requestDto.itemName() ?: '_') + ':'"
-                            + " + (#requestDto.isExactItemName() ?: false) + ':'"
-                            + " + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildAuctionRealtimeSearchKey(#requestDto, #pageable)",
+            condition =
+                    "#requestDto.itemOptionSearchRequest() == null"
+                            + " and #requestDto.enchantSearchRequest() == null"
+                            + " and (#requestDto.metalwareSearchRequests() == null or #requestDto.metalwareSearchRequests().isEmpty())"
+                            + " and #requestDto.priceSearchRequest() == null")
     @Transactional(readOnly = true)
     public PageResponseDto<AuctionRealtimeDetailResponse<RealtimeItemOptionResponse>> search(
             AuctionRealtimeSearchRequest requestDto, Pageable pageable) {
