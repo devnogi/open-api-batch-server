@@ -97,7 +97,7 @@ springdoc:
 decorator:
   datasource:
     p6spy:
-      enable-logging: false
+      enable-logging: true
 
 logging:
   config: classpath:logback/logback-display.xml
@@ -146,6 +146,7 @@ elasticsearch:
 
 app:
   cache:
+    redis-prefix: ${APP_CACHE_REDIS_PREFIX:oab:v2} # 직렬화 방식 변경 시 버전업 필요
     warmup:
       enabled: ${APP_CACHE_WARMUP_ENABLED:true}
       ranking-limit: ${APP_CACHE_WARMUP_RANKING_LIMIT:50}
