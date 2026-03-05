@@ -14,8 +14,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -34,11 +32,51 @@ class AuctionHistoryQueryDslRepository {
     /** 옵션 조건 빌드 결과 (조건 BooleanBuilder + 추가된 조건 개수) */
     record OptionConditionResult(BooleanBuilder builder, int count) {}
 
-    /** 경매 거래내역 검색 (옵션 조건 포함) */
-    public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
+    /** 경매 거래내역 콘텐츠 조회 (옵션 조건 포함) */
+    public List<AuctionHistory> searchContent(
+            AuctionHistorySearchRequest condition, Pageable pageable) {
         QAuctionHistory ah = QAuctionHistory.auctionHistory;
         QAuctionHistoryItemOption aio = QAuctionHistoryItemOption.auctionHistoryItemOption;
+        BooleanBuilder historyBuilder = buildSearchPredicate(condition, ah);
 
+        List<OrderSpecifier<?>> orderSpecifiers = buildOrderSpecifiers(pageable, ah);
+
+        // Deferred Join (Late Row Lookup): 인덱스 친화적으로 ID 먼저 조회
+        List<String> ids =
+                queryFactory
+                        .select(ah.auctionBuyId)
+                        .from(ah)
+                        .where(historyBuilder)
+                        .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .fetch();
+
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        return queryFactory
+                .selectFrom(ah)
+                .leftJoin(ah.auctionHistoryItemOptions, aio)
+                .fetchJoin()
+                .where(ah.auctionBuyId.in(ids))
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
+                .distinct()
+                .fetch();
+    }
+
+    /** 경매 거래내역 조건 기준 전체 건수 조회 */
+    public long count(AuctionHistorySearchRequest condition) {
+        QAuctionHistory ah = QAuctionHistory.auctionHistory;
+        BooleanBuilder historyBuilder = buildSearchPredicate(condition, ah);
+        Long total = queryFactory.select(ah.count()).from(ah).where(historyBuilder).fetchOne();
+        return total == null ? 0L : total;
+    }
+
+    /** 검색 where 절 빌드 (옵션/인챈트/세공 포함) */
+    private BooleanBuilder buildSearchPredicate(
+            AuctionHistorySearchRequest condition, QAuctionHistory ah) {
         OptionConditionResult optionResult = buildOptionConditionResult(condition);
         boolean hasItemOptionFilter = hasEffectiveItemOptionFilter(optionResult);
         boolean hasEnchantFilter = hasEnchantFilter(condition);
@@ -46,10 +84,8 @@ class AuctionHistoryQueryDslRepository {
         boolean isBasicSearchOnly =
                 !(hasItemOptionFilter || hasEnchantFilter || hasMetalwareFilter);
 
-        // 1단계: 거래내역 조건 빌드
         BooleanBuilder historyBuilder = buildHistoryPredicate(condition, ah, !isBasicSearchOnly);
 
-        // 2단계: 옵션 조건이 있으면 서브쿼리 추가
         if (hasItemOptionFilter) {
             QAuctionHistoryItemOption subOption = new QAuctionHistoryItemOption("subOption");
             var subQuery =
@@ -62,41 +98,7 @@ class AuctionHistoryQueryDslRepository {
             historyBuilder.and(ah.auctionBuyId.in(subQuery));
         }
 
-        // 3단계: 정렬 조건 빌드
-        List<OrderSpecifier<?>> orderSpecifiers = buildOrderSpecifiers(pageable, ah);
-
-        // 4단계: Deferred Join (Late Row Lookup) 패턴 적용
-        // 4-1단계: ID만 먼저 조회 (인덱스 활용)
-        List<String> ids =
-                queryFactory
-                        .select(ah.auctionBuyId)
-                        .from(ah)
-                        .where(historyBuilder)
-                        .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
-                        .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize())
-                        .fetch();
-
-        // 결과가 없으면 빈 페이지 반환
-        if (ids.isEmpty()) {
-            return new PageImpl<>(List.of(), pageable, 0L);
-        }
-
-        // 4-2단계: ID로 상세 조회 (LEFT JOIN으로 옵션 포함)
-        List<AuctionHistory> content =
-                queryFactory
-                        .selectFrom(ah)
-                        .leftJoin(ah.auctionHistoryItemOptions, aio)
-                        .fetchJoin()
-                        .where(ah.auctionBuyId.in(ids))
-                        .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
-                        .distinct()
-                        .fetch();
-
-        // Count 쿼리 (JOIN 없이 실행)
-        Long total = queryFactory.select(ah.count()).from(ah).where(historyBuilder).fetchOne();
-
-        return new PageImpl<>(content, pageable, total == null ? 0L : total);
+        return historyBuilder;
     }
 
     /** 거래내역 기본 조건 빌드 (카테고리, 아이템명, 가격, 거래일자) */

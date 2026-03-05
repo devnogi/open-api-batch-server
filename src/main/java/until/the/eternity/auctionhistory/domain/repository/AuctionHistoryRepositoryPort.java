@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
@@ -15,7 +14,9 @@ public interface AuctionHistoryRepositoryPort {
 
     record LatestDateWithIds(Instant latestDate, Set<String> existingIds) {}
 
-    Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable);
+    List<AuctionHistory> searchContent(AuctionHistorySearchRequest condition, Pageable pageable);
+
+    long count(AuctionHistorySearchRequest condition);
 
     Optional<AuctionHistory> findById(String id);
 

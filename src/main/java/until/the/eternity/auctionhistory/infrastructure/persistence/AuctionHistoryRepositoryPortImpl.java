@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +28,14 @@ public class AuctionHistoryRepositoryPortImpl implements AuctionHistoryRepositor
     private int batchSize;
 
     @Override
-    public Page<AuctionHistory> search(AuctionHistorySearchRequest condition, Pageable pageable) {
-        return queryDslRepository.search(condition, pageable);
+    public List<AuctionHistory> searchContent(
+            AuctionHistorySearchRequest condition, Pageable pageable) {
+        return queryDslRepository.searchContent(condition, pageable);
+    }
+
+    @Override
+    public long count(AuctionHistorySearchRequest condition) {
+        return queryDslRepository.count(condition);
     }
 
     @Override

@@ -56,12 +56,14 @@ public class AuctionHistoryCacheWarmupService {
 
     private void evictCaches() {
         clearCache(CacheNames.AUCTION_HISTORY_SEARCH);
+        clearCache(CacheNames.AUCTION_HISTORY_COUNT);
         // auction_history 전체를 직접 쿼리하는 역대 랭킹도 함께 무효화
         clearCache(CacheNames.RANKING_ALLTIME_HIGHEST);
         clearCache(CacheNames.RANKING_ALLTIME_MONTH_VOLUME);
         log.info(
-                "[Cache Warmup] Evicted: {}, {}, {}",
+                "[Cache Warmup] Evicted: {}, {}, {}, {}",
                 CacheNames.AUCTION_HISTORY_SEARCH,
+                CacheNames.AUCTION_HISTORY_COUNT,
                 CacheNames.RANKING_ALLTIME_HIGHEST,
                 CacheNames.RANKING_ALLTIME_MONTH_VOLUME);
     }
