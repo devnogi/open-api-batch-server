@@ -34,8 +34,7 @@ public class AuctionHistoryCacheWarmupService {
     private final CacheManager cacheManager;
 
     /**
-     * <<<<<<< HEAD 캐시 무효화 후 기본 30가지 조합을 선제적으로 워밍한다. ======= 캐시 무효화 후 기본 12가지 조합(page 1~2 × size 20
-     * × sortField 3종 × direction 2종)을 선제적으로 워밍한다. >>>>>>> 40261cb1cdfa017f341bfbde515c64716860b68f
+     * 캐시 무효화 후 기본 12가지 조합(page 1~2 × size 20 × sortField 3종 × direction 2종)을 선제적으로 워밍한다.
      *
      * <p>빈 검색 조건(필터 없음) 기준으로 워밍하므로, 단순 목록 조회 요청에 즉시 캐시 히트가 발생한다.
      */
