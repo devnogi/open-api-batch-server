@@ -1,7 +1,6 @@
 package until.the.eternity.auctionhistory.interfaces.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,6 +27,10 @@ public record AuctionHistorySearchRequest(
                 List<MetalwareSearchRequest> metalwareSearchRequests) {
 
     public AuctionHistorySearchRequest {
+        if (isExactItemName == null) {
+            isExactItemName = true;
+        }
+
         if (dateAuctionBuyRequest == null
                 || ((dateAuctionBuyRequest.dateAuctionBuyFrom() == null
                                 || dateAuctionBuyRequest.dateAuctionBuyFrom().isBlank())

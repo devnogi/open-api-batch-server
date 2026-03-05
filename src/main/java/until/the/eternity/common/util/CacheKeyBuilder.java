@@ -1,5 +1,6 @@
 package until.the.eternity.common.util;
 
+import java.time.LocalDate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
@@ -7,8 +8,6 @@ import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRea
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.request.MetalwareAttributeInfoSearchRequest;
-
-import java.time.LocalDate;
 
 public final class CacheKeyBuilder {
 
@@ -130,7 +129,7 @@ public final class CacheKeyBuilder {
                 + ":"
                 + normalize(requestDto.itemName())
                 + ":"
-                + Boolean.TRUE.equals(requestDto.isExactItemName())
+                + isExactItemName(requestDto.isExactItemName())
                 + ":"
                 + normalize(requestDto.itemTopCategory())
                 + ":"
@@ -156,7 +155,7 @@ public final class CacheKeyBuilder {
                 + ":"
                 + normalize(requestDto.itemName())
                 + ":"
-                + Boolean.TRUE.equals(requestDto.isExactItemName())
+                + isExactItemName(requestDto.isExactItemName())
                 + ":"
                 + dateFrom
                 + ":"
@@ -175,5 +174,9 @@ public final class CacheKeyBuilder {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? "" : trimmed;
+    }
+
+    private static boolean isExactItemName(Boolean isExactItemName) {
+        return Boolean.TRUE.equals(isExactItemName);
     }
 }

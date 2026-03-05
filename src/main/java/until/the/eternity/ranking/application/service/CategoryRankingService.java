@@ -1,5 +1,6 @@
 package until.the.eternity.ranking.application.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -9,8 +10,6 @@ import until.the.eternity.ranking.domain.mapper.RankingMapper;
 import until.the.eternity.ranking.interfaces.rest.dto.response.PriceRankingResponse;
 import until.the.eternity.ranking.interfaces.rest.dto.response.VolumeRankingResponse;
 import until.the.eternity.ranking.repository.RankingRepository;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

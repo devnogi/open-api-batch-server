@@ -73,8 +73,10 @@ jobs:
           echo "COVERAGE=$percent" >> "$GITHUB_OUTPUT"
 
       - name: Comment PR with Test and Coverage Result
-        if: always()
+        if: always() && github.event.pull_request.head.repo.full_name == github.repository
         uses: marocchino/sticky-pull-request-comment@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           header: test-results
           message: |
