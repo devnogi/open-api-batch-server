@@ -47,6 +47,9 @@ services:
       AUCTION_HISTORY_DELAY_MS: ${AUCTION_HISTORY_DELAY_MS:-1000}
       AUCTION_HISTORY_CRON: "${AUCTION_HISTORY_CRON:-0 0 * * * *}"
       STATISTICS_PREVIOUS_DAY_CRON: "${STATISTICS_PREVIOUS_DAY_CRON:-0 0 * * * *}"
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6389}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       # === Elasticsearch Configuration ===
       ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
@@ -97,6 +100,8 @@ services:
     # MySQL 준비될 때까지 대기 (Elasticsearch는 선택 의존성)
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
     # === Health Check (Local - 표준) ===
@@ -189,6 +194,27 @@ services:
         reservations:
           memory: 512m
 
+  # Redis
+  redis:
+    image: redis:8.4.0
+    container_name: open-api-batch-redis
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    ports:
+      - "${REDIS_EXTERNAL_PORT:-6389}:${REDIS_PORT:-6389}"
+    command: ["redis-server", "--port", "${REDIS_PORT:-6389}", "--requirepass", "${REDIS_PASSWORD}"]
+    networks:
+      - app-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "-p", "${REDIS_PORT:-6389}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   # === Autoheal (Local - 표준) ===
   # unhealthy 컨테이너 자동 재시작 서비스
   autoheal:
@@ -214,6 +240,7 @@ services:
 volumes:
   mysql_data:
   elasticsearch_data:
+  redis_data:
   app-logs:
     driver: local
 
