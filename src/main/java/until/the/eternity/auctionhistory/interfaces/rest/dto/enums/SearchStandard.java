@@ -3,6 +3,7 @@ package until.the.eternity.auctionhistory.interfaces.rest.dto.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Arrays;
 
 /** 검색 기준 (이상/이하/같음) */

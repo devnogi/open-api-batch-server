@@ -1,11 +1,11 @@
 package until.the.eternity.enchantinfo.domain.exception;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import until.the.eternity.common.exception.ExceptionCode;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Getter
 @RequiredArgsConstructor

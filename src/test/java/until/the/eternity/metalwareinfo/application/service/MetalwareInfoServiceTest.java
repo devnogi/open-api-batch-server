@@ -1,9 +1,5 @@
 package until.the.eternity.metalwareinfo.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import until.the.eternity.metalwareinfo.domain.repository.MetalwareInfoRepositoryPort;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoResponse;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoSyncResponse;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MetalwareInfoServiceTest {

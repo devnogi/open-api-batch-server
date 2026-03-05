@@ -1,7 +1,5 @@
 package until.the.eternity.config;
 
-import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,18 +25,12 @@ import until.the.eternity.metalwareinfo.application.service.MetalwareAttributeIn
 import until.the.eternity.metalwareinfo.application.service.MetalwareInfoService;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.request.MetalwareAttributeInfoSearchRequest;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoResponse;
-import until.the.eternity.ranking.application.service.AllTimeRankingService;
-import until.the.eternity.ranking.application.service.CategoryRankingService;
-import until.the.eternity.ranking.application.service.PriceChangeRankingService;
-import until.the.eternity.ranking.application.service.PriceRankingService;
-import until.the.eternity.ranking.application.service.VolumeRankingService;
+import until.the.eternity.ranking.application.service.*;
 import until.the.eternity.ranking.util.RankingConstants;
-import until.the.eternity.statistics.application.service.ItemDailyStatisticsService;
-import until.the.eternity.statistics.application.service.ItemWeeklyStatisticsService;
-import until.the.eternity.statistics.application.service.SubcategoryDailyStatisticsService;
-import until.the.eternity.statistics.application.service.SubcategoryWeeklyStatisticsService;
-import until.the.eternity.statistics.application.service.TopCategoryDailyStatisticsService;
-import until.the.eternity.statistics.application.service.TopCategoryWeeklyStatisticsService;
+import until.the.eternity.statistics.application.service.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Component
