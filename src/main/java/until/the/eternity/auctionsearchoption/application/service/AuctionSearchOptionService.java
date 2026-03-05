@@ -28,7 +28,9 @@ public class AuctionSearchOptionService {
      *
      * @return 검색 옵션 메타데이터 리스트
      */
-    @Cacheable(cacheNames = CacheNames.SEARCH_OPTION_ALL_ACTIVE, key = "'all'")
+    @Cacheable(
+            cacheNames = CacheNames.SEARCH_OPTION_ALL_ACTIVE,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()")
     @Transactional(readOnly = true)
     public List<SearchOptionMetadataResponse> getAllActiveSearchOptions() {
         List<AuctionSearchOptionMetadata> entities = repositoryPort.findAllActive();

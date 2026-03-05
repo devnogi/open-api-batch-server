@@ -34,7 +34,8 @@ public class MetalwareAttributeInfoService {
     @Cacheable(
             cacheNames = CacheNames.METALWARE_ATTRIBUTE_INFO_SEARCH,
             key =
-                    "#request.metalware() + ':' + (#request.page ?: 1) + ':' + (#request.size ?: 25) + ':' + (#request.direction?.name() ?: 'ASC')")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildMetalwareAttributeInfoSearchKey(#request)")
     @Transactional(readOnly = true)
     public Page<MetalwareAttributeInfoResponse> search(
             MetalwareAttributeInfoSearchRequest request) {

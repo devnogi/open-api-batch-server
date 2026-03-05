@@ -39,19 +39,25 @@ public class ItemInfoService {
         return ItemCategoryResponse.from();
     }
 
-    @Cacheable(cacheNames = CacheNames.ITEM_INFO_ALL, key = "'all'")
+    @Cacheable(
+            cacheNames = CacheNames.ITEM_INFO_ALL,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()")
     public List<ItemInfoResponse> findAll() {
         List<ItemInfo> itemInfos = itemInfoRepository.findAll();
         return ItemInfoResponse.from(itemInfos);
     }
 
-    @Cacheable(cacheNames = CacheNames.ITEM_INFO_BY_TOP_CATEGORY, key = "#topCategory")
+    @Cacheable(
+            cacheNames = CacheNames.ITEM_INFO_BY_TOP_CATEGORY,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byText(#topCategory)")
     public List<ItemInfoResponse> findByTopCategory(String topCategory) {
         List<ItemInfo> itemInfos = itemInfoRepository.findByTopCategory(topCategory);
         return ItemInfoResponse.from(itemInfos);
     }
 
-    @Cacheable(cacheNames = CacheNames.ITEM_INFO_BY_SUB_CATEGORY, key = "#subCategory")
+    @Cacheable(
+            cacheNames = CacheNames.ITEM_INFO_BY_SUB_CATEGORY,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byText(#subCategory)")
     public List<ItemInfoResponse> findBySubCategory(String subCategory) {
         List<ItemInfo> itemInfos = itemInfoRepository.findBySubCategory(subCategory);
         return ItemInfoResponse.from(itemInfos);
@@ -60,11 +66,8 @@ public class ItemInfoService {
     @Cacheable(
             cacheNames = CacheNames.ITEM_INFO_DETAIL,
             key =
-                    "(#searchRequest.name() ?: '') + ':'"
-                            + " + (#searchRequest.topCategory() ?: '') + ':'"
-                            + " + (#searchRequest.subCategory() ?: '') + ':'"
-                            + " + #pageable.pageNumber + ':' + #pageable.pageSize"
-                            + " + ':' + #pageable.sort")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildItemInfoDetailKey(#searchRequest, #pageable)")
     public Page<ItemInfoResponse> findAllDetail(
             ItemInfoSearchRequest searchRequest, Pageable pageable) {
         Page<ItemInfo> itemInfoPage =
@@ -75,10 +78,8 @@ public class ItemInfoService {
     @Cacheable(
             cacheNames = CacheNames.ITEM_INFO_SUMMARY,
             key =
-                    "(#searchRequest.name() ?: '') + ':'"
-                            + " + (#searchRequest.topCategory() ?: '') + ':'"
-                            + " + (#searchRequest.subCategory() ?: '') + ':'"
-                            + " + #direction.name()")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildItemInfoSummaryKey(#searchRequest, #direction)")
     public List<ItemInfoSummaryResponse> findAllSummary(
             ItemInfoSearchRequest searchRequest,
             org.springframework.data.domain.Sort.Direction direction) {

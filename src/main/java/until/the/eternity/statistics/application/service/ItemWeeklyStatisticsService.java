@@ -26,10 +26,8 @@ public class ItemWeeklyStatisticsService {
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_ITEM_WEEKLY,
             key =
-                    "(#itemName ?: '') + ':'"
-                            + " + (#subCategory ?: '') + ':'"
-                            + " + (#topCategory ?: '') + ':'"
-                            + " + #startDate + ':' + #endDate")
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildStatisticsItemKey(#itemName, #subCategory, #topCategory, #startDate, #endDate)")
     @Transactional(readOnly = true)
     public List<ItemWeeklyStatisticsResponse> search(
             String itemName,

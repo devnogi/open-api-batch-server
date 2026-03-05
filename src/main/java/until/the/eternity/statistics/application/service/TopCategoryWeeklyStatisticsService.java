@@ -25,7 +25,9 @@ public class TopCategoryWeeklyStatisticsService {
     /** 탑카테고리별 주간 통계 조회 (topCategory, 날짜 범위) */
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_TOPCATEGORY_WEEKLY,
-            key = "(#topCategory ?: '') + ':' + #startDate + ':' + #endDate")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildStatisticsTopCategoryKey(#topCategory, #startDate, #endDate)")
     @Transactional(readOnly = true)
     public List<TopCategoryWeeklyStatisticsResponse> search(
             String topCategory, LocalDate startDate, LocalDate endDate) {

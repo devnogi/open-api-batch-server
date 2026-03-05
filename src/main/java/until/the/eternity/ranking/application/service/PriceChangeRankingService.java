@@ -20,21 +20,27 @@ public class PriceChangeRankingService {
     private final RankingMapper rankingMapper;
 
     /** 가격 급등 TOP N (API 6) */
-    @Cacheable(cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_CHANGE_PRICE_SURGE,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<PriceChangeRankingResponse> getPriceSurge(int limit) {
         List<Object[]> results = rankingRepository.findPriceSurge(limit);
         return rankingMapper.toPriceChangeRankingResponses(results);
     }
 
     /** 가격 급락 TOP N (API 7) */
-    @Cacheable(cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_CHANGE_PRICE_DROP,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<PriceChangeRankingResponse> getPriceDrop(int limit) {
         List<Object[]> results = rankingRepository.findPriceDrop(limit);
         return rankingMapper.toPriceChangeRankingResponses(results);
     }
 
     /** 거래량 급증 TOP N (API 8) */
-    @Cacheable(cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_CHANGE_VOLUME_SURGE,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<VolumeChangeRankingResponse> getVolumeSurge(int limit) {
         List<Object[]> results = rankingRepository.findVolumeSurge(limit);
         return rankingMapper.toVolumeChangeRankingResponses(results);

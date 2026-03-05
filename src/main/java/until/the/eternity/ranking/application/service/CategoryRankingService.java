@@ -22,7 +22,9 @@ public class CategoryRankingService {
     /** 카테고리별 최고가 TOP N (API 9) */
     @Cacheable(
             cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
-            key = "#topCategory + ':' + #subCategory + ':' + #limit")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
     public List<PriceRankingResponse> getCategoryTopPriced(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
@@ -33,7 +35,9 @@ public class CategoryRankingService {
     /** 카테고리별 인기 아이템 TOP N (API 10) */
     @Cacheable(
             cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
-            key = "#topCategory + ':' + #subCategory + ':' + #limit")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
     public List<VolumeRankingResponse> getCategoryPopular(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =

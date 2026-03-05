@@ -19,14 +19,18 @@ public class VolumeRankingService {
     private final RankingMapper rankingMapper;
 
     /** 오늘의 인기 아이템 TOP N (API 4) */
-    @Cacheable(cacheNames = CacheNames.RANKING_VOLUME_TODAY_POPULAR, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_VOLUME_TODAY_POPULAR,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<VolumeRankingResponse> getTodayPopular(int limit) {
         List<Object[]> results = rankingRepository.findTodayPopular(limit);
         return rankingMapper.toVolumeRankingResponses(results);
     }
 
     /** 이번 주 인기 아이템 TOP N (API 5) */
-    @Cacheable(cacheNames = CacheNames.RANKING_VOLUME_WEEK_POPULAR, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_VOLUME_WEEK_POPULAR,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<VolumeRankingResponse> getWeekPopular(int limit) {
         List<Object[]> results = rankingRepository.findWeekPopular(limit);
         return rankingMapper.toVolumeRankingResponses(results);

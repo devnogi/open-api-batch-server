@@ -19,21 +19,27 @@ public class PriceRankingService {
     private final RankingMapper rankingMapper;
 
     /** 오늘의 최고가 거래 TOP N (API 1) */
-    @Cacheable(cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_PRICE_TODAY_HIGHEST,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<PriceRankingResponse> getTodayHighestPrice(int limit) {
         List<Object[]> results = rankingRepository.findTodayHighestPrice(limit);
         return rankingMapper.toPriceRankingResponses(results);
     }
 
     /** 이번 주 최고가 아이템 TOP N (API 2) */
-    @Cacheable(cacheNames = CacheNames.RANKING_PRICE_WEEK_HIGHEST, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_PRICE_WEEK_HIGHEST,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<PriceRankingResponse> getWeekHighestPrice(int limit) {
         List<Object[]> results = rankingRepository.findWeekHighestPrice(limit);
         return rankingMapper.toPriceRankingResponses(results);
     }
 
     /** 오늘의 최대 거래액 TOP N (API 3) */
-    @Cacheable(cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_PRICE_TODAY_VOLUME,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<PriceRankingResponse> getTodayLargestVolume(int limit) {
         List<Object[]> results = rankingRepository.findTodayLargestVolume(limit);
         return rankingMapper.toPriceRankingResponses(results);

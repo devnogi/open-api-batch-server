@@ -25,7 +25,9 @@ public class SubcategoryWeeklyStatisticsService {
     /** 서브카테고리별 주간 통계 조회 (subCategory, 날짜 범위) */
     @Cacheable(
             cacheNames = CacheNames.STATISTICS_SUBCATEGORY_WEEKLY,
-            key = "(#subCategory ?: '') + ':' + #startDate + ':' + #endDate")
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildStatisticsSubcategoryKey(#subCategory, #startDate, #endDate)")
     @Transactional(readOnly = true)
     public List<SubcategoryWeeklyStatisticsResponse> search(
             String topCategory, String subCategory, LocalDate startDate, LocalDate endDate) {

@@ -19,7 +19,9 @@ public class MetalwareInfoService {
 
     private final MetalwareInfoRepositoryPort metalwareInfoRepository;
 
-    @Cacheable(cacheNames = CacheNames.METALWARE_INFO_ALL, key = "'all'")
+    @Cacheable(
+            cacheNames = CacheNames.METALWARE_INFO_ALL,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()")
     public List<MetalwareInfoResponse> findAll() {
         List<String> metalwares = metalwareInfoRepository.findAllMetalwares();
         return MetalwareInfoResponse.from(metalwares);

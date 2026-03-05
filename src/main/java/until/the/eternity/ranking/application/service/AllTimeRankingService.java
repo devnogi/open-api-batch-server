@@ -19,14 +19,18 @@ public class AllTimeRankingService {
     private final RankingMapper rankingMapper;
 
     /** 역대 최고가 거래 TOP N (API 11) - auction_history 전체 스캔, 1시간 TTL */
-    @Cacheable(cacheNames = CacheNames.RANKING_ALLTIME_HIGHEST, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_ALLTIME_HIGHEST,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<AllTimeRankingResponse> getAllTimeHighestPrice(int limit) {
         List<Object[]> results = rankingRepository.findAllTimeHighestPrice(limit);
         return rankingMapper.toAllTimeRankingResponses(results);
     }
 
     /** 이번 달 최대 거래액 TOP N (API 12) */
-    @Cacheable(cacheNames = CacheNames.RANKING_ALLTIME_MONTH_VOLUME, key = "#limit")
+    @Cacheable(
+            cacheNames = CacheNames.RANKING_ALLTIME_MONTH_VOLUME,
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).byLimit(#limit)")
     public List<AllTimeRankingResponse> getMonthLargestVolume(int limit) {
         List<Object[]> results = rankingRepository.findMonthLargestVolume(limit);
         return rankingMapper.toAllTimeRankingResponses(results);
