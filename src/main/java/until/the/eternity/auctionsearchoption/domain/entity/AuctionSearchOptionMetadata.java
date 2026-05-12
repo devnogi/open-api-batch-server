@@ -1,15 +1,22 @@
 package until.the.eternity.auctionsearchoption.domain.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "auction_search_option_metadata")
+@Table(
+        name = "auction_search_option_metadata",
+        indexes = {
+            @Index(
+                    name = "idx_search_option_active_display_order",
+                    columnList = "is_active, display_order")
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AuctionSearchOptionMetadata {

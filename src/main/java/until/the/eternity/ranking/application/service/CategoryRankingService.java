@@ -1,6 +1,5 @@
 package until.the.eternity.ranking.application.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,8 @@ import until.the.eternity.ranking.domain.mapper.RankingMapper;
 import until.the.eternity.ranking.interfaces.rest.dto.response.PriceRankingResponse;
 import until.the.eternity.ranking.interfaces.rest.dto.response.VolumeRankingResponse;
 import until.the.eternity.ranking.repository.RankingRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +25,15 @@ public class CategoryRankingService {
             cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)",
+            sync = true)
     public List<PriceRankingResponse> getCategoryTopPriced(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
-                rankingRepository.findCategoryTopPriced(topCategory, subCategory, limit);
+                hasSubCategory(subCategory)
+                        ? rankingRepository.findCategoryTopPricedByTopAndSubCategory(
+                                topCategory, subCategory, limit)
+                        : rankingRepository.findCategoryTopPricedByTopCategory(topCategory, limit);
         return rankingMapper.toPriceRankingResponses(results);
     }
 
@@ -37,11 +42,19 @@ public class CategoryRankingService {
             cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)",
+            sync = true)
     public List<VolumeRankingResponse> getCategoryPopular(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
-                rankingRepository.findCategoryPopular(topCategory, subCategory, limit);
+                hasSubCategory(subCategory)
+                        ? rankingRepository.findCategoryPopularByTopAndSubCategory(
+                                topCategory, subCategory, limit)
+                        : rankingRepository.findCategoryPopularByTopCategory(topCategory, limit);
         return rankingMapper.toVolumeRankingResponses(results);
+    }
+
+    private boolean hasSubCategory(String subCategory) {
+        return subCategory != null && !subCategory.isBlank();
     }
 }

@@ -2,10 +2,11 @@ package until.the.eternity.statistics.domain.entity.weekly;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import lombok.*;
 
 @Entity
 @Table(
@@ -13,7 +14,14 @@ import lombok.*;
         indexes = {
             @Index(
                     name = "idx_item_weekly_statistics_item_name_year_week",
-                    columnList = "item_name, year, week_number")
+                    columnList = "item_name, year, week_number"),
+            @Index(
+                    name = "idx_item_weekly_item_category_start_date",
+                    columnList =
+                            "item_name, item_top_category, item_sub_category, week_start_date"),
+            @Index(
+                    name = "idx_item_weekly_year_week_total_quantity",
+                    columnList = "year, week_number, total_quantity DESC")
         },
         uniqueConstraints = {
             @UniqueConstraint(

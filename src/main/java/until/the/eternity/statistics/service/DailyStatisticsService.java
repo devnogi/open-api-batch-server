@@ -2,23 +2,43 @@ package until.the.eternity.statistics.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import until.the.eternity.config.CacheNames;
+import until.the.eternity.ranking.application.service.VolumeRankingService;
+import until.the.eternity.ranking.util.RankingConstants;
+import until.the.eternity.statistics.application.service.ItemDailyStatisticsService;
+import until.the.eternity.statistics.application.service.TopCategoryDailyStatisticsService;
 import until.the.eternity.statistics.repository.daily.ItemDailyStatisticsRepository;
 import until.the.eternity.statistics.repository.daily.SubcategoryDailyStatisticsRepository;
 import until.the.eternity.statistics.repository.daily.TopCategoryDailyStatisticsRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DailyStatisticsService {
 
+    @Qualifier("applicationTaskExecutor")
+    private final TaskExecutor taskExecutor;
+
     private final ItemDailyStatisticsRepository itemDailyStatisticsRepository;
     private final SubcategoryDailyStatisticsRepository subcategoryDailyStatisticsRepository;
     private final TopCategoryDailyStatisticsRepository topCategoryDailyStatisticsRepository;
+    private final ItemDailyStatisticsService itemDailyStatisticsReadService;
+    private final TopCategoryDailyStatisticsService topCategoryDailyStatisticsReadService;
+    private final VolumeRankingService volumeRankingService;
+
+    private record DailyStatisticsWarmupTarget(
+            String itemName, String topCategory, String subCategory) {}
 
     /**
      * 당일의 경매 거래 내역을 기반으로 일간 통계를 업데이트 AuctionHistoryScheduler가 실행될 때마다 호출되어 당일 통계만 갱신 순서:
@@ -80,6 +100,7 @@ public class DailyStatisticsService {
         log.info(
                 "[Current Day Statistics] All current day statistics calculated successfully in {} ms",
                 System.currentTimeMillis() - start);
+        scheduleReadCacheWarmup("current-day");
     }
 
     /**
@@ -140,5 +161,55 @@ public class DailyStatisticsService {
         log.info(
                 "[Previous Day Statistics] All previous day statistics finalized successfully in {} ms",
                 System.currentTimeMillis() - start);
+        scheduleReadCacheWarmup("previous-day");
+    }
+
+    private void scheduleReadCacheWarmup(String reason) {
+        Runnable warmup = () -> warmReadCaches(reason);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            taskExecutor.execute(warmup);
+                        }
+                    });
+            return;
+        }
+        taskExecutor.execute(warmup);
+    }
+
+    private void warmReadCaches(String reason) {
+        try {
+            LocalDate end = LocalDate.now();
+            LocalDate dailyStart = end.minusDays(14);
+
+            for (DailyStatisticsWarmupTarget target : dailyStatisticsWarmupTargets()) {
+                itemDailyStatisticsReadService.search(
+                        target.itemName(),
+                        target.subCategory(),
+                        target.topCategory(),
+                        dailyStart,
+                        end);
+                topCategoryDailyStatisticsReadService.search(target.topCategory(), dailyStart, end);
+            }
+
+            volumeRankingService.getTodayPopular(20);
+            volumeRankingService.getTodayPopular(RankingConstants.DEFAULT_LIMIT);
+
+            log.info("[Daily Statistics] Read cache warmup completed after {}", reason);
+        } catch (Exception e) {
+            log.warn(
+                    "[Daily Statistics] Read cache warmup failed after {}: {}",
+                    reason,
+                    e.getMessage(),
+                    e);
+        }
+    }
+
+    private List<DailyStatisticsWarmupTarget> dailyStatisticsWarmupTargets() {
+        return List.of(
+                new DailyStatisticsWarmupTarget("향기로운 꿀 우유", "기타", "기타"),
+                new DailyStatisticsWarmupTarget("축복의 포션", "소모품", "포션"));
     }
 }

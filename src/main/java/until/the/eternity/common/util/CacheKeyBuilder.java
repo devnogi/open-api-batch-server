@@ -1,13 +1,15 @@
 package until.the.eternity.common.util;
 
-import java.time.LocalDate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
 import until.the.eternity.common.request.PageRequestDto;
+import until.the.eternity.hornBugle.interfaces.rest.dto.request.HornBuglePageRequestDto;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.request.MetalwareAttributeInfoSearchRequest;
+
+import java.time.LocalDate;
 
 public final class CacheKeyBuilder {
 
@@ -94,8 +96,10 @@ public final class CacheKeyBuilder {
     }
 
     public static String buildStatisticsSubcategoryKey(
-            String subCategory, LocalDate startDate, LocalDate endDate) {
-        return normalize(subCategory)
+            String topCategory, String subCategory, LocalDate startDate, LocalDate endDate) {
+        return normalize(topCategory)
+                + ":"
+                + normalize(subCategory)
                 + ":"
                 + String.valueOf(startDate)
                 + ":"
@@ -181,6 +185,13 @@ public final class CacheKeyBuilder {
                 + pageable.getPageSize()
                 + ":"
                 + pageable.getSort();
+    }
+
+    public static String buildHornBugleRecentKey(
+            String serverName, HornBuglePageRequestDto pageRequest) {
+        int page = pageRequest != null ? pageRequest.getResolvedPage() : 1;
+        int size = pageRequest != null ? pageRequest.getResolvedSize() : 20;
+        return normalize(serverName) + ":" + page + ":" + size;
     }
 
     private static String normalize(String value) {

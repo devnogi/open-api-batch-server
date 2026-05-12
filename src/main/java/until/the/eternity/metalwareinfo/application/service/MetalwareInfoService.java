@@ -1,6 +1,5 @@
 package until.the.eternity.metalwareinfo.application.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -12,6 +11,8 @@ import until.the.eternity.metalwareinfo.domain.repository.MetalwareInfoRepositor
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoResponse;
 import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareInfoSyncResponse;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -21,7 +22,8 @@ public class MetalwareInfoService {
 
     @Cacheable(
             cacheNames = CacheNames.METALWARE_INFO_ALL,
-            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()")
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()",
+            sync = true)
     public List<MetalwareInfoResponse> findAll() {
         List<String> metalwares = metalwareInfoRepository.findAllMetalwares();
         return MetalwareInfoResponse.from(metalwares);

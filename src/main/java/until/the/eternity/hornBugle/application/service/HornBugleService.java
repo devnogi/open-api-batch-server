@@ -1,13 +1,13 @@
 package until.the.eternity.hornBugle.application.service;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.common.response.PageResponseDto;
+import until.the.eternity.config.CacheNames;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
 import until.the.eternity.hornBugle.domain.mapper.HornBugleMapper;
@@ -18,6 +18,10 @@ import until.the.eternity.hornBugle.infrastructure.elasticsearch.HornBugleIndexS
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
 import until.the.eternity.hornBugle.interfaces.rest.dto.request.HornBuglePageRequestDto;
 import until.the.eternity.hornBugle.interfaces.rest.dto.response.HornBugleHistoryResponse;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -47,11 +51,13 @@ public class HornBugleService {
      * @return 저장된 건수
      */
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.HORN_BUGLE_RECENT, allEntries = true)
     public int saveAll(HornBugleServer server, List<OpenApiHornBugleHistoryResponse> responses) {
         return saveAllAndReturnSaved(server, responses).size();
     }
 
     @Transactional
+    @CacheEvict(cacheNames = CacheNames.HORN_BUGLE_RECENT, allEntries = true)
     public List<HornBugleWorldHistory> saveAllAndReturnSaved(
             HornBugleServer server, List<OpenApiHornBugleHistoryResponse> responses) {
         if (responses == null || responses.isEmpty()) {
@@ -95,6 +101,13 @@ public class HornBugleService {
      * @return 페이징 응답
      */
     @Transactional(readOnly = true)
+    @Cacheable(
+            cacheNames = CacheNames.HORN_BUGLE_RECENT,
+            key =
+                    "T(until.the.eternity.common.util.CacheKeyBuilder)"
+                            + ".buildHornBugleRecentKey(#serverName, #pageRequest)",
+            condition = "#keyword == null or #keyword.isBlank()",
+            sync = true)
     public PageResponseDto<HornBugleHistoryResponse> search(
             String serverName, String keyword, HornBuglePageRequestDto pageRequest) {
 

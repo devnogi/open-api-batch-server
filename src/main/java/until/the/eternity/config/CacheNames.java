@@ -37,6 +37,9 @@ public final class CacheNames {
     public static final String METALWARE_INFO_ALL = "metalware-info:all";
     public static final String METALWARE_ATTRIBUTE_INFO_SEARCH = "metalware-attribute-info:search";
 
+    // ===== 뿔피리 =====
+    public static final String HORN_BUGLE_RECENT = "horn-bugle:recent";
+
     // ===== 통계 (일간) =====
     public static final String STATISTICS_ITEM_DAILY = "statistics:item:daily";
     public static final String STATISTICS_SUBCATEGORY_DAILY = "statistics:subcategory:daily";

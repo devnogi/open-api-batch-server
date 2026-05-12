@@ -5,7 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "enchant_info")
+@Table(
+        name = "enchant_info",
+        indexes = {
+            @Index(name = "idx_enchant_info_affix_position_id", columnList = "affix_position, id")
+        })
 @Getter
 @NoArgsConstructor
 public class EnchantInfoEntity {

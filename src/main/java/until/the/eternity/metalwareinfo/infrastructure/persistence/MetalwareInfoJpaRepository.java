@@ -1,13 +1,14 @@
 package until.the.eternity.metalwareinfo.infrastructure.persistence;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface MetalwareInfoJpaRepository extends JpaRepository<MetalwareInfoEntity, String> {
 
-    @Query("SELECT m.metalware FROM MetalwareInfoEntity m")
+    @Query("SELECT m.metalware FROM MetalwareInfoEntity m ORDER BY m.metalware ASC")
     List<String> findAllMetalwares();
 
     @Modifying

@@ -1,7 +1,5 @@
 package until.the.eternity.enchantinfo.application.service;
 
-import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,6 +14,9 @@ import until.the.eternity.enchantinfo.domain.exception.EnchantInfoExceptionCode;
 import until.the.eternity.enchantinfo.domain.repository.EnchantInfoRepositoryPort;
 import until.the.eternity.enchantinfo.interfaces.rest.dto.response.EnchantInfoResponse;
 import until.the.eternity.enchantinfo.interfaces.rest.dto.response.EnchantInfoSyncResponse;
+
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,7 +40,8 @@ public class EnchantInfoService {
             cacheNames = CacheNames.ENCHANT_INFO_FULLNAMES,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildEnchantInfoFullnamesKey(#affixPosition)")
+                            + ".buildEnchantInfoFullnamesKey(#affixPosition)",
+            sync = true)
     public List<String> findAllFullnames(String affixPosition) {
         if (affixPosition != null) {
             if (!ALLOWED_AFFIX_POSITIONS.contains(affixPosition)) {

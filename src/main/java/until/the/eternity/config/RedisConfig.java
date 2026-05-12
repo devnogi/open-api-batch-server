@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -21,6 +18,10 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -91,9 +92,12 @@ public class RedisConfig implements CachingConfigurer {
         configs.put(CacheNames.ITEM_INFO_DETAIL, defaultConfig.entryTtl(masterTtl));
         configs.put(CacheNames.ITEM_INFO_SUMMARY, defaultConfig.entryTtl(masterTtl));
         configs.put(CacheNames.ENCHANT_INFO_ALL, defaultConfig.entryTtl(masterTtl));
-        configs.put(CacheNames.ENCHANT_INFO_FULLNAMES, defaultConfig.entryTtl(masterTtl));
-        configs.put(CacheNames.METALWARE_INFO_ALL, defaultConfig.entryTtl(masterTtl));
+        configs.put(CacheNames.ENCHANT_INFO_FULLNAMES, defaultConfig.entryTtl(Duration.ofHours(6)));
+        configs.put(CacheNames.METALWARE_INFO_ALL, defaultConfig.entryTtl(Duration.ofHours(6)));
         configs.put(CacheNames.METALWARE_ATTRIBUTE_INFO_SEARCH, defaultConfig.entryTtl(masterTtl));
+
+        // 뿔피리 최신 목록 - 5분 배치 데이터의 짧은 TTL 캐시
+        configs.put(CacheNames.HORN_BUGLE_RECENT, defaultConfig.entryTtl(Duration.ofMinutes(2)));
 
         // 통계 - 30분 TTL (이벤트 기반 eviction으로 실시간 반영)
         Duration statsTtl = Duration.ofMinutes(30);

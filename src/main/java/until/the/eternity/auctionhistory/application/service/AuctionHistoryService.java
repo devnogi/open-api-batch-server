@@ -1,7 +1,6 @@
 package until.the.eternity.auctionhistory.application.service;
 
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -22,6 +21,8 @@ import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.common.util.CacheKeyBuilder;
 import until.the.eternity.config.CacheNames;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,8 @@ public class AuctionHistoryService {
                     "#requestDto.itemOptionSearchRequest() == null"
                             + " and #requestDto.enchantSearchRequest() == null"
                             + " and (#requestDto.metalwareSearchRequests() == null or #requestDto.metalwareSearchRequests().isEmpty())"
-                            + " and #requestDto.priceSearchRequest() == null")
+                            + " and #requestDto.priceSearchRequest() == null",
+            sync = true)
     @Transactional(readOnly = true)
     public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
             AuctionHistorySearchRequest requestDto, PageRequestDto pageRequestDto) {

@@ -1,12 +1,14 @@
 package until.the.eternity.statistics.repository.weekly;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.weekly.ItemWeeklyStatistics;
+import until.the.eternity.statistics.interfaces.rest.dto.response.ItemWeeklyStatisticsResponse;
+
+import java.util.List;
 
 public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeeklyStatistics, Long> {
 
@@ -21,11 +23,29 @@ public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeekly
      * @return 해당 조건의 주간 통계 리스트
      */
     @Query(
-            "SELECT i FROM ItemWeeklyStatistics i WHERE i.itemName = :itemName "
-                    + "AND i.itemSubCategory = :subCategory AND i.itemTopCategory = :topCategory "
-                    + "AND i.weekStartDate BETWEEN :startDate AND :endDate "
-                    + "ORDER BY i.year ASC, i.weekNumber ASC")
-    List<ItemWeeklyStatistics> findByItemAndDateRange(
+            """
+            SELECT new until.the.eternity.statistics.interfaces.rest.dto.response.ItemWeeklyStatisticsResponse(
+                i.id,
+                i.itemName,
+                i.year,
+                i.weekNumber,
+                i.weekStartDate,
+                i.minPrice,
+                i.maxPrice,
+                i.avgPrice,
+                i.totalVolume,
+                i.totalQuantity,
+                i.createdAt,
+                i.updatedAt
+            )
+            FROM ItemWeeklyStatistics i
+            WHERE i.itemName = :itemName
+              AND i.itemSubCategory = :subCategory
+              AND i.itemTopCategory = :topCategory
+              AND i.weekStartDate BETWEEN :startDate AND :endDate
+            ORDER BY i.weekStartDate ASC
+            """)
+    List<ItemWeeklyStatisticsResponse> findByItemAndDateRange(
             @Param("itemName") String itemName,
             @Param("subCategory") String subCategory,
             @Param("topCategory") String topCategory,

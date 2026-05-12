@@ -2,8 +2,6 @@ package until.the.eternity.auctionsearchoption.application.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,6 +12,9 @@ import until.the.eternity.auctionsearchoption.domain.repository.AuctionSearchOpt
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.FieldMetadata;
 import until.the.eternity.auctionsearchoption.interfaces.rest.dto.response.SearchOptionMetadataResponse;
 import until.the.eternity.config.CacheNames;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,7 +31,8 @@ public class AuctionSearchOptionService {
      */
     @Cacheable(
             cacheNames = CacheNames.SEARCH_OPTION_ALL_ACTIVE,
-            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()")
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()",
+            sync = true)
     @Transactional(readOnly = true)
     public List<SearchOptionMetadataResponse> getAllActiveSearchOptions() {
         List<AuctionSearchOptionMetadata> entities = repositoryPort.findAllActive();

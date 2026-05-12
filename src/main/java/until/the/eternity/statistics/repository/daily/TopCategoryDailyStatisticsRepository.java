@@ -1,13 +1,15 @@
 package until.the.eternity.statistics.repository.daily;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.daily.TopCategoryDailyStatistics;
+import until.the.eternity.statistics.interfaces.rest.dto.response.TopCategoryDailyStatisticsResponse;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public interface TopCategoryDailyStatisticsRepository
         extends JpaRepository<TopCategoryDailyStatistics, Long> {
@@ -21,10 +23,25 @@ public interface TopCategoryDailyStatisticsRepository
      * @return 해당 조건의 일간 통계 리스트
      */
     @Query(
-            "SELECT t FROM TopCategoryDailyStatistics t WHERE t.itemTopCategory = :topCategory "
-                    + "AND t.dateAuctionBuy BETWEEN :startDate AND :endDate "
-                    + "ORDER BY t.dateAuctionBuy ASC")
-    List<TopCategoryDailyStatistics> findByTopCategoryAndDateRange(
+            """
+            SELECT new until.the.eternity.statistics.interfaces.rest.dto.response.TopCategoryDailyStatisticsResponse(
+                t.id,
+                t.itemTopCategory,
+                t.dateAuctionBuy,
+                t.minPrice,
+                t.maxPrice,
+                t.avgPrice,
+                t.totalVolume,
+                t.totalQuantity,
+                t.createdAt,
+                t.updatedAt
+            )
+            FROM TopCategoryDailyStatistics t
+            WHERE t.itemTopCategory = :topCategory
+              AND t.dateAuctionBuy BETWEEN :startDate AND :endDate
+            ORDER BY t.dateAuctionBuy ASC
+            """)
+    List<TopCategoryDailyStatisticsResponse> findByTopCategoryAndDateRange(
             @Param("topCategory") String topCategory,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
