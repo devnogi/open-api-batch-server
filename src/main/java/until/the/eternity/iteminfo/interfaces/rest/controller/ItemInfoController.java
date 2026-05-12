@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,9 @@ public class ItemInfoController {
     @Operation(summary = "카테고리 정보", description = "아이템 상위 카테고리, 하위 카테고리 정보 조회")
     public ResponseEntity<ApiResponse<List<ItemCategoryResponse>>> findItemCategories() {
         List<ItemCategoryResponse> itemCategories = itemInfoService.findItemCategories();
-        return ResponseEntity.ok(ApiResponse.success(itemCategories));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(Duration.ofDays(1)).cachePublic())
+                .body(ApiResponse.success(itemCategories));
     }
 
     @Operation(summary = "모든 아이템 정보 조회", description = "시스템에 저장된 모든 아이템 정보를 조회합니다.")

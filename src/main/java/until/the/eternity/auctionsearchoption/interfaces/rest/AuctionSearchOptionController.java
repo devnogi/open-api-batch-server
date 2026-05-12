@@ -2,8 +2,10 @@ package until.the.eternity.auctionsearchoption.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +27,8 @@ public class AuctionSearchOptionController {
     public ResponseEntity<ApiResponse<List<SearchOptionMetadataResponse>>> getSearchOptions() {
         List<SearchOptionMetadataResponse> searchOptions = service.getAllActiveSearchOptions();
 
-        return ResponseEntity.ok(
-                ApiResponse.success("SEARCH_OPTION_SUCCESS", "검색 옵션 조회 성공", searchOptions));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(Duration.ofDays(1)).cachePublic())
+                .body(ApiResponse.success("SEARCH_OPTION_SUCCESS", "검색 옵션 조회 성공", searchOptions));
     }
 }

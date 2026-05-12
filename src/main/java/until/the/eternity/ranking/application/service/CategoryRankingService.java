@@ -24,11 +24,15 @@ public class CategoryRankingService {
             cacheNames = CacheNames.RANKING_CATEGORY_HIGHEST,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)",
+            sync = true)
     public List<PriceRankingResponse> getCategoryTopPriced(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
-                rankingRepository.findCategoryTopPriced(topCategory, subCategory, limit);
+                hasSubCategory(subCategory)
+                        ? rankingRepository.findCategoryTopPricedByTopAndSubCategory(
+                                topCategory, subCategory, limit)
+                        : rankingRepository.findCategoryTopPricedByTopCategory(topCategory, limit);
         return rankingMapper.toPriceRankingResponses(results);
     }
 
@@ -37,11 +41,19 @@ public class CategoryRankingService {
             cacheNames = CacheNames.RANKING_CATEGORY_POPULAR,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)")
+                            + ".buildRankingCategoryKey(#topCategory, #subCategory, #limit)",
+            sync = true)
     public List<VolumeRankingResponse> getCategoryPopular(
             String topCategory, String subCategory, int limit) {
         List<Object[]> results =
-                rankingRepository.findCategoryPopular(topCategory, subCategory, limit);
+                hasSubCategory(subCategory)
+                        ? rankingRepository.findCategoryPopularByTopAndSubCategory(
+                                topCategory, subCategory, limit)
+                        : rankingRepository.findCategoryPopularByTopCategory(topCategory, limit);
         return rankingMapper.toVolumeRankingResponses(results);
+    }
+
+    private boolean hasSubCategory(String subCategory) {
+        return subCategory != null && !subCategory.isBlank();
     }
 }

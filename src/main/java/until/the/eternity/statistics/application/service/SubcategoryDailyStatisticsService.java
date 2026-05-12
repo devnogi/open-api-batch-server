@@ -27,7 +27,8 @@ public class SubcategoryDailyStatisticsService {
             cacheNames = CacheNames.STATISTICS_SUBCATEGORY_DAILY,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildStatisticsSubcategoryKey(#subCategory, #startDate, #endDate)")
+                            + ".buildStatisticsSubcategoryKey(#topCategory, #subCategory, #startDate, #endDate)",
+            sync = true)
     @Transactional(readOnly = true)
     public List<SubcategoryDailyStatisticsResponse> search(
             String topCategory, String subCategory, LocalDate startDate, LocalDate endDate) {

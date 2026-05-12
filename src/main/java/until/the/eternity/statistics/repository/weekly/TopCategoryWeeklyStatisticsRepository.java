@@ -22,7 +22,7 @@ public interface TopCategoryWeeklyStatisticsRepository
     @Query(
             "SELECT t FROM TopCategoryWeeklyStatistics t WHERE t.itemTopCategory = :topCategory "
                     + "AND t.weekStartDate BETWEEN :startDate AND :endDate "
-                    + "ORDER BY t.year ASC, t.weekNumber ASC")
+                    + "ORDER BY t.weekStartDate ASC")
     List<TopCategoryWeeklyStatistics> findByTopCategoryAndDateRange(
             @Param("topCategory") String topCategory,
             @Param("startDate") java.time.LocalDate startDate,

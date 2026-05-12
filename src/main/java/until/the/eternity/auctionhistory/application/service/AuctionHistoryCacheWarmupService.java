@@ -10,6 +10,8 @@ import until.the.eternity.common.enums.SortDirection;
 import until.the.eternity.common.enums.SortField;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.config.CacheNames;
+import until.the.eternity.ranking.application.service.AllTimeRankingService;
+import until.the.eternity.ranking.util.RankingConstants;
 
 /**
  * 경매 거래 내역 캐시 워밍업 서비스.
@@ -29,8 +31,10 @@ public class AuctionHistoryCacheWarmupService {
 
     private static final int WARMUP_SIZE = 20;
     private static final int WARMUP_MAX_PAGE = 2;
+    private static final int[] RANKING_WARMUP_LIMITS = {20, RankingConstants.DEFAULT_LIMIT};
 
     private final AuctionHistoryService auctionHistoryService;
+    private final AllTimeRankingService allTimeRankingService;
     private final CacheManager cacheManager;
 
     /**
@@ -41,6 +45,7 @@ public class AuctionHistoryCacheWarmupService {
     public void evictAndWarm() {
         evictCaches();
         warmup();
+        warmAllTimeRankingCaches();
     }
 
     /** 앱 시작 시 기본 화면 1개 키만 경량 워밍업한다. */
@@ -103,6 +108,27 @@ public class AuctionHistoryCacheWarmupService {
                 successCount,
                 failCount,
                 WARMUP_MAX_PAGE * SortField.values().length * SortDirection.values().length);
+    }
+
+    private void warmAllTimeRankingCaches() {
+        int successCount = 0;
+        int failCount = 0;
+
+        for (int limit : RANKING_WARMUP_LIMITS) {
+            try {
+                allTimeRankingService.getAllTimeHighestPrice(limit);
+                allTimeRankingService.getMonthLargestVolume(limit);
+                successCount += 2;
+            } catch (Exception e) {
+                failCount++;
+                log.warn("[Cache Warmup] Failed all-time ranking warmup: limit={}", limit, e);
+            }
+        }
+
+        log.info(
+                "[Cache Warmup] All-time ranking completed: success={}, fail={}",
+                successCount,
+                failCount);
     }
 
     private void clearCache(String cacheName) {

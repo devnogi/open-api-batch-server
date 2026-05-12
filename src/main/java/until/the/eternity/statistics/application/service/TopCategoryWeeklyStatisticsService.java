@@ -27,7 +27,8 @@ public class TopCategoryWeeklyStatisticsService {
             cacheNames = CacheNames.STATISTICS_TOPCATEGORY_WEEKLY,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildStatisticsTopCategoryKey(#topCategory, #startDate, #endDate)")
+                            + ".buildStatisticsTopCategoryKey(#topCategory, #startDate, #endDate)",
+            sync = true)
     @Transactional(readOnly = true)
     public List<TopCategoryWeeklyStatisticsResponse> search(
             String topCategory, LocalDate startDate, LocalDate endDate) {

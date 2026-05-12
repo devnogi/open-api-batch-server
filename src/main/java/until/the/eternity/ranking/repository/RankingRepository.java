@@ -199,7 +199,7 @@ public interface RankingRepository extends JpaRepository<ItemDailyStatistics, Lo
 
     // ===== 카테고리별 랭킹 (Category Ranking) =====
 
-    /** 카테고리별 최고가 TOP N (API 9) */
+    /** 상위 카테고리별 최고가 TOP N (API 9) */
     @Query(
             value =
                     """
@@ -215,17 +215,40 @@ public interface RankingRepository extends JpaRepository<ItemDailyStatistics, Lo
                     FROM item_daily_statistics i
                     WHERE i.date_auction_buy = CURDATE()
                       AND i.item_top_category = :topCategory
-                      AND (:subCategory IS NULL OR i.item_sub_category = :subCategory)
                     ORDER BY i.max_price DESC
                     LIMIT :limit
                     """,
             nativeQuery = true)
-    List<Object[]> findCategoryTopPriced(
+    List<Object[]> findCategoryTopPricedByTopCategory(
+            @Param("topCategory") String topCategory, @Param("limit") int limit);
+
+    /** 상위/하위 카테고리별 최고가 TOP N (API 9) */
+    @Query(
+            value =
+                    """
+                    SELECT
+                        i.item_name,
+                        i.item_top_category,
+                        i.item_sub_category,
+                        i.max_price,
+                        i.avg_price,
+                        i.total_volume,
+                        i.total_quantity,
+                        i.date_auction_buy
+                    FROM item_daily_statistics i
+                    WHERE i.date_auction_buy = CURDATE()
+                      AND i.item_top_category = :topCategory
+                      AND i.item_sub_category = :subCategory
+                    ORDER BY i.max_price DESC
+                    LIMIT :limit
+                    """,
+            nativeQuery = true)
+    List<Object[]> findCategoryTopPricedByTopAndSubCategory(
             @Param("topCategory") String topCategory,
             @Param("subCategory") String subCategory,
             @Param("limit") int limit);
 
-    /** 카테고리별 인기 아이템 TOP N (API 10) - 거래 수량 기준 */
+    /** 상위 카테고리별 인기 아이템 TOP N (API 10) - 거래 수량 기준 */
     @Query(
             value =
                     """
@@ -240,12 +263,34 @@ public interface RankingRepository extends JpaRepository<ItemDailyStatistics, Lo
                     FROM item_daily_statistics i
                     WHERE i.date_auction_buy = CURDATE()
                       AND i.item_top_category = :topCategory
-                      AND (:subCategory IS NULL OR i.item_sub_category = :subCategory)
                     ORDER BY i.total_quantity DESC
                     LIMIT :limit
                     """,
             nativeQuery = true)
-    List<Object[]> findCategoryPopular(
+    List<Object[]> findCategoryPopularByTopCategory(
+            @Param("topCategory") String topCategory, @Param("limit") int limit);
+
+    /** 상위/하위 카테고리별 인기 아이템 TOP N (API 10) - 거래 수량 기준 */
+    @Query(
+            value =
+                    """
+                    SELECT
+                        i.item_name,
+                        i.item_top_category,
+                        i.item_sub_category,
+                        i.total_quantity,
+                        i.total_volume,
+                        i.avg_price,
+                        i.date_auction_buy
+                    FROM item_daily_statistics i
+                    WHERE i.date_auction_buy = CURDATE()
+                      AND i.item_top_category = :topCategory
+                      AND i.item_sub_category = :subCategory
+                    ORDER BY i.total_quantity DESC
+                    LIMIT :limit
+                    """,
+            nativeQuery = true)
+    List<Object[]> findCategoryPopularByTopAndSubCategory(
             @Param("topCategory") String topCategory,
             @Param("subCategory") String subCategory,
             @Param("limit") int limit);
@@ -266,7 +311,7 @@ public interface RankingRepository extends JpaRepository<ItemDailyStatistics, Lo
                         (ah.auction_price_per_unit * ah.item_count) AS total_price,
                         ah.date_auction_buy
                     FROM auction_history ah
-                    ORDER BY ah.auction_price_per_unit DESC
+                    ORDER BY ah.auction_price_per_unit DESC, ah.auction_buy_id DESC
                     LIMIT :limit
                     """,
             nativeQuery = true)
@@ -288,7 +333,7 @@ public interface RankingRepository extends JpaRepository<ItemDailyStatistics, Lo
                     FROM auction_history ah
                     WHERE YEAR(ah.date_auction_buy) = YEAR(CURDATE())
                       AND MONTH(ah.date_auction_buy) = MONTH(CURDATE())
-                    ORDER BY (ah.auction_price_per_unit * ah.item_count) DESC
+                    ORDER BY (ah.auction_price_per_unit * ah.item_count) DESC, ah.auction_buy_id DESC
                     LIMIT :limit
                     """,
             nativeQuery = true)

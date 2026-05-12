@@ -30,7 +30,8 @@ public class AuctionSearchOptionService {
      */
     @Cacheable(
             cacheNames = CacheNames.SEARCH_OPTION_ALL_ACTIVE,
-            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()")
+            key = "T(until.the.eternity.common.util.CacheKeyBuilder).all()",
+            sync = true)
     @Transactional(readOnly = true)
     public List<SearchOptionMetadataResponse> getAllActiveSearchOptions() {
         List<AuctionSearchOptionMetadata> entities = repositoryPort.findAllActive();

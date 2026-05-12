@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.statistics.domain.entity.daily.ItemDailyStatistics;
+import until.the.eternity.statistics.interfaces.rest.dto.response.ItemDailyStatisticsResponse;
 
 public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailyStatistics, Long> {
 
@@ -22,11 +23,27 @@ public interface ItemDailyStatisticsRepository extends JpaRepository<ItemDailySt
      * @return 해당 조건의 일간 통계 리스트
      */
     @Query(
-            "SELECT i FROM ItemDailyStatistics i WHERE i.itemName = :itemName "
-                    + "AND i.itemSubCategory = :subCategory AND i.itemTopCategory = :topCategory "
-                    + "AND i.dateAuctionBuy BETWEEN :startDate AND :endDate "
-                    + "ORDER BY i.dateAuctionBuy ASC")
-    List<ItemDailyStatistics> findByItemAndDateRange(
+            """
+            SELECT new until.the.eternity.statistics.interfaces.rest.dto.response.ItemDailyStatisticsResponse(
+                i.id,
+                i.itemName,
+                i.dateAuctionBuy,
+                i.minPrice,
+                i.maxPrice,
+                i.avgPrice,
+                i.totalVolume,
+                i.totalQuantity,
+                i.createdAt,
+                i.updatedAt
+            )
+            FROM ItemDailyStatistics i
+            WHERE i.itemName = :itemName
+              AND i.itemSubCategory = :subCategory
+              AND i.itemTopCategory = :topCategory
+              AND i.dateAuctionBuy BETWEEN :startDate AND :endDate
+            ORDER BY i.dateAuctionBuy ASC
+            """)
+    List<ItemDailyStatisticsResponse> findByItemAndDateRange(
             @Param("itemName") String itemName,
             @Param("subCategory") String subCategory,
             @Param("topCategory") String topCategory,

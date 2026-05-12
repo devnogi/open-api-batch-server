@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MetalwareInfoJpaRepository extends JpaRepository<MetalwareInfoEntity, String> {
 
-    @Query("SELECT m.metalware FROM MetalwareInfoEntity m")
+    @Query("SELECT m.metalware FROM MetalwareInfoEntity m ORDER BY m.metalware ASC")
     List<String> findAllMetalwares();
 
     @Modifying

@@ -47,7 +47,8 @@ public class AuctionHistoryService {
                     "#requestDto.itemOptionSearchRequest() == null"
                             + " and #requestDto.enchantSearchRequest() == null"
                             + " and (#requestDto.metalwareSearchRequests() == null or #requestDto.metalwareSearchRequests().isEmpty())"
-                            + " and #requestDto.priceSearchRequest() == null")
+                            + " and #requestDto.priceSearchRequest() == null",
+            sync = true)
     @Transactional(readOnly = true)
     public PageResponseDto<AuctionHistoryDetailResponse<ItemOptionResponse>> search(
             AuctionHistorySearchRequest requestDto, PageRequestDto pageRequestDto) {

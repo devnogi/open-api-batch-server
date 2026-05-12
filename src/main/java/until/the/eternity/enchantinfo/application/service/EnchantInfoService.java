@@ -39,7 +39,8 @@ public class EnchantInfoService {
             cacheNames = CacheNames.ENCHANT_INFO_FULLNAMES,
             key =
                     "T(until.the.eternity.common.util.CacheKeyBuilder)"
-                            + ".buildEnchantInfoFullnamesKey(#affixPosition)")
+                            + ".buildEnchantInfoFullnamesKey(#affixPosition)",
+            sync = true)
     public List<String> findAllFullnames(String affixPosition) {
         if (affixPosition != null) {
             if (!ALLOWED_AFFIX_POSITIONS.contains(affixPosition)) {

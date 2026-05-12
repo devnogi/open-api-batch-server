@@ -13,7 +13,10 @@ import lombok.*;
         indexes = {
             @Index(
                     name = "idx_top_category_weekly_statistics_category_year_week",
-                    columnList = "item_top_category, year, week_number")
+                    columnList = "item_top_category, year, week_number"),
+            @Index(
+                    name = "idx_top_category_weekly_statistics_category_start_date",
+                    columnList = "item_top_category, week_start_date")
         },
         uniqueConstraints = {
             @UniqueConstraint(

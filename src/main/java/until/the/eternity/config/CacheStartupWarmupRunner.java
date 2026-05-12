@@ -1,7 +1,9 @@
 package until.the.eternity.config;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +22,8 @@ import until.the.eternity.auctionsearchoption.application.service.AuctionSearchO
 import until.the.eternity.common.enums.ItemCategory;
 import until.the.eternity.common.enums.SortDirection;
 import until.the.eternity.enchantinfo.application.service.EnchantInfoService;
+import until.the.eternity.hornBugle.application.service.HornBugleService;
+import until.the.eternity.hornBugle.interfaces.rest.dto.request.HornBuglePageRequestDto;
 import until.the.eternity.iteminfo.application.service.ItemInfoService;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
 import until.the.eternity.iteminfo.interfaces.rest.dto.response.ItemInfoResponse;
@@ -46,6 +50,7 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
 
     private final AuctionHistoryCacheWarmupService auctionHistoryCacheWarmupService;
     private final AuctionRealtimeCacheWarmupService auctionRealtimeCacheWarmupService;
+    private final HornBugleService hornBugleService;
     private final AuctionSearchOptionService auctionSearchOptionService;
     private final ItemInfoService itemInfoService;
     private final EnchantInfoService enchantInfoService;
@@ -66,6 +71,11 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
     @Value("${app.cache.warmup.ranking-limit:50}")
     private int startupRankingLimit;
 
+    private record StatisticsWarmupTarget(
+            String itemName, String topCategory, String subCategory) {}
+
+    private record RankingCategoryWarmupTarget(String topCategory, String subCategory) {}
+
     @Override
     public void run(ApplicationArguments args) {
         log.info("[Cache Warmup] Startup warmup scheduled (async)");
@@ -77,6 +87,7 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
 
         tryWarm("auction-history", auctionHistoryCacheWarmupService::evictAndWarm);
         tryWarm("auction-realtime", auctionRealtimeCacheWarmupService::evictAndWarm);
+        tryWarm("horn-bugle", this::warmHornBugleCaches);
         tryWarm("search-option", auctionSearchOptionService::getAllActiveSearchOptions);
         tryWarm("item-info", this::warmItemInfoCaches);
         tryWarm("enchant-info", this::warmEnchantCaches);
@@ -117,29 +128,57 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
         }
     }
 
+    private void warmHornBugleCaches() {
+        hornBugleService.search(null, null, new HornBuglePageRequestDto(1, 20));
+    }
+
     private void warmRankingCaches() {
-        int limit =
-                startupRankingLimit > 0
-                        ? Math.min(startupRankingLimit, RankingConstants.MAX_LIMIT)
-                        : RankingConstants.DEFAULT_LIMIT;
-        priceRankingService.getTodayHighestPrice(limit);
-        priceRankingService.getWeekHighestPrice(limit);
-        priceRankingService.getTodayLargestVolume(limit);
+        for (int limit : rankingWarmupLimits()) {
+            priceRankingService.getTodayHighestPrice(limit);
+            priceRankingService.getWeekHighestPrice(limit);
+            priceRankingService.getTodayLargestVolume(limit);
 
-        volumeRankingService.getTodayPopular(limit);
-        volumeRankingService.getWeekPopular(limit);
+            volumeRankingService.getTodayPopular(limit);
+            volumeRankingService.getWeekPopular(limit);
 
-        priceChangeRankingService.getPriceSurge(limit);
-        priceChangeRankingService.getPriceDrop(limit);
-        priceChangeRankingService.getVolumeSurge(limit);
+            priceChangeRankingService.getPriceSurge(limit);
+            priceChangeRankingService.getPriceDrop(limit);
+            priceChangeRankingService.getVolumeSurge(limit);
 
-        String defaultTopCategory = ItemCategory.ONE_HANDED_WEAPON.getTopCategory();
-        String defaultSubCategory = ItemCategory.ONE_HANDED_WEAPON.getSubCategory();
-        categoryRankingService.getCategoryTopPriced(defaultTopCategory, defaultSubCategory, limit);
-        categoryRankingService.getCategoryPopular(defaultTopCategory, defaultSubCategory, limit);
+            for (RankingCategoryWarmupTarget target : rankingCategoryWarmupTargets()) {
+                categoryRankingService.getCategoryTopPriced(
+                        target.topCategory(), target.subCategory(), limit);
+                categoryRankingService.getCategoryPopular(
+                        target.topCategory(), target.subCategory(), limit);
+            }
 
-        allTimeRankingService.getAllTimeHighestPrice(limit);
-        allTimeRankingService.getMonthLargestVolume(limit);
+            allTimeRankingService.getAllTimeHighestPrice(limit);
+            allTimeRankingService.getMonthLargestVolume(limit);
+        }
+    }
+
+    private Set<Integer> rankingWarmupLimits() {
+        Set<Integer> limits = new LinkedHashSet<>();
+        addRankingWarmupLimit(limits, 20);
+        addRankingWarmupLimit(limits, RankingConstants.DEFAULT_LIMIT);
+        addRankingWarmupLimit(limits, startupRankingLimit);
+        return limits;
+    }
+
+    private void addRankingWarmupLimit(Set<Integer> limits, int limit) {
+        if (limit <= 0) {
+            return;
+        }
+        limits.add(Math.min(limit, RankingConstants.MAX_LIMIT));
+    }
+
+    private List<RankingCategoryWarmupTarget> rankingCategoryWarmupTargets() {
+        return List.of(
+                new RankingCategoryWarmupTarget(
+                        ItemCategory.ONE_HANDED_WEAPON.getTopCategory(),
+                        ItemCategory.ONE_HANDED_WEAPON.getSubCategory()),
+                new RankingCategoryWarmupTarget("기타", "기타"),
+                new RankingCategoryWarmupTarget("소모품", "포션"));
     }
 
     private void warmStatisticsCaches() {
@@ -150,21 +189,33 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
         }
 
         ItemInfoResponse sample = items.get(0);
+        List<StatisticsWarmupTarget> targets =
+                List.of(
+                        new StatisticsWarmupTarget(
+                                sample.name(), sample.topCategory(), sample.subCategory()),
+                        new StatisticsWarmupTarget("향기로운 꿀 우유", "기타", "기타"),
+                        new StatisticsWarmupTarget("축복의 포션", "소모품", "포션"));
         LocalDate dailyStart = LocalDate.now().minusDays(14);
         LocalDate weeklyStart = LocalDate.now().minusMonths(2);
         LocalDate end = LocalDate.now();
 
-        itemDailyStatisticsService.search(
-                sample.name(), sample.subCategory(), sample.topCategory(), dailyStart, end);
-        subcategoryDailyStatisticsService.search(
-                sample.topCategory(), sample.subCategory(), dailyStart, end);
-        topCategoryDailyStatisticsService.search(sample.topCategory(), dailyStart, end);
+        for (StatisticsWarmupTarget target : targets) {
+            itemDailyStatisticsService.search(
+                    target.itemName(), target.subCategory(), target.topCategory(), dailyStart, end);
+            subcategoryDailyStatisticsService.search(
+                    target.topCategory(), target.subCategory(), dailyStart, end);
+            topCategoryDailyStatisticsService.search(target.topCategory(), dailyStart, end);
 
-        itemWeeklyStatisticsService.search(
-                sample.name(), sample.subCategory(), sample.topCategory(), weeklyStart, end);
-        subcategoryWeeklyStatisticsService.search(
-                sample.topCategory(), sample.subCategory(), weeklyStart, end);
-        topCategoryWeeklyStatisticsService.search(sample.topCategory(), weeklyStart, end);
+            itemWeeklyStatisticsService.search(
+                    target.itemName(),
+                    target.subCategory(),
+                    target.topCategory(),
+                    weeklyStart,
+                    end);
+            subcategoryWeeklyStatisticsService.search(
+                    target.topCategory(), target.subCategory(), weeklyStart, end);
+            topCategoryWeeklyStatisticsService.search(target.topCategory(), weeklyStart, end);
+        }
     }
 
     private void tryWarm(String domain, Runnable runnable) {
