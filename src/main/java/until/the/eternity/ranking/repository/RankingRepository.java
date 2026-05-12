@@ -1,10 +1,11 @@
 package until.the.eternity.ranking.repository;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import until.the.eternity.statistics.domain.entity.daily.ItemDailyStatistics;
+
+import java.util.List;
 
 public interface RankingRepository extends JpaRepository<ItemDailyStatistics, Long> {
 

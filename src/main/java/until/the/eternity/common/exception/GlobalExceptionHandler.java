@@ -1,13 +1,13 @@
 package until.the.eternity.common.exception;
 
-import static until.the.eternity.common.exception.GlobalExceptionCode.SERVER_ERROR;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import until.the.eternity.common.response.ApiResponse;
+
+import static until.the.eternity.common.exception.GlobalExceptionCode.SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice
