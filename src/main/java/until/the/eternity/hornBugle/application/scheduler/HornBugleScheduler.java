@@ -1,5 +1,10 @@
 package until.the.eternity.hornBugle.application.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,14 +17,9 @@ import until.the.eternity.hornBugle.domain.enums.HornBugleServer;
 import until.the.eternity.hornBugle.infrastructure.client.HornBugleClient;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryListResponse;
 import until.the.eternity.hornBugle.interfaces.external.dto.OpenApiHornBugleHistoryResponse;
+import until.the.eternity.hornBugle.interfaces.rest.dto.request.HornBuglePageRequestDto;
 import until.the.eternity.hornBugle.kafka.application.HornBugleKafkaProducerService;
 import until.the.eternity.hornBugle.kafka.dto.UserVerificationVerifyEvent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -75,6 +75,8 @@ public class HornBugleScheduler {
         log.info(
                 "[HornBugle] Horn Bugle World History scheduler completed. Total saved: {}",
                 totalSavedCount);
+
+        warmRecentReadCaches();
     }
 
     /**
@@ -222,6 +224,21 @@ public class HornBugleScheduler {
         } catch (InterruptedException e) {
             log.error("[HornBugle] Rate limit wait interrupted", e);
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void warmRecentReadCaches() {
+        try {
+            service.search(null, null, new HornBuglePageRequestDto(1, 20));
+            service.search(null, null, new HornBuglePageRequestDto(2, 20));
+
+            for (HornBugleServer server : HornBugleServer.values()) {
+                service.search(server.getServerName(), null, new HornBuglePageRequestDto(1, 20));
+            }
+
+            log.info("[HornBugle] Recent read cache warmup completed");
+        } catch (Exception e) {
+            log.warn("[HornBugle] Recent read cache warmup failed: {}", e.getMessage(), e);
         }
     }
 }

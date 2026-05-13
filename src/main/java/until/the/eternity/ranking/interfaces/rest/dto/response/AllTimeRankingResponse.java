@@ -2,7 +2,6 @@ package until.the.eternity.ranking.interfaces.rest.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.Instant;
 
 @Schema(description = "역대 기록 랭킹 응답")

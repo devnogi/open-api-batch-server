@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -18,10 +21,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -101,12 +100,15 @@ public class RedisConfig implements CachingConfigurer {
 
         // 통계 - 30분 TTL (이벤트 기반 eviction으로 실시간 반영)
         Duration statsTtl = Duration.ofMinutes(30);
+        Duration weeklyStatsTtl = Duration.ofHours(12);
         configs.put(CacheNames.STATISTICS_ITEM_DAILY, defaultConfig.entryTtl(statsTtl));
         configs.put(CacheNames.STATISTICS_SUBCATEGORY_DAILY, defaultConfig.entryTtl(statsTtl));
         configs.put(CacheNames.STATISTICS_TOPCATEGORY_DAILY, defaultConfig.entryTtl(statsTtl));
-        configs.put(CacheNames.STATISTICS_ITEM_WEEKLY, defaultConfig.entryTtl(statsTtl));
-        configs.put(CacheNames.STATISTICS_SUBCATEGORY_WEEKLY, defaultConfig.entryTtl(statsTtl));
-        configs.put(CacheNames.STATISTICS_TOPCATEGORY_WEEKLY, defaultConfig.entryTtl(statsTtl));
+        configs.put(CacheNames.STATISTICS_ITEM_WEEKLY, defaultConfig.entryTtl(weeklyStatsTtl));
+        configs.put(
+                CacheNames.STATISTICS_SUBCATEGORY_WEEKLY, defaultConfig.entryTtl(weeklyStatsTtl));
+        configs.put(
+                CacheNames.STATISTICS_TOPCATEGORY_WEEKLY, defaultConfig.entryTtl(weeklyStatsTtl));
 
         // 실시간 경매 - 12분 TTL (10분 배치 + 여유 2분)
         configs.put(
