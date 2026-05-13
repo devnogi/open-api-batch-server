@@ -8,7 +8,13 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "auction_history")
+@Table(
+        name = "auction_history",
+        indexes = {
+            @Index(
+                    name = "idx_auction_history_price_buy_id",
+                    columnList = "auction_price_per_unit DESC, auction_buy_id DESC")
+        })
 @Getter
 @Setter
 @NoArgsConstructor

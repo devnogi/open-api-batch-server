@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.common.response.PageResponseDto;
@@ -159,15 +160,17 @@ public class HornBugleService {
     private PageResponseDto<HornBugleHistoryResponse> searchByDatabase(
             String serverName, HornBuglePageRequestDto pageRequest) {
 
-        Page<HornBugleWorldHistory> page;
+        Slice<HornBugleWorldHistory> page;
 
         if (serverName != null && !serverName.isBlank()) {
-            page = repository.findByServerName(serverName, pageRequest.toPageable());
+            page =
+                    repository.findRecentByServerName(
+                            serverName, pageRequest.toPageableWithoutSort());
         } else {
-            page = repository.findAll(pageRequest.toPageable());
+            page = repository.findRecent(pageRequest.toPageableWithoutSort());
         }
 
-        Page<HornBugleHistoryResponse> responsePage = page.map(mapper::toResponse);
+        Slice<HornBugleHistoryResponse> responsePage = page.map(mapper::toResponse);
 
         return PageResponseDto.of(responsePage);
     }

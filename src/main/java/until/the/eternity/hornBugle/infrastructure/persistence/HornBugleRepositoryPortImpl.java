@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
@@ -42,7 +43,7 @@ public class HornBugleRepositoryPortImpl implements HornBugleRepositoryPort {
 
     @Override
     public Optional<HornBugleWorldHistory> findLatestByServerName(String serverName) {
-        return jpaRepository.findLatestByServerName(serverName);
+        return jpaRepository.findTopByServerNameOrderByDateSendDescIdDesc(serverName);
     }
 
     @Override
@@ -53,6 +54,17 @@ public class HornBugleRepositoryPortImpl implements HornBugleRepositoryPort {
     @Override
     public Page<HornBugleWorldHistory> findAll(Pageable pageable) {
         return jpaRepository.findAll(pageable);
+    }
+
+    @Override
+    public Slice<HornBugleWorldHistory> findRecent(Pageable pageable) {
+        return jpaRepository.findRecent(pageable);
+    }
+
+    @Override
+    public Slice<HornBugleWorldHistory> findRecentByServerName(
+            String serverName, Pageable pageable) {
+        return jpaRepository.findRecentByServerName(serverName, pageable);
     }
 
     @Override

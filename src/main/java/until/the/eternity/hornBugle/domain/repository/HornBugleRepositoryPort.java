@@ -2,6 +2,7 @@ package until.the.eternity.hornBugle.domain.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import until.the.eternity.hornBugle.domain.entity.HornBugleWorldHistory;
 
 import java.time.Instant;
@@ -17,6 +18,10 @@ public interface HornBugleRepositoryPort {
     Page<HornBugleWorldHistory> findByServerName(String serverName, Pageable pageable);
 
     Page<HornBugleWorldHistory> findAll(Pageable pageable);
+
+    Slice<HornBugleWorldHistory> findRecent(Pageable pageable);
+
+    Slice<HornBugleWorldHistory> findRecentByServerName(String serverName, Pageable pageable);
 
     List<HornBugleWorldHistory> findByServerNameAndDateSend(String serverName, Instant dateSend);
 

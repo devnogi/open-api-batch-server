@@ -2,6 +2,7 @@ package until.the.eternity.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 
 @Schema(description = "페이지 응답 메타데이터")
 public record PageMeta(
@@ -20,5 +21,22 @@ public record PageMeta(
                 page.getTotalElements(),
                 page.isFirst(),
                 page.isLast());
+    }
+
+    public static PageMeta of(Slice<?> slice) {
+        int currentPage = slice.getNumber() + 1;
+        int totalPages = currentPage + (slice.hasNext() ? 1 : 0);
+        long totalElements =
+                slice.getPageable().getOffset()
+                        + slice.getNumberOfElements()
+                        + (slice.hasNext() ? 1 : 0);
+
+        return new PageMeta(
+                currentPage,
+                slice.getSize(),
+                totalPages,
+                totalElements,
+                slice.isFirst(),
+                slice.isLast());
     }
 }

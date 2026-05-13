@@ -71,3 +71,7 @@ package.json
 
 ### temp directory ###
 /temp/
+
+### K6 performance reports ###
+k6/results/*
+!k6/results/.gitkeep

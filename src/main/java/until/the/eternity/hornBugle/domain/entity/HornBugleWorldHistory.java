@@ -12,7 +12,11 @@ import java.time.Instant;
             @Index(
                     name = "idx_horn_bugle_server_date_send",
                     columnList = "server_name, date_send DESC"),
-            @Index(name = "idx_horn_bugle_date_send", columnList = "date_send DESC")
+            @Index(name = "idx_horn_bugle_date_send", columnList = "date_send DESC"),
+            @Index(name = "idx_horn_bugle_date_send_id", columnList = "date_send DESC, id DESC"),
+            @Index(
+                    name = "idx_horn_bugle_server_date_send_id",
+                    columnList = "server_name, date_send DESC, id DESC")
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

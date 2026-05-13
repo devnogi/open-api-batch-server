@@ -101,12 +101,15 @@ public class RedisConfig implements CachingConfigurer {
 
         // 통계 - 30분 TTL (이벤트 기반 eviction으로 실시간 반영)
         Duration statsTtl = Duration.ofMinutes(30);
+        Duration weeklyStatsTtl = Duration.ofHours(12);
         configs.put(CacheNames.STATISTICS_ITEM_DAILY, defaultConfig.entryTtl(statsTtl));
         configs.put(CacheNames.STATISTICS_SUBCATEGORY_DAILY, defaultConfig.entryTtl(statsTtl));
         configs.put(CacheNames.STATISTICS_TOPCATEGORY_DAILY, defaultConfig.entryTtl(statsTtl));
-        configs.put(CacheNames.STATISTICS_ITEM_WEEKLY, defaultConfig.entryTtl(statsTtl));
-        configs.put(CacheNames.STATISTICS_SUBCATEGORY_WEEKLY, defaultConfig.entryTtl(statsTtl));
-        configs.put(CacheNames.STATISTICS_TOPCATEGORY_WEEKLY, defaultConfig.entryTtl(statsTtl));
+        configs.put(CacheNames.STATISTICS_ITEM_WEEKLY, defaultConfig.entryTtl(weeklyStatsTtl));
+        configs.put(
+                CacheNames.STATISTICS_SUBCATEGORY_WEEKLY, defaultConfig.entryTtl(weeklyStatsTtl));
+        configs.put(
+                CacheNames.STATISTICS_TOPCATEGORY_WEEKLY, defaultConfig.entryTtl(weeklyStatsTtl));
 
         // 실시간 경매 - 12분 TTL (10분 배치 + 여유 2분)
         configs.put(

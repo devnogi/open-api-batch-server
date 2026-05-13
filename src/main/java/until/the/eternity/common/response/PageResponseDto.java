@@ -1,6 +1,7 @@
 package until.the.eternity.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.data.domain.Slice;
 
 import java.util.List;
 
@@ -11,5 +12,9 @@ public record PageResponseDto<T>(
 
     public static <T> PageResponseDto<T> of(org.springframework.data.domain.Page<T> page) {
         return new PageResponseDto<>(page.getContent(), PageMeta.of(page));
+    }
+
+    public static <T> PageResponseDto<T> of(Slice<T> slice) {
+        return new PageResponseDto<>(slice.getContent(), PageMeta.of(slice));
     }
 }
