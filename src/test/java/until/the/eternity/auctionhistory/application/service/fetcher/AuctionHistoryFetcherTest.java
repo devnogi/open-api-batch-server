@@ -1,13 +1,5 @@
 package until.the.eternity.auctionhistory.application.service.fetcher;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.OptionalInt;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,6 +13,15 @@ import until.the.eternity.auctionhistory.infrastructure.client.AuctionHistoryCli
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryListResponse;
 import until.the.eternity.auctionhistory.interfaces.external.dto.OpenApiAuctionHistoryResponse;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.OptionalInt;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionHistoryFetcherTest {

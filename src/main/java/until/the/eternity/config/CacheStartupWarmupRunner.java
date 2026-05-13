@@ -1,9 +1,5 @@
 package until.the.eternity.config;
 
-import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +30,11 @@ import until.the.eternity.metalwareinfo.interfaces.rest.dto.response.MetalwareIn
 import until.the.eternity.ranking.application.service.*;
 import until.the.eternity.ranking.util.RankingConstants;
 import until.the.eternity.statistics.application.service.*;
+
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component

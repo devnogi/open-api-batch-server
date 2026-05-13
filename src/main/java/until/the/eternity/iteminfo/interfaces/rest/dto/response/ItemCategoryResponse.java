@@ -1,10 +1,11 @@
 package until.the.eternity.iteminfo.interfaces.rest.dto.response;
 
-import java.util.Arrays;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import until.the.eternity.common.enums.ItemCategory;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 @Builder

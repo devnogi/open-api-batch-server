@@ -1,9 +1,10 @@
 package until.the.eternity.enchantinfo.domain.repository;
 
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.enchantinfo.infrastructure.persistence.EnchantInfoEntity;
+
+import java.util.List;
 
 public interface EnchantInfoRepositoryPort {
 
