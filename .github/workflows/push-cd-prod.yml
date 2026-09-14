@@ -1,6 +1,7 @@
 name: CI/CD for Production Server
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main, dev ]  # Only main branch, 서비스 시작 후 dev 제거
 
