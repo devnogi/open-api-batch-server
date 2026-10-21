@@ -1131,10 +1131,10 @@ GitHub Repository → Settings → Secrets and variables → Actions → Reposit
 
   3. 비밀키 복사
      cat ~/.ssh/id_rsa
-     -----BEGIN RSA PRIVATE KEY-----
+     [private key header]
      MIIEpAIBAAKCAQEA...
      ... (전체 내용) ...
-     -----END RSA PRIVATE KEY-----
+     [private key footer]
 
   4. GitHub Secrets에 전체 내용 붙여넣기
      ⚠️ BEGIN/END 포함, 줄바꿈 유지
@@ -1568,7 +1568,7 @@ ssh user@server "cat ~/.ssh/authorized_keys"
 
 # 2. 비밀키 포맷 확인
 cat ~/.ssh/id_rsa
-# -----BEGIN RSA PRIVATE KEY----- 로 시작해야 함
+# [private key header] 로 시작해야 함
 
 # 3. GitHub Secret 재등록
 # Settings → Secrets → SSH_PRIVATE_KEY

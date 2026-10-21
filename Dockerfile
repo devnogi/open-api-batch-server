@@ -18,13 +18,13 @@ COPY settings.gradle.kts .
 COPY build.gradle.kts .
 
 # 의존성 다운로드 (캐시 활용)
-RUN gradle dependencies --no-daemon || true
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
 # 소스 코드 복사
 COPY src src
 
 # 애플리케이션 빌드 (테스트 제외)
-RUN gradle clean bootJar -x test --no-daemon
+RUN ./gradlew clean bootJar --no-daemon
 
 # JAR 파일 위치 확인 및 이름 변경
 RUN mkdir -p /app/build/extracted && \
