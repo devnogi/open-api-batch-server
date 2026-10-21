@@ -1,12 +1,11 @@
 package until.the.eternity.auctionitem.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 /** 실시간 경매장 아이템(auction_realtime_item)에 연결된 아이템 옵션 정보. */
 @Entity

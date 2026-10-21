@@ -1,7 +1,6 @@
 package until.the.eternity.hornBugle.interfaces.external.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public record OpenApiHornBugleHistoryListResponse(

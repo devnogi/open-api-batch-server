@@ -1,9 +1,8 @@
 package until.the.eternity.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.data.domain.Slice;
-
 import java.util.List;
+import org.springframework.data.domain.Slice;
 
 @Schema(description = "페이지 응답 객체")
 public record PageResponseDto<T>(

@@ -1,8 +1,7 @@
 package until.the.eternity.auctionsearchoption.domain.repository;
 
-import until.the.eternity.auctionsearchoption.domain.entity.AuctionSearchOptionMetadata;
-
 import java.util.List;
+import until.the.eternity.auctionsearchoption.domain.entity.AuctionSearchOptionMetadata;
 
 public interface AuctionSearchOptionRepositoryPort {
 

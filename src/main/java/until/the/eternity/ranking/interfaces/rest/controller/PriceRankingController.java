@@ -3,6 +3,7 @@ package until.the.eternity.ranking.interfaces.rest.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,6 @@ import until.the.eternity.common.response.ApiResponse;
 import until.the.eternity.ranking.application.service.PriceRankingService;
 import until.the.eternity.ranking.interfaces.rest.dto.request.RankingSearchRequest;
 import until.the.eternity.ranking.interfaces.rest.dto.response.PriceRankingResponse;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/rankings/price")

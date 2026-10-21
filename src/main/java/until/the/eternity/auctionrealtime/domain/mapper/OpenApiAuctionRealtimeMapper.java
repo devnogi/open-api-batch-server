@@ -1,13 +1,12 @@
 package until.the.eternity.auctionrealtime.domain.mapper;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.mapstruct.*;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
 import until.the.eternity.auctionrealtime.interfaces.external.dto.OpenApiAuctionRealtimeResponse;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /** OpenApiAuctionRealtimeResponse → AuctionRealtimeItem Entity 변환 Mapper. */
 @Mapper(componentModel = "spring", uses = OpenApiRealtimeItemOptionMapper.class)

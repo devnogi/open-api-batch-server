@@ -1,13 +1,12 @@
 package until.the.eternity.auctionitemoption.domain.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
-
-import java.util.UUID;
 
 /**
  * 경매장 거래 내역(auction_history)에 연결된 아이템 옵션 정보. V15 마이그레이션에서 auction_item_option →

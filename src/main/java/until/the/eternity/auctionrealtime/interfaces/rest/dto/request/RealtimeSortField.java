@@ -3,7 +3,6 @@ package until.the.eternity.auctionrealtime.interfaces.rest.dto.request;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.Arrays;
 
 /** 실시간 경매장 정렬 필드 */

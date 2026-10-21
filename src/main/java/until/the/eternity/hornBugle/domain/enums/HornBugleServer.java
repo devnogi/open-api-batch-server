@@ -1,11 +1,10 @@
 package until.the.eternity.hornBugle.domain.enums;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor

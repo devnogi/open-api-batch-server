@@ -1,12 +1,11 @@
 package until.the.eternity.iteminfo.domain.repository;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.iteminfo.domain.entity.ItemInfo;
 import until.the.eternity.iteminfo.domain.entity.ItemInfoId;
 import until.the.eternity.iteminfo.interfaces.rest.dto.request.ItemInfoSearchRequest;
-
-import java.util.List;
 
 public interface ItemInfoRepositoryPort {
     List<ItemInfo> findAll();
