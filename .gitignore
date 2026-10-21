@@ -75,3 +75,9 @@ package.json
 ### K6 performance reports ###
 k6/results/*
 !k6/results/.gitkeep
+
+# Local credentials; share only synthetic examples
+.env*
+!.env.example
+!.env.sample
+!.env.local.sample

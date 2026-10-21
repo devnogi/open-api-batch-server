@@ -124,3 +124,13 @@ Jenkinsfile
 node_modules/
 npm-debug.log
 yarn-error.log
+# Keep host-only state and credential files out of every build context.
+**/.git
+**/.env
+**/.env.*
+**/.local
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+**/node_modules

@@ -1,5 +1,7 @@
 package until.the.eternity.statistics.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,9 +21,6 @@ import until.the.eternity.statistics.application.service.TopCategoryWeeklyStatis
 import until.the.eternity.statistics.repository.weekly.ItemWeeklyStatisticsRepository;
 import until.the.eternity.statistics.repository.weekly.SubcategoryWeeklyStatisticsRepository;
 import until.the.eternity.statistics.repository.weekly.TopCategoryWeeklyStatisticsRepository;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Slf4j
 @Service

@@ -1,14 +1,15 @@
 name: CI/CD for Development Server
 
 on:
-  push:
-    branches: [ dev ]  # Only dev branch
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   ci-cd-dev:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'
+    environment: development
     name: Test, Build, and Deploy to Dev Server
     runs-on: ubuntu-latest
 

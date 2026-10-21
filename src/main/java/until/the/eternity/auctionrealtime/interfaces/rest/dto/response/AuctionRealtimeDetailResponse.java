@@ -1,7 +1,6 @@
 package until.the.eternity.auctionrealtime.interfaces.rest.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.time.Instant;
 import java.util.List;
 

@@ -1,10 +1,9 @@
 package until.the.eternity.config;
 
+import java.net.ConnectException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.CacheErrorHandler;
-
-import java.net.ConnectException;
 
 /**
  * Redis 장애 시 캐시 오류를 로깅만 하고 예외를 전파하지 않는 핸들러.

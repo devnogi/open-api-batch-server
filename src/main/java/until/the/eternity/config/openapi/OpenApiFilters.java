@@ -1,12 +1,11 @@
 package until.the.eternity.config.openapi;
 
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
 
 @Slf4j
 @Component

@@ -2,14 +2,14 @@ name: CI/CD for Production Server
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, dev ]  # Only main branch, 서비스 시작 후 dev 제거
 
 permissions:
   contents: read
 
 jobs:
   ci-cd-prod:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    environment: production
     name: Test, Build, and Deploy to Production Server
     runs-on: ubuntu-latest
 

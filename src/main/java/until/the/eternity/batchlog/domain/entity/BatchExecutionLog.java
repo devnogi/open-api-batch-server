@@ -1,13 +1,12 @@
 package until.the.eternity.batchlog.domain.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import until.the.eternity.batchlog.domain.enums.BatchType;
 import until.the.eternity.batchlog.domain.enums.TriggerType;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "batch_execution_log")

@@ -150,14 +150,6 @@ spotless {
     }
 }
 
-tasks.named("compileJava") {
-    dependsOn("spotlessApply")
-}
-
-tasks.named("build") {
-    dependsOn("spotlessApply")
-}
-
 // REST Docs
 val snippetsDir = layout.buildDirectory.dir("generated-snippets")
 val asciidoctorExt by configurations.creating
@@ -199,4 +191,11 @@ tasks.named<Jar>("jar") {
 tasks.named<BootJar>("bootJar") {
     archiveBaseName.set("DevnogiServer")
     archiveFileName.set("DevnogiServer.jar")
+}
+
+// Verification must not format sources or regenerate checked-in documentation.
+tasks.register("verify") {
+    group = "verification"
+    description = "Run tests, configured static checks, and build the application JAR."
+    dependsOn("check", "bootJar")
 }

@@ -1,5 +1,8 @@
 package until.the.eternity.auctionrealtime.application.scheduler;
 
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +15,6 @@ import until.the.eternity.auctionrealtime.application.service.fetcher.AuctionRea
 import until.the.eternity.auctionrealtime.application.service.persister.AuctionRealtimePersister;
 import until.the.eternity.auctionrealtime.domain.service.fetcher.AuctionRealtimeFetcherPort.FetchResult;
 import until.the.eternity.common.enums.ItemCategory;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 실시간 경매장 데이터 수집 스케줄러.
