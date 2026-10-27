@@ -7,13 +7,34 @@ permissions:
   contents: read
 
 jobs:
+  deployment-window:
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      # 빠른 개선을 위한 dev 브랜치 운영 배포 허용: 2026-12-31까지 (KST)
+      - name: Check temporary dev production window
+        run: |
+          if [[ "$GITHUB_REF" == 'refs/heads/dev' ]] && (( $(date -u +%s) >= $(date -u -d '2026-12-31 15:00:00 UTC' +%s) )); then
+            echo 'dev production deployment expired at 2027-01-01 00:00:00 KST' >&2
+            exit 1
+          fi
+
   ci-cd-prod:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: deployment-window
+    if: needs.deployment-window.result == 'success'
     environment: production
     name: Test, Build, and Deploy to Production Server
     runs-on: ubuntu-latest
 
     steps:
+      # 빠른 개선을 위한 dev 브랜치 운영 배포 허용: 2026-12-31까지 (KST)
+      - name: Recheck temporary dev production window after approval
+        run: |
+          if [[ "$GITHUB_REF" == 'refs/heads/dev' ]] && (( $(date -u +%s) >= $(date -u -d '2026-12-31 15:00:00 UTC' +%s) )); then
+            echo 'dev production deployment expired at 2027-01-01 00:00:00 KST' >&2
+            exit 1
+          fi
+
       # ========================================
       # CI Stage: Test & Coverage
       # ========================================
@@ -64,7 +85,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (main)
+        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -78,9 +100,41 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
 
+      - name: Build Docker image (dev)
+        if: github.ref == 'refs/heads/dev'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: Recheck temporary dev production window before image publication
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          if (( $(date -u +%s) >= $(date -u -d '2026-12-31 15:00:00 UTC' +%s) )); then
+            echo 'dev production deployment expired before image publication' >&2
+            exit 1
+          fi
+
+      - name: Push Docker image (dev)
+        if: github.ref == 'refs/heads/dev'
+        run: docker push "${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev-${{ github.sha }}"
+
       # ========================================
       # Deploy Stage: SSH & Deploy
       # ========================================
+      - name: Recheck temporary dev production window before SSH
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          if (( $(date -u +%s) >= $(date -u -d '2026-12-31 15:00:00 UTC' +%s) )); then
+            echo 'dev production deployment expired before SSH' >&2
+            exit 1
+          fi
+
       - name: Setup SSH key and config
         run: |
           mkdir -p ~/.ssh
@@ -102,6 +156,7 @@ jobs:
       - name: Deploy to Production Server
         run: |
           ssh -i ~/.ssh/my-key.pem -p ${{ secrets.PROD_SERVER_PORT }} ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+            set -e
             cd /opt/devnogi-batch
 
             # Write .env.prod content to .env
@@ -110,8 +165,24 @@ jobs:
             # Docker Hub 로그인
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            # Pull latest production image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod
+            DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
+            DOCKER_REPO="${{ secrets.DOCKER_REPO }}"
+            DOCKER_IMAGE_TAG="${{ github.ref == 'refs/heads/dev' && format('dev-{0}', github.sha) || 'prod' }}"
+            export DOCKER_USERNAME DOCKER_REPO DOCKER_IMAGE_TAG
+            EXPECTED_IMAGE="${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG}"
+            # Confirm the selected image exists before stopping the running service.
+            docker pull "$EXPECTED_IMAGE"
+            docker image inspect "$EXPECTED_IMAGE" >/dev/null
+            COMPOSE_IMAGES="$(docker compose -f docker-compose-prod.yml --env-file .env.prod config --images)"
+            if ! printf '%s\n' "$COMPOSE_IMAGES" | grep -Fxq -- "$EXPECTED_IMAGE"; then
+              echo 'Compose app image differs from the selected release image' >&2
+              exit 1
+            fi
+
+            if [ "${{ github.ref }}" = 'refs/heads/dev' ] && [ "$(date -u +%s)" -ge 1798729200 ]; then
+              echo 'dev production deployment expired before container replacement' >&2
+              exit 1
+            fi
 
             # Stop and remove existing containers
             docker compose -f docker-compose-prod.yml down
@@ -204,7 +275,7 @@ jobs:
         run: |
           echo "✅ Production deployment successful!"
           echo "🔗 Production Server: http://${{ secrets.PROD_SERVER_HOST }}:${{ secrets.PROD_APP_PORT || 8080 }}"
-          echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod"
+          echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:${{ github.ref == 'refs/heads/dev' && format('dev-{0}', github.sha) || 'prod' }}"
           echo "📦 Commit: ${{ github.sha }}"
           echo "⚠️  Please verify the production deployment manually"
 
