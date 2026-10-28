@@ -238,6 +238,8 @@ docker-compose -f docker-compose-local.yml down
 
 ## 빌드 및 테스트
 
+Git hook 설치와 코드 품질 검사는 [개발과 검증](docs/development.md#검증)을 참고하세요.
+
 ```bash
 # 빌드
 ./gradlew clean build
