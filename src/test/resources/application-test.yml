@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+# Override the custom logback configuration for tests
+logging:
+  config: classpath:logback-test.xml
+  level:
+    root: INFO
+    until.the.eternity: DEBUG
+
+# Required configuration properties for tests
+openapi:
+  nexon:
+    base-url: https://test.api.nexon.com
+    api-key: test_api_key
+    api-key-sub: test_api_key_sub
+    max-in-memory-size-mb: 5
+    default-timeout-seconds: 5
+  auction-history:
+    delay-ms: 1000
+    cron: '0 0 */4 * * *'
+
+statistics:
+  daily:
+    cron: '0 0 3 * * *'
+  weekly:
+    cron: '0 0 4 * * MON'
+
+jwt:
+  secret-key: test_secret_key_for_testing_purposes_only
+  access-token-validity: 3600
+  refresh-token-validity: 86400

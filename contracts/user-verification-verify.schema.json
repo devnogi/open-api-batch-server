@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/devnogi/open-api-batch-server/contracts/user-verification-verify.schema.json",
+  "title": "USER_VERIFICATION_VERIFY_EVENT",
+  "type": "object",
+  "properties": {
+    "characterName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "인증 대상 캐릭터 이름"
+    },
+    "serverName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "마비노기 서버명"
+    },
+    "verificationValue": {
+      "type": "string",
+      "minLength": 1,
+      "description": "인증 토큰; 운영 데이터 대신 합성 fixture만 사용"
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "원본 메시지"
+    },
+    "dateSend": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ],
+      "description": "Instant: Kafka Jackson의 epoch seconds 또는 ISO-8601 UTC 문자열; 기존 소비자는 모두 역직렬화 가능"
+    }
+  },
+  "required": [
+    "characterName",
+    "serverName",
+    "verificationValue"
+  ],
+  "additionalProperties": true
+}

@@ -1,6 +1,6 @@
-HELP.md
 .gradle
 build/
+.DS_STORE
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -26,6 +26,17 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+**/src/main/generated/
+
+### RestDocs index.html ###
+src/docs/asciidoc/**/*.html
+src/main/resources/static/docs
+
+### Docker ###
+docker/
+logs/
+spy.log
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -35,3 +46,38 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Kotlin ###
+.kotlin
+
+### Environment Variables
+# Exclude actual .env file (contains real secrets)
+.env
+.env.local
+.env.dev
+.env.prod
+
+# Include environment templates (placeholder values only)
+# - .env.sample: Template with all available variables
+# - .env.local.sample: Local development configuration template
+# - .env.dev: Development server configuration template
+# - .env.prod: Production server configuration template
+# NOTE: These template files should ONLY contain placeholder values, never real secrets!
+
+### node ###
+node_modules/
+package-lock.json
+package.json
+
+### temp directory ###
+/temp/
+
+### K6 performance reports ###
+k6/results/*
+!k6/results/.gitkeep
+
+# Local credentials; share only synthetic examples
+.env*
+!.env.example
+!.env.sample
+!.env.local.sample

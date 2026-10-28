@@ -1,0 +1,216 @@
+name: CI/CD for Development Server
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci-cd-dev:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev'
+    environment: development
+    name: Test, Build, and Deploy to Dev Server
+    runs-on: ubuntu-latest
+
+    steps:
+      # ========================================
+      # CI Stage: Test & Coverage
+      # ========================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Tests and Generate Coverage
+        run: ./gradlew clean test jacocoTestReport --no-daemon
+
+      - name: Upload JaCoCo report to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          fail_ci_if_error: false
+          flags: dev
+          verbose: true
+
+      # ========================================
+      # CD Stage: Build & Deploy
+      # ========================================
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      # ========================================
+      # Deploy Stage: SSH & Deploy
+      # ========================================
+      - name: Setup SSH key and config
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/my-key.pem
+          chmod 400 ~/.ssh/my-key.pem
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo -e "Host *\n  ServerAliveInterval 60\n  ServerAliveCountMax 3" >> ~/.ssh/config
+
+      - name: Create app directory on server
+        run: |
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /home/${{ secrets.SERVER_USER }}/app/logs"
+
+      - name: Copy docker-compose-dev.yml to server
+        run: |
+          scp -i ~/.ssh/my-key.pem docker-compose-dev.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app/
+
+      - name: Deploy to Dev Server
+        run: |
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            cd /home/${{ secrets.SERVER_USER }}/app
+
+            # Write .env.dev content to .env.dev
+            echo "${{ secrets.ENV_FILE_DEV }}" > .env.dev
+
+            # Docker Hub 로그인
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+            # Pull latest dev image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev
+
+            # Stop and remove existing containers
+            docker compose -f docker-compose-dev.yml down
+
+            # Start new containers
+            docker compose -f docker-compose-dev.yml --env-file .env.dev up -d
+
+            echo "✅ Dev deployment complete"
+          EOF
+
+      # ========================================
+      # Health Check Stage
+      # ========================================
+      - name: Comprehensive Health Check
+        run: |
+          ssh -i ~/.ssh/my-key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            echo "=== Starting Health Check ==="
+
+            # 1. Check if container is running
+            CONTAINER_ID=$(docker ps -q --filter "name=devnogi-batch-app-dev")
+            if [ -z "$CONTAINER_ID" ]; then
+              echo "❌ Container not running"
+              docker ps -a
+              docker logs devnogi-batch-app-dev --tail 50
+              exit 1
+            fi
+            echo "✅ Container is running (ID: $CONTAINER_ID)"
+
+            # 2. Wait for Docker health check
+            echo "Waiting for container to become healthy..."
+            for i in {1..30}; do
+              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' devnogi-batch-app-dev 2>/dev/null || echo "no-healthcheck")
+
+              if [ "$HEALTH_STATUS" == "healthy" ]; then
+                echo "✅ Container is healthy"
+                break
+              elif [ "$HEALTH_STATUS" == "no-healthcheck" ]; then
+                echo "⚠️  No healthcheck configured, checking actuator directly"
+                break
+              fi
+
+              echo "Current health status: $HEALTH_STATUS ($i/30)"
+              sleep 10
+
+              if [ $i -eq 30 ]; then
+                echo "❌ Container failed to become healthy after 5 minutes"
+                docker logs devnogi-batch-app-dev --tail 100
+                exit 1
+              fi
+            done
+
+            # 3. Check Spring Boot actuator health endpoint
+            echo "Checking actuator health endpoint..."
+            for i in {1..20}; do
+              HEALTH_RESPONSE=$(curl -s http://localhost:${{ secrets.SERVER_PORT || 8080 }}/actuator/health || echo "")
+
+              if echo "$HEALTH_RESPONSE" | grep -q '"status":"UP"'; then
+                echo "✅ Application health check passed"
+                echo "Health response: $HEALTH_RESPONSE"
+                break
+              fi
+
+              echo "Waiting for application to start... ($i/20)"
+              sleep 10
+
+              if [ $i -eq 20 ]; then
+                echo "❌ Application health check failed after 3+ minutes"
+                echo "Last response: $HEALTH_RESPONSE"
+                docker logs devnogi-batch-app-dev --tail 100
+                exit 1
+              fi
+            done
+
+            # 4. Smoke test: Check if API responds
+            echo "Running smoke test..."
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.SERVER_PORT || 8080 }}/actuator/health)
+            if [ "$HTTP_CODE" == "200" ]; then
+              echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
+            else
+              echo "❌ Smoke test failed (HTTP $HTTP_CODE)"
+              exit 1
+            fi
+
+            echo "=== Health Check Complete ==="
+            docker ps --filter "name=devnogi-batch-app-dev"
+          EOF
+
+      - name: Display deployment info
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🔗 Dev Server: http://${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PORT || 8080 }}"
+          echo "🐳 Image: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev"
+          echo "📦 Commit: ${{ github.sha }}"
+
+      # ========================================
+      # Rollback on Failure
+      # ========================================
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed! Consider manual rollback if needed."
+          echo "To rollback, SSH to server and run:"
+          echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:dev-<previous-sha>"
+          echo "  docker compose -f docker-compose-dev.yml down && docker compose -f docker-compose-dev.yml --env-file .env.dev up -d"

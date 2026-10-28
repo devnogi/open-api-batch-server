@@ -1,0 +1,77 @@
+name: Deploy batch production
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: batch-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require trusted production SSH host key
+        env:
+          KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+        run: test -n "$KNOWN_HOSTS"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: chmod +x gradlew && ./gradlew verify --no-daemon
+      - run: node --test scripts/test-production-workflow.mjs
+      - run: node scripts/secret-scan.mjs
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - id: image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:prod-${{ github.sha }}
+          labels: org.opencontainers.image.revision=${{ github.sha }}
+      - name: Set up SSH
+        env:
+          KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+          SSH_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/my-key.pem
+          chmod 400 ~/.ssh/my-key.pem
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Copy candidate files
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE_PROD }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes -p '${{ secrets.PROD_SERVER_PORT }}' -i ~/.ssh/my-key.pem '${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}' 'mkdir -p /opt/devnogi-batch/candidate'
+          scp -o StrictHostKeyChecking=yes -P '${{ secrets.PROD_SERVER_PORT }}' -i ~/.ssh/my-key.pem docker-compose-prod.yml scripts/deploy-production.sh '${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}:/opt/devnogi-batch/candidate/'
+          printf '%s\n' "$ENV_FILE" | ssh -o StrictHostKeyChecking=yes -p '${{ secrets.PROD_SERVER_PORT }}' -i ~/.ssh/my-key.pem '${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}' 'umask 077; cat > /opt/devnogi-batch/candidate/.env.candidate'
+          printf '%s' "$DOCKER_PASSWORD" | ssh -o StrictHostKeyChecking=yes -p '${{ secrets.PROD_SERVER_PORT }}' -i ~/.ssh/my-key.pem '${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}' 'umask 077; cat > /opt/devnogi-batch/candidate/.docker-password'
+      - name: Deploy digest and check health
+        run: |
+          ssh -o StrictHostKeyChecking=yes -p '${{ secrets.PROD_SERVER_PORT }}' -i ~/.ssh/my-key.pem '${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}' <<'EOF'
+            set -eu
+            cd /opt/devnogi-batch
+            umask 077
+            trap 'rm -f .env.candidate candidate/.docker-password' EXIT
+            mv candidate/.env.candidate .env.candidate
+            docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin < candidate/.docker-password
+            export DOCKER_USERNAME='${{ secrets.DOCKER_USERNAME }}'
+            export DOCKER_REPO='${{ secrets.DOCKER_REPO }}'
+            export IMAGE_REF='${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}@${{ steps.image.outputs.digest }}'
+            sh candidate/deploy-production.sh
+          EOF
