@@ -7,8 +7,7 @@
 
 services:
   spring-app:
-    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-prod}
-    pull_policy: always
+    image: ${IMAGE_REF:?Set an immutable image digest}
     container_name: devnogi-batch-app-prod
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
