@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-const pin = '9506ea4c4dd3147e3ab15a8b06e780ce416908a6';
+const pin = '5c46d7aff8ce452b72ad8f6c18bcb5a09828384d';
 const ci = read('.github/workflows/pr-ci.yml');
 const prod = read('.github/workflows/push-cd-prod.yml');
 
@@ -20,6 +20,7 @@ test('production caller only permits main push or manual dispatch', () => {
   assert.match(prod, /if: github\.ref == 'refs\/heads\/main' && \(github\.event_name == 'push' \|\| github\.event_name == 'workflow_dispatch'\)/);
   assert.doesNotMatch(prod, /pull_request:/);
   assert.match(prod, new RegExp(`spring-prod\\.yml@${pin}`));
+  assert.match(prod, /permissions:\s*\n\s*contents: write/);
   assert.match(prod, /health-timeout: '300'/);
   assert.match(prod, /platform: linux\/amd64/);
   assert.match(prod, /secrets: inherit/);
@@ -27,7 +28,7 @@ test('production caller only permits main push or manual dispatch', () => {
 
 test('callers agree on Batch inputs and Compose requires the image', () => {
   for (const workflow of [ci, prod]) {
-    for (const line of ['service-profile: batch', 'image-name: open-api-batch-server',
+    for (const line of ['service-profile: batch', 'service-name: batch',
       'dockerfile: Dockerfile', 'compose-file: docker-compose-prod.yml']) {
       assert.ok(workflow.includes(line), line);
     }
