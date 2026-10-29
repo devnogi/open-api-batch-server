@@ -1,13 +1,13 @@
 # =============================================================================
 # 운영 서버 환경용 Docker Compose 설정 (Profile: prod)
 # =============================================================================
-# 사용법: docker-compose -f docker-compose-prod.yml --env-file .env.prod up -d
+# 운영 배포는 공통 workflow가 IMAGE_REF를 지정해 실행한다.
 # 고성능 리소스 할당 (Dev의 3배 메모리)
 # =============================================================================
 
 services:
   spring-app:
-    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${DOCKER_IMAGE_TAG:-prod}
+    image: ${IMAGE_REF:?IMAGE_REF is required}
     pull_policy: always
     container_name: devnogi-batch-app-prod
     ports:

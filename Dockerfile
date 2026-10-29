@@ -47,7 +47,6 @@ FROM eclipse-temurin:21-jre-alpine
 # 메타데이터 추가
 LABEL maintainer="DevNogi Team"
 LABEL description="Open API Batch Server - Mabinogi Auction Data Collector"
-LABEL version="0.0.1"
 
 # 보안: non-root 사용자 생성
 RUN addgroup -S spring && adduser -S spring -G spring
