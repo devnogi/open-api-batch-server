@@ -30,7 +30,9 @@ docker compose --env-file .env.local -f docker-compose-local.yml up --build spri
 
 ## CI와 배포
 
-`main` 대상 PR에서 `verify`, `secret-scan`과 배포 workflow 테스트를 실행한다. `main`에 merge되면 같은 커밋으로 이미지를 빌드하고 digest로 운영 배포한다. 배포는 직렬화하며 health 실패 시 이전 digest, Compose, 환경 파일을 복구하고 health를 다시 확인한다. 이전 digest나 Compose 또는 환경이 없으면 자동 복구 불가를 보고하고 실패한다. 수동 재배포는 `main`에서만 허용한다. 최초 승격 전에 운영 Flyway 적용 이력과 checksum을 읽기 전용으로 대조하고 불일치 시 배포를 중단한다. `production` environment에는 별도의 신뢰 경로로 확인한 SSH 서버 공개 키를 `PROD_SSH_KNOWN_HOSTS`로 설정해야 하며, 값이 없거나 맞지 않으면 배포가 실패한다. 운영 Environment와 Ruleset은 GitHub에서 별도로 설정하고 검증한다.
+PR은 공통 workflow로 verify와 secret-scan, 이미지 빌드 및 Compose 검증을 실행한다. Batch JaCoCo 보고서는 생성되면 artifact로 보존하며 Codecov는 필수 검사가 아니다. 실제 PR에서 새 검사 context를 확인한 뒤 브랜치 보호를 별도로 설정해야 한다.
+
+main push는 동일 검증 후 production 환경에서 불변 digest 이미지를 게시·배포한다. 수동 운영 실행도 main으로 제한하며 dev 운영 배포는 허용하지 않는다. PR은 배포하지 않는다. main 병합은 자동 운영 배포를 수반하므로 별도 사람 승인이 필요하다. 개발 배포 workflow는 별도로 유지한다. 상세 설정과 복구는 [CD 파이프라인 가이드](CD_PIPELINE_GUIDE.md)를 참조한다.
 
 각 서비스의 Compose는 개별 개발 환경이다. 전체 MSA가 자동 연결된다는 뜻은 아니다. Kafka는 bootstrap 주소뿐 아니라 브로커 advertised.listeners가 각 애플리케이션 컨테이너에서 접근 가능한 주소여야 한다. 호스트용 localhost 광고 주소를 컨테이너에 그대로 사용하지 않는다. 통합 환경에서는 공통 네트워크의 내부 리스너를 사용하거나 개발 호스트 주소로 광고하도록 별도 구성한다.
 
