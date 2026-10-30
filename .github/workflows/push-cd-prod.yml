@@ -21,7 +21,7 @@ jobs:
   production:
     needs: contract
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    uses: devnogi/ci-workflows/.github/workflows/spring-prod.yml@5e016f1fec66dd7e0bb752ec77d822b80940ac0c
+    uses: devnogi/ci-workflows/.github/workflows/spring-prod.yml@5f5c9251604cf13025e3bcb8a44425ddf79777ab
     with:
       service-profile: batch
       deployment-target: prod2
