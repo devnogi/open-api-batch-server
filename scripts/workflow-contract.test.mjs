@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-const pin = '5f5c9251604cf13025e3bcb8a44425ddf79777ab';
+const pin = '2b4fbf8f7ab7403959f4641fe6d175b832ffe331';
 const ci = read('.github/workflows/pr-ci.yml');
 const prod = read('.github/workflows/push-cd-prod.yml');
 const gradleProperties = read('gradle.properties');
