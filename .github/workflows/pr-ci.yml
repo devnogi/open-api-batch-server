@@ -18,7 +18,7 @@ jobs:
       - run: node --test scripts/workflow-contract.test.mjs
   ci:
     needs: contract
-    uses: devnogi/ci-workflows/.github/workflows/spring-ci.yml@5e016f1fec66dd7e0bb752ec77d822b80940ac0c
+    uses: devnogi/ci-workflows/.github/workflows/spring-ci.yml@5f5c9251604cf13025e3bcb8a44425ddf79777ab
     with:
       service-profile: batch
       service-name: batch
