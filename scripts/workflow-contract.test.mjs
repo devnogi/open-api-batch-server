@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-const pin = '2b4fbf8f7ab7403959f4641fe6d175b832ffe331';
+const pin = 'c5b33bfa84762986d47037f5ce3eca14a1c516ca';
 const ci = read('.github/workflows/pr-ci.yml');
 const prod = read('.github/workflows/push-cd-prod.yml');
 const gradleProperties = read('gradle.properties');
@@ -31,7 +31,7 @@ test('production caller only permits main push or manual dispatch', () => {
   assert.match(prod, /platform: linux\/amd64/);
   assert.match(prod, /secrets: inherit/);
   assert.match(prod, /deployment-target: prod2/);
-  assert.match(gradleProperties, /^applicationVersion=1\.0\.0$/m);
+  assert.match(gradleProperties, /^applicationVersion=1\.0\.1$/m);
 });
 
 test('callers agree on Batch inputs and Compose requires the image', () => {
