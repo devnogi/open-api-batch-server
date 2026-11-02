@@ -43,3 +43,15 @@ test('callers agree on Batch inputs and Compose requires the image', () => {
   }
   assert.match(read('docker-compose-prod.yml'), /spring-app:\s*\n\s*image: \$\{IMAGE_REF:\?IMAGE_REF is required\}/);
 });
+
+test('production Batch logs use the host collector and retain diagnostic cache', () => {
+  const compose = read('docker-compose-prod.yml');
+  const app = compose.split('  devnogi-elastic-search:')[0];
+  for (const line of ['driver: "syslog"', 'syslog-address: "unixgram:///dev/log"',
+    'syslog-format: "rfc5424micro"', 'tag: "memonogi-batch"', 'mode: "non-blocking"',
+    'max-buffer-size: "4m"', 'cache-disabled: "false"', 'cache-max-size: "20m"',
+    'cache-max-file: "5"', 'app-logs:/app/logs']) {
+    assert.ok(app.includes(line), line);
+  }
+  assert.match(compose.split('  devnogi-elastic-search:')[1], /driver: "json-file"/);
+});
