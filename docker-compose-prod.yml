@@ -102,12 +102,18 @@ services:
       retries: 5         # 더 많은 재시도 (일시적 장애 허용)
       start_period: 180s # 더 긴 시작 유예 (충분한 워밍업)
 
-    # === Logging (Prod - 대용량, 장기 보관) ===
+    # Host rsyslog owns persistent logs; Docker keeps a bounded diagnostic cache.
     logging:
-      driver: "json-file"
+      driver: "syslog"
       options:
-        max-size: "50m"
-        max-file: "5"
+        syslog-address: "unixgram:///dev/log"
+        syslog-format: "rfc5424micro"
+        tag: "memonogi-batch"
+        mode: "non-blocking"
+        max-buffer-size: "4m"
+        cache-disabled: "false"
+        cache-max-size: "20m"
+        cache-max-file: "5"
 
   # === Elasticsearch (Prod - 고성능, 최대 3GB) ===
   devnogi-elastic-search:
