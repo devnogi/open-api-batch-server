@@ -40,6 +40,8 @@ test('Elasticsearch remediation is manual, main-only, and uses pinned native SSH
   assert.match(elasticsearchRollout, /StrictHostKeyChecking=yes/);
   assert.match(elasticsearchRollout, /HostKeyAlgorithms=ssh-ed25519/);
   assert.match(elasticsearchRollout, /scripts\/rebind-prod-elasticsearch\.sh/);
+  assert.match(elasticsearchRollout, /scp -P "\$PROD2_SSH_PORT"/);
+  assert.match(elasticsearchRollout, /\.elasticsearch-rollout-\$run/);
 });
 
 test('Elasticsearch remediation preserves Compose identity and resources with verified rollback', () => {
@@ -50,11 +52,11 @@ test('Elasticsearch remediation preserves Compose identity and resources with ve
     /--pull never --no-deps --force-recreate/, /docker port "\$container" 9200\/tcp/,
     /http:\/\/127\.0\.0\.1:\$http_port\/_cluster\/health/,
     /recreate "\$rollback_compose"/,
-    /trap 'recover \$\?' ERR/, /trap 'recover 129' HUP/,
-    /trap 'recover 130' INT/, /trap 'recover 143' TERM/,
-    /ROLLOUT_RESULT=SUCCESS/, /ROLLOUT_RESULT=ROLLED_BACK/,
+    /nohup env ELASTICSEARCH_HEALTH_ATTEMPTS=/, /watchdog_main/,
+    /kill -KILL "\$parent_pid"/, /record_result SUCCESS/,
+    /record_result ROLLED_BACK/, /record_result ROLLBACK_FAILED/,
   ]) assert.match(elasticsearchScript, contract);
-  assert.match(elasticsearchScript, /\$remote_dir\/compose\.yml" \|\| \$config_files == "\$remote_dir\/docker-compose-prod\.yml/);
+  assert.match(elasticsearchScript, /\$config_files == "\$remote_dir\/docker-compose-prod\.yml"/);
   assert.doesNotMatch(elasticsearchScript, /docker compose down|down -v|--pull always/);
 });
 
@@ -64,6 +66,7 @@ test('PR caller targets the approved reusable Batch CI', () => {
   assert.match(ci, new RegExp(`spring-ci\\.yml@${pin}`));
   assert.doesNotMatch(ci, /spring-prod\.yml|\bpush:/);
   assert.match(ci, /node --test scripts\/workflow-contract\.test\.mjs/);
+  assert.match(ci, /bash scripts\/rebind-prod-elasticsearch\.test\.sh/);
   assert.match(ci, /ci:\s*\n\s*needs: contract/);
 });
 
@@ -76,6 +79,7 @@ test('production caller only permits main push or manual dispatch', () => {
   assert.match(prod, /permissions:\s*\n\s*contents: write/);
   assert.match(prod, /concurrency:\s*\n\s*group: batch-production\s*\n\s*cancel-in-progress: false/);
   assert.match(prod, /node --test scripts\/workflow-contract\.test\.mjs/);
+  assert.match(prod, /bash scripts\/rebind-prod-elasticsearch\.test\.sh/);
   assert.match(prod, /production:\s*\n\s*needs: contract/);
   assert.match(prod, /health-timeout: '300'/);
   assert.match(prod, /platform: linux\/amd64/);

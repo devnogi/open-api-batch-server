@@ -62,22 +62,39 @@ jobs:
           compose_sha256=$(sha256sum docker-compose-prod.yml | awk '{print $1}')
           [[ "$compose_sha256" =~ ^[a-f0-9]{64}$ ]]
           opts=(-i "$work/key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$work/known_hosts" -o GlobalKnownHostsFile=/dev/null -o HostKeyAlgorithms=ssh-ed25519 -o IdentitiesOnly=yes -o ConnectTimeout=15)
+          run="$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [[ "$run" =~ ^[0-9]+-[0-9]+$ ]]
+          stage="$REMOTE_DIR/.elasticsearch-rollout-$run"
+
+          if ! ssh -p "$PROD2_SSH_PORT" "${opts[@]}" "$PROD2_USER@$PROD2_HOST" "mkdir '$stage'" >"$work/ssh.log" 2>&1 ||
+             ! scp -P "$PROD2_SSH_PORT" "${opts[@]}" scripts/rebind-prod-elasticsearch.sh "$PROD2_USER@$PROD2_HOST:$stage/remote.sh" >"$work/ssh.log" 2>&1; then
+            echo 'Could not stage Elasticsearch recovery owner'
+            exit 1
+          fi
 
           set +e
-          ssh -p "$PROD2_SSH_PORT" "${opts[@]}" "$PROD2_USER@$PROD2_HOST" bash -s -- \
-            "$REMOTE_DIR" "$compose_sha256" < scripts/rebind-prod-elasticsearch.sh >"$work/ssh.log" 2>&1
+          ssh -p "$PROD2_SSH_PORT" "${opts[@]}" "$PROD2_USER@$PROD2_HOST" bash "$stage/remote.sh" \
+            rollout "$REMOTE_DIR" "$compose_sha256" "$stage" >"$work/ssh.log" 2>&1
           remote_status=$?
+          result=
+          for _ in $(seq 1 36); do
+            result=$(ssh -p "$PROD2_SSH_PORT" "${opts[@]}" "$PROD2_USER@$PROD2_HOST" "test ! -f '$stage/result' || cat '$stage/result'" 2>/dev/null) || true
+            [[ -z "$result" ]] || break
+            sleep 5
+          done
           set -e
 
-          if [[ $remote_status -eq 0 ]] && grep -qx 'ROLLOUT_RESULT=SUCCESS' "$work/ssh.log"; then
+          if [[ $remote_status -eq 0 && $result == ROLLOUT_RESULT=SUCCESS ]]; then
+            ssh -p "$PROD2_SSH_PORT" "${opts[@]}" "$PROD2_USER@$PROD2_HOST" "rm -rf '$stage'" >/dev/null 2>&1 || true
             echo 'Elasticsearch loopback rollout verified'
             exit 0
           fi
-          if grep -qx 'ROLLOUT_RESULT=ROLLBACK_FAILED' "$work/ssh.log"; then
+          if [[ $result == ROLLOUT_RESULT=ROLLBACK_FAILED ]]; then
             echo 'Elasticsearch rollout and rollback verification failed'
             exit 2
           fi
-          if grep -qx 'ROLLOUT_RESULT=ROLLED_BACK' "$work/ssh.log"; then
+          if [[ $result == ROLLOUT_RESULT=ROLLED_BACK ]]; then
+            ssh -p "$PROD2_SSH_PORT" "${opts[@]}" "$PROD2_USER@$PROD2_HOST" "rm -rf '$stage'" >/dev/null 2>&1 || true
             echo 'Elasticsearch rollout failed; the pre-change service state was restored'
             exit 1
           fi

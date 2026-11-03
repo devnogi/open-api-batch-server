@@ -17,7 +17,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - run: node --test scripts/workflow-contract.test.mjs
+      - run: |
+          node --test scripts/workflow-contract.test.mjs
+          bash scripts/rebind-prod-elasticsearch.test.sh
   production:
     needs: contract
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
