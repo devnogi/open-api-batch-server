@@ -50,8 +50,11 @@ test('Elasticsearch remediation preserves Compose identity and resources with ve
     /--pull never --no-deps --force-recreate/, /docker port "\$container" 9200\/tcp/,
     /http:\/\/127\.0\.0\.1:\$http_port\/_cluster\/health/,
     /recreate "\$rollback_compose"/,
+    /trap 'recover \$\?' ERR/, /trap 'recover 129' HUP/,
+    /trap 'recover 130' INT/, /trap 'recover 143' TERM/,
     /ROLLOUT_RESULT=SUCCESS/, /ROLLOUT_RESULT=ROLLED_BACK/,
   ]) assert.match(elasticsearchScript, contract);
+  assert.match(elasticsearchScript, /\$remote_dir\/compose\.yml" \|\| \$config_files == "\$remote_dir\/docker-compose-prod\.yml/);
   assert.doesNotMatch(elasticsearchScript, /docker compose down|down -v|--pull always/);
 });
 
@@ -78,7 +81,7 @@ test('production caller only permits main push or manual dispatch', () => {
   assert.match(prod, /platform: linux\/amd64/);
   assert.match(prod, /secrets: inherit/);
   assert.match(prod, /deployment-target: prod2/);
-  assert.match(gradleProperties, /^applicationVersion=1\.0\.3$/m);
+  assert.match(gradleProperties, /^applicationVersion=1\.0\.4$/m);
 });
 
 test('callers agree on Batch inputs and Compose requires the image', () => {

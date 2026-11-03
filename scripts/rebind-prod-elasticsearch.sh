@@ -22,7 +22,7 @@ config_files=$(docker inspect --format '{{index .Config.Labels "com.docker.compo
 compose_service=$(docker inspect --format '{{index .Config.Labels "com.docker.compose.service"}}' "$container")
 [[ $project =~ ^[a-zA-Z0-9][a-zA-Z0-9_.-]*$ ]]
 [[ $working_dir == "$remote_dir" ]]
-[[ $config_files == "$remote_dir/compose.yml" ]]
+[[ $config_files == "$remote_dir/compose.yml" || $config_files == "$remote_dir/docker-compose-prod.yml" ]]
 [[ $compose_service == "$service" ]]
 
 previous_image_id=$(docker inspect --format '{{.Image}}' "$container")
@@ -126,10 +126,27 @@ rollback() {
   return 1
 }
 
-if ! recreate compose.yml || ! wait_for_health || ! same_identity || ! same_resources || ! loopback_ports; then
-  rollback || exit 2
-  exit 1
-fi
+recover() {
+  local status=$1
+  trap - ERR HUP INT TERM
+  set +e
+  if rollback; then
+    exit 1
+  fi
+  exit 2
+}
 
+trap 'recover $?' ERR
+trap 'recover 129' HUP
+trap 'recover 130' INT
+trap 'recover 143' TERM
+
+recreate compose.yml
+wait_for_health
+same_identity
+same_resources
+loopback_ports
+
+trap - ERR HUP INT TERM
 rm -f "$image_override"
 echo 'ROLLOUT_RESULT=SUCCESS'
