@@ -6,6 +6,8 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 const pin = '698f7b25995156af3f2df7f17171e5c3f5e77d76';
 const ci = read('.github/workflows/pr-ci.yml');
 const prod = read('.github/workflows/push-cd-prod.yml');
+const elasticsearchRollout = read('.github/workflows/rollout-elasticsearch-loopback-prod.yml');
+const elasticsearchScript = read('scripts/rebind-prod-elasticsearch.sh');
 const gradleProperties = read('gradle.properties');
 
 test('production Batch and Elasticsearch ports are bound to loopback', () => {
@@ -24,6 +26,33 @@ test('Elasticsearch loopback rollout preserves image and volume and recreates th
   assert.match(guide, /--pull never --no-deps --force-recreate devnogi-elastic-search/);
   assert.match(guide, /-f "\$rollback_compose" -f "\$override"/);
   assert.match(guide, /docker compose down -v/);
+});
+
+test('Elasticsearch remediation is manual, main-only, and uses pinned native SSH trust', () => {
+  assert.match(elasticsearchRollout, /on:\s*\n\s*workflow_dispatch:/);
+  assert.doesNotMatch(elasticsearchRollout, /\bpush:|pull_request:/);
+  assert.match(elasticsearchRollout, /if: github\.ref == 'refs\/heads\/main' && github\.event_name == 'workflow_dispatch'/);
+  assert.match(elasticsearchRollout, /runs-on: ubuntu-24\.04/);
+  assert.match(elasticsearchRollout, /environment: production/);
+  assert.match(elasticsearchRollout, /cancel-in-progress: false/);
+  assert.match(elasticsearchRollout, /ssh-keyscan -T 15 .* -t ed25519/);
+  assert.match(elasticsearchRollout, /ssh-keygen -E sha256/);
+  assert.match(elasticsearchRollout, /StrictHostKeyChecking=yes/);
+  assert.match(elasticsearchRollout, /HostKeyAlgorithms=ssh-ed25519/);
+  assert.match(elasticsearchRollout, /scripts\/rebind-prod-elasticsearch\.sh/);
+});
+
+test('Elasticsearch remediation preserves Compose identity and resources with verified rollback', () => {
+  for (const contract of [
+    /com\.docker\.compose\.project/, /com\.docker\.compose\.project\.working_dir/,
+    /com\.docker\.compose\.project\.config_files/, /--project-name "\$project"/,
+    /previous_image_id/, /previous_mount/, /previous_networks/,
+    /--pull never --no-deps --force-recreate/, /docker port "\$container" 9200\/tcp/,
+    /http:\/\/127\.0\.0\.1:\$http_port\/_cluster\/health/,
+    /recreate "\$rollback_compose"/,
+    /ROLLOUT_RESULT=SUCCESS/, /ROLLOUT_RESULT=ROLLED_BACK/,
+  ]) assert.match(elasticsearchScript, contract);
+  assert.doesNotMatch(elasticsearchScript, /docker compose down|down -v|--pull always/);
 });
 
 test('PR caller targets the approved reusable Batch CI', () => {
