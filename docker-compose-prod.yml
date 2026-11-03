@@ -11,7 +11,7 @@ services:
     pull_policy: always
     container_name: devnogi-batch-app-prod
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "127.0.0.1:${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .env.prod  # 운영 환경 변수 파일 (DB, JWT, API 키 등 민감 정보)
 
@@ -134,8 +134,8 @@ services:
         soft: 65536
         hard: 65536
     ports:
-      - "${ELASTICSEARCH_PORT:-9200}:9200"
-      - "${ELASTICSEARCH_TRANSPORT_PORT:-9300}:9300"
+      - "127.0.0.1:${ELASTICSEARCH_PORT:-9200}:9200"
+      - "127.0.0.1:${ELASTICSEARCH_TRANSPORT_PORT:-9300}:9300"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:

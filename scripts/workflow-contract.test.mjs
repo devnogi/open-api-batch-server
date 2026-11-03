@@ -8,6 +8,24 @@ const ci = read('.github/workflows/pr-ci.yml');
 const prod = read('.github/workflows/push-cd-prod.yml');
 const gradleProperties = read('gradle.properties');
 
+test('production Batch and Elasticsearch ports are bound to loopback', () => {
+  const compose = read('docker-compose-prod.yml');
+  assert.match(compose, /ports:\s*\n\s*- "127\.0\.0\.1:\$\{SERVER_PORT\}:\$\{SERVER_PORT\}"/);
+  assert.match(compose, /"127\.0\.0\.1:\$\{ELASTICSEARCH_PORT:-9200\}:9200"/);
+  assert.match(compose, /"127\.0\.0\.1:\$\{ELASTICSEARCH_TRANSPORT_PORT:-9300\}:9300"/);
+});
+
+test('Elasticsearch loopback rollout preserves image and volume and recreates the dependency explicitly', () => {
+  const guide = read('docs/CD_PIPELINE_GUIDE.md');
+  assert.match(guide, /--no-deps spring-app/);
+  assert.match(guide, /previous_image_id=\$\(docker inspect/);
+  assert.match(guide, /previous_mounts=\$\(docker inspect/);
+  assert.match(guide, /--project-directory "\$PWD"/);
+  assert.match(guide, /--pull never --no-deps --force-recreate devnogi-elastic-search/);
+  assert.match(guide, /-f "\$rollback_compose" -f "\$override"/);
+  assert.match(guide, /docker compose down -v/);
+});
+
 test('PR caller targets the approved reusable Batch CI', () => {
   assert.match(ci, /pull_request:\s*\n\s*branches: \[dev, main\]/);
   assert.match(ci, /workflow_dispatch:/);
@@ -31,7 +49,7 @@ test('production caller only permits main push or manual dispatch', () => {
   assert.match(prod, /platform: linux\/amd64/);
   assert.match(prod, /secrets: inherit/);
   assert.match(prod, /deployment-target: prod2/);
-  assert.match(gradleProperties, /^applicationVersion=1\.0\.2$/m);
+  assert.match(gradleProperties, /^applicationVersion=1\.0\.3$/m);
 });
 
 test('callers agree on Batch inputs and Compose requires the image', () => {
