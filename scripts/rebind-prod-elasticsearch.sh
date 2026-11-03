@@ -198,6 +198,10 @@ rollout_main() {
   http_mode=$(binding_mode "$previous_http_bindings")
   transport_mode=$(binding_mode "$previous_transport_bindings")
   [[ $http_mode == "$transport_mode" ]]
+  previous_http_port=${previous_http_bindings%%$'\n'*}
+  previous_http_port=${previous_http_port#*|}
+  previous_transport_port=${previous_transport_bindings%%$'\n'*}
+  previous_transport_port=${previous_transport_port#*|}
 
   rendered=$(docker compose --project-name "$project" --project-directory "$remote_dir" --env-file .env.prod -f compose.yml config --format json)
   mapfile -t candidates < <(python3 -c '
@@ -205,15 +209,22 @@ import json, sys
 c=json.load(sys.stdin); s=c["services"]["devnogi-elastic-search"]
 v=[x for x in s.get("volumes",[]) if x.get("target")=="/usr/share/elasticsearch/data" and x.get("type")=="volume"]
 n=sorted(s.get("networks",{}))
-assert len(v)==1 and len(n)==1
+p=sorted(s.get("ports",[]), key=lambda x: x.get("target",0))
+assert len(v)==1 and len(n)==1 and len(p)==2
+assert [x.get("target") for x in p]==[9200,9300] and all(x.get("protocol","tcp")=="tcp" and x.get("host_ip")=="127.0.0.1" for x in p)
 print(c["volumes"][v[0]["source"]]["name"])
 print(c["networks"][n[0]]["name"])
+print(p[0]["published"])
+print(p[1]["published"])
 ' <<<"$rendered")
-  [[ ${#candidates[@]} -eq 2 ]]
+  [[ ${#candidates[@]} -eq 4 ]]
   candidate_volume=${candidates[0]}
   candidate_network=${candidates[1]}
+  candidate_http_port=${candidates[2]}
+  candidate_transport_port=${candidates[3]}
   valid_resource "$candidate_volume" && valid_resource "$candidate_network"
   [[ $previous_volume == "$candidate_volume" && $previous_networks == "$candidate_network" ]]
+  [[ $previous_http_port == "$candidate_http_port" && $previous_transport_port == "$candidate_transport_port" ]]
 
   timestamp=$(date -u +%Y%m%dT%H%M%SZ)
   rollback_compose="$remote_dir/elasticsearch-rollback-$timestamp.yml"
@@ -242,11 +253,15 @@ import json, sys
 c=json.load(sys.stdin); s=c["services"]["devnogi-elastic-search"]
 v=[x for x in s.get("volumes",[]) if x.get("target")=="/usr/share/elasticsearch/data" and x.get("type")=="volume"]
 n=sorted(s.get("networks",{}))
-assert len(v)==1 and len(n)==1
+p=sorted(s.get("ports",[]), key=lambda x: x.get("target",0))
+assert len(v)==1 and len(n)==1 and len(p)==2
 print(c["volumes"][v[0]["source"]]["name"])
 print(c["networks"][n[0]]["name"])
+print(p[0]["published"])
+print(p[1]["published"])
 ' <<<"$rollback_rendered")
   [[ ${rollback_candidates[0]:-} == "$previous_volume" && ${rollback_candidates[1]:-} == "$candidate_network" ]]
+  [[ ${rollback_candidates[2]:-} == "$previous_http_port" && ${rollback_candidates[3]:-} == "$previous_transport_port" ]]
 
   printf '%s\n' "$project" >"$state_dir/project"
   printf '%s\n' "$previous_image_id" >"$state_dir/image"

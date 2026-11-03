@@ -56,12 +56,14 @@ if [[ $1 == inspect ]]; then
         public) printf '0.0.0.0|9200\n::|9200\n' ;;
         loopback) printf '127.0.0.1|9200\n' ;;
         mixed) printf '0.0.0.0|9200\n127.0.0.1|9200\n' ;;
+        custom) printf '0.0.0.0|19200\n::|19200\n' ;;
       esac ;;
     *'9300/tcp'*)
       case $(<"$state/mode") in
         public) printf '0.0.0.0|9300\n::|9300\n' ;;
         loopback) printf '127.0.0.1|9300\n' ;;
         mixed) printf '0.0.0.0|9300\n127.0.0.1|9300\n' ;;
+        custom) printf '0.0.0.0|19300\n::|19300\n' ;;
       esac ;;
     *'.State.Status'*) printf 'running|%s\n' "$(<"$state/health")" ;;
     *) exit 90 ;;
@@ -90,7 +92,7 @@ while (($#)); do
 done
 if [[ $operation == config ]]; then
   if ((format_json)); then
-    printf '{"services":{"devnogi-elastic-search":{"volumes":[{"type":"volume","source":"elasticsearch_data","target":"/usr/share/elasticsearch/data"}],"networks":{"app-network":{}}}},"volumes":{"elasticsearch_data":{"name":"batch_elasticsearch_data"}},"networks":{"app-network":{"name":"batch_app-network"}}}\n'
+    printf '{"services":{"devnogi-elastic-search":{"volumes":[{"type":"volume","source":"elasticsearch_data","target":"/usr/share/elasticsearch/data"}],"networks":{"app-network":{}},"ports":[{"target":9200,"published":"9200","host_ip":"127.0.0.1","protocol":"tcp"},{"target":9300,"published":"9300","host_ip":"127.0.0.1","protocol":"tcp"}]}},"volumes":{"elasticsearch_data":{"name":"batch_elasticsearch_data"}},"networks":{"app-network":{"name":"batch_app-network"}}}\n'
   fi
   exit 0
 fi
@@ -125,6 +127,7 @@ BASH
 #!/usr/bin/env bash
 cat >/dev/null
 printf 'batch_elasticsearch_data\nbatch_app-network\n'
+printf '9200\n9300\n'
 BASH
   chmod +x "$fake_bin/docker" "$fake_bin/curl" "$fake_bin/flock" "$fake_bin/python3" "$stage/remote.sh"
   compose_sha=$(sha256sum "$remote/compose.yml" | awk '{print $1}')
@@ -167,6 +170,12 @@ rm -rf "$fixture"
 
 new_fixture
 printf 'wrong-volume\n' >"$fake_state/volume"
+run_rollout
+[[ $status -ne 0 && ! -e $stage/result && $(<"$fake_state/up-count") == 0 ]]
+rm -rf "$fixture"
+
+new_fixture
+printf 'custom\n' >"$fake_state/mode"
 run_rollout
 [[ $status -ne 0 && ! -e $stage/result && $(<"$fake_state/up-count") == 0 ]]
 rm -rf "$fixture"
