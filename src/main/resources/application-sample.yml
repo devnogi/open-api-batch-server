@@ -84,9 +84,14 @@ logging:
     until.the.eternity: DEBUG
 
 app:
+  cache:
+    redis-prefix: ${CACHE_REDIS_PREFIX:oab:v2}
   kafka:
     topics:
       user-verification-verify: ${KAFKA_TOPIC_USER_VERIFICATION_VERIFY:USER_VERIFICATION_VERIFY_EVENT}
+
+total-search:
+  refresh-cron: ${TOTAL_SEARCH_REFRESH_CRON:0 0 * * * *}
 
 openapi:
   nexon:

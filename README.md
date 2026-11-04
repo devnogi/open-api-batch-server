@@ -119,6 +119,7 @@ infrastructure/   # Repository 구현체, JPA
 ### 메타데이터
 | Endpoint | Method | 설명 |
 |----------|--------|------|
+| `/api/total-search` | GET | 아이템과 메뉴 통합 자동완성 |
 | `/api/item-infos` | GET | 아이템 메타데이터 |
 | `/api/v1/item-option-infos` | GET | 아이템 옵션 정보 |
 | `/api/auction-search-options` | GET | 검색 옵션 메타데이터 |

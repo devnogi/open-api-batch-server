@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memonogi.com/contracts/total-search-response.schema.json",
+  "title": "Open API Batch total search response data",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["type", "keyword", "targetKey"],
+    "properties": {
+      "type": { "enum": ["MENU", "ITEM"] },
+      "keyword": { "type": "string", "minLength": 1, "maxLength": 255 },
+      "targetKey": { "type": "string", "minLength": 1, "maxLength": 255 }
+    }
+  }
+}
