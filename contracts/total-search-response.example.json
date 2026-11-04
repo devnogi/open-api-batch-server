@@ -1,0 +1,12 @@
+[
+  {
+    "type": "MENU",
+    "keyword": "경매장",
+    "targetKey": "AUCTION"
+  },
+  {
+    "type": "ITEM",
+    "keyword": "나이트브링어 워로드",
+    "targetKey": "나이트브링어 워로드"
+  }
+]
