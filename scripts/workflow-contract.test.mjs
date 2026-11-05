@@ -85,7 +85,7 @@ test('production caller only permits main push or manual dispatch', () => {
   assert.match(prod, /platform: linux\/amd64/);
   assert.match(prod, /secrets: inherit/);
   assert.match(prod, /deployment-target: prod2/);
-  assert.match(gradleProperties, /^applicationVersion=1\.0\.5$/m);
+  assert.match(gradleProperties, /^applicationVersion=1\.0\.6$/m);
 });
 
 test('callers agree on Batch inputs and Compose requires the image', () => {

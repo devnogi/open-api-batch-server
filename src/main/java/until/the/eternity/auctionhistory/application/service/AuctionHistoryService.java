@@ -13,11 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
+import until.the.eternity.auctionhistory.domain.exception.AuctionHistoryExceptionCode;
 import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
+import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.common.util.CacheKeyBuilder;
@@ -97,8 +99,9 @@ public class AuctionHistoryService {
                         .findById(id)
                         .orElseThrow(
                                 () ->
-                                        new IllegalArgumentException(
-                                                "AuctionHistory not found: " + id));
+                                        new CustomException(
+                                                AuctionHistoryExceptionCode
+                                                        .AUCTION_HISTORY_NOT_FOUND));
         return mapper.toDto(auctionHistory);
     }
 

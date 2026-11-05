@@ -18,12 +18,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.PriceSearchRequest;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
+import until.the.eternity.auctionrealtime.domain.exception.AuctionRealtimeExceptionCode;
 import until.the.eternity.auctionrealtime.domain.mapper.AuctionRealtimeMapper;
 import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemRepositoryPort;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.DateAuctionExpireRequest;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.AuctionRealtimeDetailResponse;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.RealtimeItemOptionResponse;
+import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.common.response.PageResponseDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,12 +69,35 @@ class AuctionRealtimeServiceTest {
     }
 
     @Test
+    @DisplayName("데이터가 존재하면 findByIdOrElseThrow는 dto를 반환한다")
+    void findByIdOrElseThrow_should_return_dto_when_entity_exists() {
+        Long id = 1L;
+        AuctionRealtimeItem entity = new AuctionRealtimeItem();
+        AuctionRealtimeDetailResponse<RealtimeItemOptionResponse> dto =
+                mock(AuctionRealtimeDetailResponse.class);
+
+        when(repository.findById(id)).thenReturn(Optional.of(entity));
+        when(mapper.toDto(entity)).thenReturn(dto);
+
+        AuctionRealtimeDetailResponse<RealtimeItemOptionResponse> result =
+                service.findByIdOrElseThrow(id);
+
+        assertThat(result).isEqualTo(dto);
+        verify(repository).findById(id);
+        verify(mapper).toDto(entity);
+    }
+
+    @Test
     @DisplayName("데이터가 없으면 findByIdOrElseThrow는 예외를 던진다")
     void findByIdOrElseThrow_should_throw_exception_when_not_found() {
         Long id = 999L;
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.findByIdOrElseThrow(id));
+        CustomException exception =
+                assertThrows(CustomException.class, () -> service.findByIdOrElseThrow(id));
+
+        assertThat(exception.getCode())
+                .isEqualTo(AuctionRealtimeExceptionCode.AUCTION_REALTIME_ITEM_NOT_FOUND);
         verify(repository).findById(id);
         verifyNoInteractions(mapper);
     }
