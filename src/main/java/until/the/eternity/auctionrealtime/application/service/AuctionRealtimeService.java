@@ -11,12 +11,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import until.the.eternity.auctionitem.domain.entity.AuctionRealtimeItem;
+import until.the.eternity.auctionrealtime.domain.exception.AuctionRealtimeExceptionCode;
 import until.the.eternity.auctionrealtime.domain.mapper.AuctionRealtimeMapper;
 import until.the.eternity.auctionrealtime.domain.repository.AuctionRealtimeItemRepositoryPort;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.request.AuctionRealtimeSearchRequest;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.AuctionRealtimeDetailResponse;
 import until.the.eternity.auctionrealtime.interfaces.rest.dto.response.RealtimeItemOptionResponse;
 import until.the.eternity.common.enums.ItemCategory;
+import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.config.CacheNames;
 
@@ -71,8 +73,9 @@ public class AuctionRealtimeService {
                         .findById(id)
                         .orElseThrow(
                                 () ->
-                                        new IllegalArgumentException(
-                                                "AuctionRealtimeItem not found: " + id));
+                                        new CustomException(
+                                                AuctionRealtimeExceptionCode
+                                                        .AUCTION_REALTIME_ITEM_NOT_FOUND));
         return mapper.toDto(item);
     }
 

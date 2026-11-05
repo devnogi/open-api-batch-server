@@ -17,12 +17,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import until.the.eternity.auctionhistory.application.service.persister.AuctionHistoryPersister;
 import until.the.eternity.auctionhistory.domain.entity.AuctionHistory;
+import until.the.eternity.auctionhistory.domain.exception.AuctionHistoryExceptionCode;
 import until.the.eternity.auctionhistory.domain.mapper.AuctionHistoryMapper;
 import until.the.eternity.auctionhistory.domain.repository.AuctionHistoryRepositoryPort;
 import until.the.eternity.auctionhistory.domain.service.fetcher.AuctionHistoryFetcherPort;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.request.AuctionHistorySearchRequest;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.AuctionHistoryDetailResponse;
 import until.the.eternity.auctionhistory.interfaces.rest.dto.response.ItemOptionResponse;
+import until.the.eternity.common.exception.CustomException;
 import until.the.eternity.common.request.PageRequestDto;
 import until.the.eternity.common.response.PageResponseDto;
 import until.the.eternity.config.CacheNames;
@@ -98,7 +100,11 @@ class AuctionHistoryServiceTest {
         when(repositoryPort.findById(id)).thenReturn(Optional.empty());
 
         // expect
-        assertThrows(IllegalArgumentException.class, () -> service.findByIdOrElseThrow(id));
+        CustomException exception =
+                assertThrows(CustomException.class, () -> service.findByIdOrElseThrow(id));
+
+        assertThat(exception.getCode())
+                .isEqualTo(AuctionHistoryExceptionCode.AUCTION_HISTORY_NOT_FOUND);
         verify(repositoryPort).findById(id);
         verifyNoInteractions(mapper);
     }

@@ -18,11 +18,12 @@ public class DateRangeValidator {
     public static void validateDailyDateRange(LocalDate startDate, LocalDate endDate) {
         validateBasicDateRange(startDate, endDate);
 
-        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
-        if (daysBetween > DAILY_MAX_DAYS) {
+        long inclusiveDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        if (inclusiveDays > DAILY_MAX_DAYS) {
             throw new IllegalArgumentException(
                     String.format(
-                            "일간 통계 조회는 최대 %d일까지만 가능합니다. 요청 기간: %d일", DAILY_MAX_DAYS, daysBetween));
+                            "일간 통계 조회는 최대 %d일까지만 가능합니다. 요청 기간: %d일",
+                            DAILY_MAX_DAYS, inclusiveDays));
         }
     }
 
@@ -36,12 +37,12 @@ public class DateRangeValidator {
     public static void validateWeeklyDateRange(LocalDate startDate, LocalDate endDate) {
         validateBasicDateRange(startDate, endDate);
 
-        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
-        if (daysBetween > WEEKLY_MAX_DAYS) {
+        long inclusiveDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        if (inclusiveDays > WEEKLY_MAX_DAYS) {
             throw new IllegalArgumentException(
                     String.format(
                             "주간 통계 조회는 최대 4개월(%d일)까지만 가능합니다. 요청 기간: %d일",
-                            WEEKLY_MAX_DAYS, daysBetween));
+                            WEEKLY_MAX_DAYS, inclusiveDays));
         }
     }
 
