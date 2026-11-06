@@ -105,9 +105,8 @@ public class HornBugleIndexService {
      */
     public Page<HornBugleDocument> search(String keyword, String serverName, Pageable pageable) {
         try {
-            // Multi-match query for keyword search
-            // Note: date_send is Date type, excluded from text search
-            // server_name is Keyword type, included for exact match
+            // Text fields use the analyzer while server_name is a keyword field and must match
+            // exactly. A single keyword therefore searches character name, message, and server.
             Query multiMatchQuery =
                     Query.of(
                             q ->
@@ -115,9 +114,13 @@ public class HornBugleIndexService {
                                             mm ->
                                                     mm.query(keyword)
                                                             .fields("character_name", "message")));
+            Query serverNameQuery =
+                    Query.of(q -> q.term(t -> t.field("server_name").value(keyword)));
 
-            // Build bool query
-            BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder().must(multiMatchQuery);
+            BoolQuery.Builder boolQueryBuilder =
+                    new BoolQuery.Builder()
+                            .should(multiMatchQuery, serverNameQuery)
+                            .minimumShouldMatch("1");
 
             // Add serverName filter if present
             if (serverName != null && !serverName.isBlank()) {
