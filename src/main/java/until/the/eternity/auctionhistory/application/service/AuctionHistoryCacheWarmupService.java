@@ -31,7 +31,7 @@ public class AuctionHistoryCacheWarmupService {
 
     private static final int WARMUP_SIZE = 20;
     private static final int WARMUP_MAX_PAGE = 2;
-    private static final int[] RANKING_WARMUP_LIMITS = {20, RankingConstants.DEFAULT_LIMIT};
+    private static final int[] RANKING_WARMUP_LIMITS = {RankingConstants.HOME_RANKING_LIMIT, 20};
 
     private final AuctionHistoryService auctionHistoryService;
     private final AllTimeRankingService allTimeRankingService;
