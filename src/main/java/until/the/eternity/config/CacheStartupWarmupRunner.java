@@ -133,7 +133,7 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
     }
 
     private void warmRankingCaches() {
-        for (int limit : rankingWarmupLimits()) {
+        for (int limit : rankingWarmupLimits(startupRankingLimit)) {
             priceRankingService.getTodayHighestPrice(limit);
             priceRankingService.getWeekHighestPrice(limit);
             priceRankingService.getTodayLargestVolume(limit);
@@ -157,15 +157,15 @@ public class CacheStartupWarmupRunner implements ApplicationRunner {
         }
     }
 
-    private Set<Integer> rankingWarmupLimits() {
+    static Set<Integer> rankingWarmupLimits(int startupRankingLimit) {
         Set<Integer> limits = new LinkedHashSet<>();
+        addRankingWarmupLimit(limits, RankingConstants.HOME_RANKING_LIMIT);
         addRankingWarmupLimit(limits, 20);
-        addRankingWarmupLimit(limits, RankingConstants.DEFAULT_LIMIT);
         addRankingWarmupLimit(limits, startupRankingLimit);
         return limits;
     }
 
-    private void addRankingWarmupLimit(Set<Integer> limits, int limit) {
+    private static void addRankingWarmupLimit(Set<Integer> limits, int limit) {
         if (limit <= 0) {
             return;
         }
