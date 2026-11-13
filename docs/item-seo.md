@@ -18,7 +18,9 @@ LastTrade 필드는 `periodType`(DAILY/WEEKLY), `periodStart`, `periodEnd`(ISO �
 
 limit 생략 시 1000, 범위 1..1000. cursor 생략 시 처음부터 조회한다. cursor는 UTF-8 JSON `[name,topCategory,subCategory]`의 padding 없는 base64url이고, 프론트 itemKey와 별개다. 빈 값, 잘못된 base64/UTF-8/JSON, 필드 수·타입·길이 오류는 400이다. `name,topCategory,subCategory ASC`로 커서보다 큰 항목만 반환한다. 마지막 페이지 nextCursor=null, hasNext=false. 다음 페이지가 있을 때만 마지막 반환 항목의 커서를 제공한다.
 
-`items`는 name/topCategory/subCategory만 포함한다. 단일 API와 동일한 DB eligibility predicate를 사용하고, LIMIT+1 및 EXISTS 서브쿼리로 한 번에 조회한다. 카탈로그/통계는 운영 DB collation을 따른다. 별도 ID, 스키마 변경, 수집 파이프라인 변경은 없다. 카탈로그 PK는 `(name,sub_category,top_category)`여서 요청 정렬의 일부 filesort는 가능하며, 기존 일간/주간 category/date 인덱스를 재사용한다.
+`items`는 name/topCategory/subCategory만 포함한다. 단일 API와 동일한 DB eligibility predicate와 EXISTS를 사용한다. `(name,top_category,sub_category)` 보조 인덱스로 identity 후보를 최대 1000개 읽고, `(이전 커서, 후보 마지막 identity]` 범위에만 eligibility를 적용한다. 응답 limit+1개를 확보하거나 카탈로그가 끝날 때까지 진행하므로 자격이 없는 후보 묶음에서도 다음 데이터를 누락하지 않는다. 공개 nextCursor는 마지막 반환 항목 기준이며 내부 후보 마지막 위치를 노출하지 않는다. 카탈로그/통계는 운영 DB collation을 따른다. 별도 ID나 수집 파이프라인 변경은 없다.
+
+V34는 기존 PK를 유지하면서 정렬에 맞는 보조 인덱스를 추가한다. 기존 인덱스 존재 여부를 확인하므로 재실행할 수 있다. 인덱스만 추가하면 첫 페이지에서 옵티마이저가 전체 스캔을 유지할 수 있어 후보 범위를 먼저 제한한다. 후보 묶음당 두 조회를 사용하며, 자격이 거의 없는 마지막 페이지는 여러 묶음을 읽을 수 있다. 합성 MySQL의 후보 covering-index 및 eligibility range 계획을 테스트하지만 운영 DB의 실행 시간이나 인덱스 생성 시간을 보장하지 않는다.
 
 ## 검증
 

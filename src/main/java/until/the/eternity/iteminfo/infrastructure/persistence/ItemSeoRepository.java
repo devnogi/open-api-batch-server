@@ -6,7 +6,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import until.the.eternity.statistics.domain.entity.weekly.QItemWeeklyStatistics;
 @Repository
 @RequiredArgsConstructor
 public class ItemSeoRepository implements ItemSeoRepositoryPort {
+    private static final int SITEMAP_CANDIDATE_WINDOW = 1000;
     private final JPAQueryFactory queryFactory;
 
     @Override
@@ -40,24 +43,30 @@ public class ItemSeoRepository implements ItemSeoRepositoryPort {
     @Override
     public List<ItemInfoSummaryResponse> findSitemapItems(ItemInfoId after, int limit) {
         QItemInfo item = QItemInfo.itemInfo;
-        BooleanExpression afterCursor = null;
-        if (after != null) {
-            afterCursor =
-                    item.id
-                            .name
-                            .gt(after.getName())
-                            .or(
-                                    item.id
-                                            .name
-                                            .eq(after.getName())
-                                            .and(item.id.topCategory.gt(after.getTopCategory())))
-                            .or(
-                                    item.id
-                                            .name
-                                            .eq(after.getName())
-                                            .and(item.id.topCategory.eq(after.getTopCategory()))
-                                            .and(item.id.subCategory.gt(after.getSubCategory())));
+        List<ItemInfoSummaryResponse> eligible = new ArrayList<>();
+        ItemInfoId cursor = after;
+        while (eligible.size() < limit) {
+            // The covering index bounds candidate reads before the expensive eligibility predicate.
+            List<ItemInfoSummaryResponse> candidates =
+                    sitemapProjection(item)
+                            .where(after(item, cursor))
+                            .limit(SITEMAP_CANDIDATE_WINDOW)
+                            .fetch();
+            if (candidates.isEmpty()) break;
+            ItemInfoSummaryResponse last = candidates.getLast();
+            ItemInfoId end = new ItemInfoId(last.name(), last.subCategory(), last.topCategory());
+            eligible.addAll(
+                    sitemapProjection(item)
+                            .where(after(item, cursor), atOrBefore(item, end), eligibility(item))
+                            .limit(limit - eligible.size())
+                            .fetch());
+            if (candidates.size() < SITEMAP_CANDIDATE_WINDOW) break;
+            cursor = end;
         }
+        return eligible;
+    }
+
+    private JPAQuery<ItemInfoSummaryResponse> sitemapProjection(QItemInfo item) {
         return queryFactory
                 .select(
                         Projections.constructor(
@@ -66,10 +75,42 @@ public class ItemSeoRepository implements ItemSeoRepositoryPort {
                                 item.id.subCategory,
                                 item.id.topCategory))
                 .from(item)
-                .where(eligibility(item), afterCursor)
-                .orderBy(item.id.name.asc(), item.id.topCategory.asc(), item.id.subCategory.asc())
-                .limit(limit)
-                .fetch();
+                .orderBy(item.id.name.asc(), item.id.topCategory.asc(), item.id.subCategory.asc());
+    }
+
+    private BooleanExpression after(QItemInfo item, ItemInfoId cursor) {
+        if (cursor == null) return null;
+        return item.id
+                .name
+                .gt(cursor.getName())
+                .or(
+                        item.id
+                                .name
+                                .eq(cursor.getName())
+                                .and(item.id.topCategory.gt(cursor.getTopCategory())))
+                .or(
+                        item.id
+                                .name
+                                .eq(cursor.getName())
+                                .and(item.id.topCategory.eq(cursor.getTopCategory()))
+                                .and(item.id.subCategory.gt(cursor.getSubCategory())));
+    }
+
+    private BooleanExpression atOrBefore(QItemInfo item, ItemInfoId end) {
+        return item.id
+                .name
+                .lt(end.getName())
+                .or(
+                        item.id
+                                .name
+                                .eq(end.getName())
+                                .and(item.id.topCategory.lt(end.getTopCategory())))
+                .or(
+                        item.id
+                                .name
+                                .eq(end.getName())
+                                .and(item.id.topCategory.eq(end.getTopCategory()))
+                                .and(item.id.subCategory.loe(end.getSubCategory())));
     }
 
     @Override
