@@ -1,0 +1,14 @@
+{
+  "item": {
+    "name": "테스트 검", "topCategory": "장비", "subCategory": "검",
+    "description": "합성 테스트 아이템", "inventoryWidth": null, "inventoryHeight": null,
+    "inventoryMaxBundleCount": null, "history": null, "acquisitionMethod": null,
+    "storeSalesPrice": null, "weaponType": null, "repair": null, "maxAlterationCount": null
+  },
+  "seoEligible": true,
+  "lastTrade": {
+    "periodType": "DAILY", "periodStart": "2020-01-01", "periodEnd": "2020-01-01",
+    "minPrice": 100, "maxPrice": 500, "avgPrice": 333.33,
+    "totalQuantity": 3, "totalVolume": 1000, "updatedAt": "2020-01-02T00:10:00"
+  }
+}

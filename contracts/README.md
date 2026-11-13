@@ -10,3 +10,9 @@
 
 - `total-search-response.schema.json`: `GET /api/total-search`의 `ApiResponse.data` JSON Schema
 - `total-search-response.example.json`: 메뉴와 아이템 결과 예시
+
+## 아이템 SEO 응답
+
+- `item-seo-response.example.json`: 단일 아이템 `ApiResponse.data` 합성 fixture
+- `item-sitemap-response.example.json`: sitemap 마지막 페이지 `ApiResponse.data` 합성 fixture
+- [필드·기간·커서·오류 계약](../docs/item-seo.md)
