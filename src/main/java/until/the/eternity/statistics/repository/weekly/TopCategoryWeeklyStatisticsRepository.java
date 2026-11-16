@@ -28,7 +28,7 @@ public interface TopCategoryWeeklyStatisticsRepository
             @Param("startDate") java.time.LocalDate startDate,
             @Param("endDate") java.time.LocalDate endDate);
 
-    /** 전주의 SubcategoryWeeklyStatistics 데이터를 기반으로 탑카테고리별 주간 통계를 집계하여 upsert */
+    /** 전주의 아이템 통계를 상위·하위 카테고리별로 묶어 탑카테고리별 주간 통계를 집계하여 upsert */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query(
@@ -48,7 +48,7 @@ public interface TopCategoryWeeklyStatisticsRepository
                         updated_at
                     )
                     SELECT
-                        ah.item_top_category,
+                        sws.item_top_category,
                         sws.year,
                         sws.week_number,
                         sws.week_start_date,
@@ -59,10 +59,16 @@ public interface TopCategoryWeeklyStatisticsRepository
                         SUM(sws.total_quantity) AS total_quantity,
                         CURRENT_TIMESTAMP AS created_at,
                         CURRENT_TIMESTAMP AS updated_at
-                    FROM subcategory_weekly_statistics sws
-                    INNER JOIN auction_history ah ON sws.item_sub_category = ah.item_sub_category
-                    WHERE sws.week_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
-                    GROUP BY ah.item_top_category, sws.year, sws.week_number, sws.week_start_date
+                    FROM (
+                        SELECT item_top_category, year, week_number, week_start_date,
+                               MIN(min_price) AS min_price, MAX(max_price) AS max_price,
+                               ROUND(AVG(avg_price), 2) AS avg_price,
+                               SUM(total_volume) AS total_volume, SUM(total_quantity) AS total_quantity
+                        FROM item_weekly_statistics
+                        WHERE week_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
+                        GROUP BY item_top_category, item_sub_category, year, week_number, week_start_date
+                    ) sws
+                    GROUP BY sws.item_top_category, sws.year, sws.week_number, sws.week_start_date
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),
