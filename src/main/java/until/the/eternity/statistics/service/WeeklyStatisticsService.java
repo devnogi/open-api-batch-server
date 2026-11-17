@@ -42,8 +42,7 @@ public class WeeklyStatisticsService {
             String itemName, String topCategory, String subCategory) {}
 
     /**
-     * 전주(지난 주 월~일)의 일간 통계를 기반으로 주간 통계를 계산하여 저장 순서: ItemDaily → ItemWeekly → SubcategoryWeekly →
-     * TopCategoryWeekly
+     * 전주(지난 주 월~일)의 거래를 일별로 묶어 아이템 주간 통계를 계산한 후 하위·상위 카테고리별로 집계한다.
      *
      * <p>주간 통계 계산 완료 후 주간 통계 캐시 + 주간 랭킹 캐시를 무효화한다.
      */
@@ -67,7 +66,7 @@ public class WeeklyStatisticsService {
 
         long start = System.currentTimeMillis();
 
-        // 1. ItemDailyStatistics → ItemWeeklyStatistics
+        // 1. 일별 거래 그룹 → ItemWeeklyStatistics
         log.info("[Weekly Statistics] Step 1/3: Calculating item weekly statistics...");
         itemWeeklyStatisticsRepository.upsertWeeklyStatistics();
         log.info(
@@ -82,7 +81,7 @@ public class WeeklyStatisticsService {
                 "[Weekly Statistics] Step 2/3 completed in {} ms",
                 System.currentTimeMillis() - step2Start);
 
-        // 3. SubcategoryWeeklyStatistics → TopCategoryWeeklyStatistics
+        // 3. ItemWeeklyStatistics → 상위·하위 카테고리 그룹 → TopCategoryWeeklyStatistics
         log.info("[Weekly Statistics] Step 3/3: Calculating top category weekly statistics...");
         long step3Start = System.currentTimeMillis();
         topCategoryWeeklyStatisticsRepository.upsertWeeklyStatistics();

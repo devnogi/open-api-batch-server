@@ -24,8 +24,13 @@ import lombok.*;
         },
         uniqueConstraints = {
             @UniqueConstraint(
-                    name = "uk_item_weekly_statistics_item_name_year_week",
-                    columnNames = {"item_name", "year", "week_number"})
+                    name = "uk_item_weekly_identity_start",
+                    columnNames = {
+                        "item_name",
+                        "item_top_category",
+                        "item_sub_category",
+                        "week_start_date"
+                    })
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

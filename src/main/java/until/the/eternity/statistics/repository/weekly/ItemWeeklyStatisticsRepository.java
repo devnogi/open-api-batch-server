@@ -51,7 +51,7 @@ public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeekly
             @Param("startDate") java.time.LocalDate startDate,
             @Param("endDate") java.time.LocalDate endDate);
 
-    /** 전주(지난 주 월~일)의 ItemDailyStatistics 데이터를 기반으로 아이템별 주간 통계를 집계하여 upsert */
+    /** 전주(지난 주 월~일)의 거래 원본을 일별로 묶어 아이템별 주간 통계를 집계하여 upsert */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query(
@@ -86,9 +86,16 @@ public interface ItemWeeklyStatisticsRepository extends JpaRepository<ItemWeekly
                         SUM(ids.total_quantity) AS total_quantity,
                         CURRENT_TIMESTAMP AS created_at,
                         CURRENT_TIMESTAMP AS updated_at
-                    FROM item_daily_statistics ids
-                    WHERE ids.date_auction_buy >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
-                      AND ids.date_auction_buy < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                    FROM (
+                        SELECT item_name, item_top_category, item_sub_category,
+                               MIN(auction_price_per_unit) AS min_price, MAX(auction_price_per_unit) AS max_price,
+                               ROUND(AVG(auction_price_per_unit), 2) AS avg_price,
+                               SUM(auction_price_per_unit * item_count) AS total_volume, SUM(item_count) AS total_quantity
+                        FROM auction_history
+                        WHERE date_auction_buy >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
+                          AND date_auction_buy < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                        GROUP BY item_name, item_top_category, item_sub_category, DATE(date_auction_buy)
+                    ) ids
                     GROUP BY ids.item_name, item_top_category, item_sub_category
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),

@@ -48,7 +48,7 @@ public interface SubcategoryWeeklyStatisticsRepository
                         updated_at
                     )
                     SELECT
-                        ah.item_sub_category,
+                        iws.item_sub_category,
                         iws.year,
                         iws.week_number,
                         iws.week_start_date,
@@ -60,9 +60,8 @@ public interface SubcategoryWeeklyStatisticsRepository
                         CURRENT_TIMESTAMP AS created_at,
                         CURRENT_TIMESTAMP AS updated_at
                     FROM item_weekly_statistics iws
-                    INNER JOIN auction_history ah ON iws.item_name = ah.item_name and iws.item_sub_category = ah.item_sub_category
                     WHERE iws.week_start_date = DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
-                    GROUP BY ah.item_sub_category, iws.year, iws.week_number, iws.week_start_date
+                    GROUP BY iws.item_sub_category, iws.year, iws.week_number, iws.week_start_date
                     ON DUPLICATE KEY UPDATE
                         min_price = VALUES(min_price),
                         max_price = VALUES(max_price),
